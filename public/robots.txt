@@ -1,0 +1,7 @@
+# Project VAYU Aviation Intelligence - SEO Crawler Policy
+User-agent: *
+Allow: /
+Allow: /api/briefing
+Allow: /sitemap.xml
+
+Sitemap: https://vayu.ai/sitemap.xml

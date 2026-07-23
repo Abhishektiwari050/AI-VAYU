@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" fill="none">
+  <rect width="128" height="128" rx="28" fill="#090d16"/>
+  <!-- Jet Aircraft Silhouette -->
+  <path d="
+    M 22 68
+    C 28 62, 38 58, 48 54
+    L 52 32
+    C 54 26, 58 25, 60 30
+    L 68 48
+    L 96 36
+    C 106 32, 112 34, 108 42
+    C 104 48, 82 64, 68 72
+    L 58 86
+    C 55 90, 52 88, 53 84
+    L 56 74
+    L 40 76
+    L 28 80
+    C 24 81, 20 78, 20 74
+    Z" 
+    fill="#38bdf8" 
+    stroke="#0284c7" 
+    stroke-width="2"/>
+  <!-- Runway Line -->
+  <rect x="18" y="98" width="92" height="8" rx="4" fill="#06b6d4"/>
+</svg>

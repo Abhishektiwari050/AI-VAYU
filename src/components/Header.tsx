@@ -17,6 +17,7 @@ import {
 } from 'lucide-react';
 import { PRESET_ROUTES } from '../lib/airportData';
 import { UserTier } from './MonetizationModal';
+import { VayuLogo } from './VayuLogo';
 
 export type DisplayTheme = 'DARK_COCKPIT' | 'NIGHT_RED' | 'DAY_FLIGHT';
 export type FontSizeSetting = 'NORMAL' | 'LARGE' | 'KNEEBOARD';
@@ -160,16 +161,9 @@ export const Header: React.FC<HeaderProps> = ({
           isNight ? 'border-red-900/40' : isDay ? 'border-slate-300/80' : 'border-white/[0.12]'
         }`}>
           {/* Brand Identity */}
-          <div className="flex items-center space-x-2.5">
-            <div className={`flex h-7 w-7 items-center justify-center border font-mono text-sm font-black rounded-lg shadow-sm ${
-              isNight ? 'border-red-500/50 bg-red-950 text-red-400' : isDay ? 'border-blue-500/40 bg-blue-50 text-blue-600' : 'border-zinc-700 bg-zinc-900 text-zinc-100'
-            }`}>
-              <Plane className="h-4 w-4" />
-            </div>
-            <div className="flex items-center space-x-2">
-              <span className={`font-bold tracking-widest text-sm sm:text-base ${isDay ? 'text-slate-900' : 'text-white'}`}>VAYU INTEL</span>
-              <span className={`w-2.5 h-2.5 rounded-full animate-pulse inline-block ${isNight ? 'led-glow-red' : isDay ? 'bg-blue-600 shadow-[0_0_8px_rgba(37,99,235,0.8)]' : 'led-glow-green'}`} />
-            </div>
+          <div className="flex items-center space-x-3">
+            <VayuLogo size="md" showText={true} />
+            <span className={`w-2.5 h-2.5 rounded-full animate-pulse inline-block ${isNight ? 'led-glow-red' : isDay ? 'bg-blue-600 shadow-[0_0_8px_rgba(37,99,235,0.8)]' : 'led-glow-green'}`} />
 
             {/* FAA SWIM Data Feed Status Badge */}
             <div className={`hidden md:flex items-center space-x-1.5 px-2.5 py-0.5 rounded-md text-[10px] font-bold border ${

@@ -2,12 +2,75 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>My Google AI Studio App</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0" />
+    
+    <!-- Primary SEO Meta Tags -->
+    <title>Project VAYU — AI Pre-Flight Briefing & NOTAM Intelligence Platform (DGCA & FAA)</title>
+    <meta name="title" content="Project VAYU — AI Pre-Flight Briefing & NOTAM Intelligence Platform (DGCA & FAA)" />
+    <meta name="description" content="Project VAYU is an AI-driven aviation intelligence platform converting FAA & DGCA NOTAMs, NOAA METARs, and TAF weather feeds into plain-English pre-flight briefings for Indian Airspace (VIDP, VABB, VOBL, VDGO) and global aerodromes." />
+    <meta name="keywords" content="Project VAYU, NOTAM decoder, DGCA NOTAM, FAA NOTAM, METAR TAF briefing, VIDP Delhi NOTAM, VABB Mumbai NOTAM, VOBL Bengaluru NOTAM, Indian aviation airspace, ICAO NOTAM decoder, AI preflight briefing, EFB kneeboard, pilot dispatch log" />
+    <meta name="author" content="Project VAYU Systems & AI Software Architecture" />
+    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
+    <meta name="theme-color" content="#090d16" />
+    <link rel="canonical" href="https://vayu.ai/" />
+
+    <!-- Icons & Favicon -->
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" type="image/svg+xml" href="/vayu-logo.svg" />
+    <link rel="apple-touch-icon" href="/vayu-logo.svg" />
+
+    <!-- Open Graph / Facebook / LinkedIn -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://vayu.ai/" />
+    <meta property="og:site_name" content="Project VAYU Aviation Intelligence" />
+    <meta property="og:title" content="Project VAYU — AI Aviation Intelligence & NOTAM Briefings" />
+    <meta property="og:description" content="Real-time AI NOTAM & METAR briefing engine for Indian (DGCA) and Global (FAA/ICAO) Airspace. Deterministic regex safety scanner paired with Gemini 3.6 Flash." />
+    <meta property="og:image" content="https://vayu.ai/vayu-logo.svg" />
+    <meta property="og:locale" content="en_US" />
+
+    <!-- Twitter Cards -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:url" content="https://vayu.ai/" />
+    <meta name="twitter:title" content="Project VAYU — AI Pre-Flight Briefing Platform" />
+    <meta name="twitter:description" content="Plain-English NOTAMs & Weather Briefings for Pilots. Powered by Gemini 3.6 Flash & Deterministic Safety Engine." />
+    <meta name="twitter:image" content="https://vayu.ai/vayu-logo.svg" />
+
+    <!-- Schema.org JSON-LD Structured Data for Search Engines -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "SoftwareApplication",
+      "name": "Project VAYU",
+      "alternateName": "VAYU Pre-Flight Briefing Engine",
+      "headline": "AI Aviation Intelligence & ICAO NOTAM Briefings",
+      "operatingSystem": "Web Browser, iOS, Android, EFB",
+      "applicationCategory": "AviationSoftware",
+      "url": "https://vayu.ai/",
+      "logo": "https://vayu.ai/vayu-logo.svg",
+      "image": "https://vayu.ai/vayu-logo.svg",
+      "description": "AI-powered aviation safety and pre-flight awareness utility providing plain-English NOTAM summaries, NOAA METAR/TAF weather analysis, and deterministic hazard detection for DGCA (India) and FAA airspace.",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "USD"
+      },
+      "featureList": [
+        "Indian Airspace ICAO & IATA Aerodrome Normalization (VIDP, VABB, VOBL, VDGO)",
+        "Deterministic Regex Safety Engine for Runway Closures & Monsoon Hazards",
+        "Gemini 3.6 Flash Audio & Executive Summary Generation",
+        "Dual UTC & IST Multi-Timezone HUD Display",
+        "DGCA & FAA Compliant Kneeboard & Dispatch Logs"
+      ],
+      "provider": {
+        "@type": "Organization",
+        "name": "Project VAYU Intelligence Systems",
+        "url": "https://vayu.ai/"
+      }
+    }
+    </script>
   </head>
-  <body>
+  <body class="bg-[#090d16] text-white antialiased selection:bg-sky-500 selection:text-white">
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
-
