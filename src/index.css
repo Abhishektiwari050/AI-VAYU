@@ -158,6 +158,35 @@
     box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2), inset 0 1px 0 0 rgba(255, 255, 255, 0.28);
   }
 
+  /* Day Flight High Contrast Override Rules */
+  .theme-day-flight .glass-pill-red {
+    background: rgba(254, 226, 226, 0.95);
+    border: 1px solid rgba(239, 68, 68, 0.6);
+    color: #450a0a !important;
+    font-weight: 800;
+  }
+
+  .theme-day-flight .glass-pill-yellow {
+    background: rgba(254, 243, 199, 0.95);
+    border: 1px solid rgba(245, 158, 11, 0.6);
+    color: #451a03 !important;
+    font-weight: 800;
+  }
+
+  .theme-day-flight .glass-pill-green {
+    background: rgba(209, 250, 229, 0.95);
+    border: 1px solid rgba(16, 185, 129, 0.6);
+    color: #022c22 !important;
+    font-weight: 800;
+  }
+
+  .theme-day-flight .glass-pill-neutral {
+    background: rgba(241, 245, 249, 0.95);
+    border: 1px solid rgba(203, 213, 225, 0.8);
+    color: #0f172a !important;
+    font-weight: 800;
+  }
+
   /* Hardware LED Indicators with Radiant Glow */
   .led-glow-red {
     background-color: #ef4444;

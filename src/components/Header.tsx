@@ -15,7 +15,7 @@ import {
   Crown,
   ShieldCheck,
 } from 'lucide-react';
-import { PRESET_ROUTES } from '../lib/airportData';
+import { PRESET_ROUTES, normalizeAirportCode } from '../lib/airportData';
 import { UserTier } from './MonetizationModal';
 import { VayuLogo } from './VayuLogo';
 
@@ -42,11 +42,7 @@ interface HeaderProps {
 }
 
 function normalizeCode(raw: string): string {
-  const trimmed = raw.trim().toUpperCase();
-  if (trimmed.length === 3 && /^[A-Z]{3}$/.test(trimmed)) {
-    return 'K' + trimmed;
-  }
-  return trimmed;
+  return normalizeAirportCode(raw) || raw.trim().toUpperCase();
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -63,14 +59,14 @@ export const Header: React.FC<HeaderProps> = ({
   onSearchSingle,
   onSearchRoute,
   isLoading,
-  activeIcao = 'KJFK',
+  activeIcao = 'VIDP',
 }) => {
   const currentZulu = new Date().toISOString().substring(11, 16);
 
-  const [singleIcao, setSingleIcao] = useState(activeIcao);
-  const [origin, setOrigin] = useState('KJFK');
-  const [destination, setDestination] = useState('KBOS');
-  const [waypointInput, setWaypointInput] = useState('KPVD');
+  const [singleIcao, setSingleIcao] = useState(activeIcao || '');
+  const [origin, setOrigin] = useState('');
+  const [destination, setDestination] = useState('');
+  const [waypointInput, setWaypointInput] = useState('');
 
   const handleSingleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -97,12 +93,12 @@ export const Header: React.FC<HeaderProps> = ({
   };
 
   const quickAirports = [
-    { code: 'KJFK', status: '🟢', type: 'GREEN', label: 'VFR' },
-    { code: 'KDFW', status: '🔴', type: 'RED', label: 'CRITICAL' },
-    { code: 'KLAX', status: '🟢', type: 'GREEN', label: 'VFR' },
-    { code: 'KORD', status: '🟡', type: 'YELLOW', label: 'ADVISORY' },
-    { code: 'KDEN', status: '🟢', type: 'GREEN', label: 'VFR' },
-    { code: 'EGLL', status: '🟢', type: 'GREEN', label: 'VFR' },
+    { code: 'VIDP', status: '🟢', type: 'GREEN', label: 'DELHI' },
+    { code: 'VABB', status: '🟡', type: 'YELLOW', label: 'MUMBAI' },
+    { code: 'VOBL', status: '🟢', type: 'GREEN', label: 'BLR' },
+    { code: 'VDGO', status: '🔴', type: 'RED', label: 'GOA' },
+    { code: 'KJFK', status: '🟢', type: 'GREEN', label: 'NYC' },
+    { code: 'EGLL', status: '🟢', type: 'GREEN', label: 'LHR' },
   ];
 
   // Theme-driven styling variables
@@ -364,12 +360,12 @@ export const Header: React.FC<HeaderProps> = ({
           </div>
 
           {/* SEAMLESS INTEGRATED NAVIGATION TABS */}
-          <div className={`flex items-center border p-1 rounded-xl text-[11px] font-mono uppercase shrink-0 ${
+          <div className={`flex items-center justify-around w-full md:w-auto border p-1 rounded-xl text-[11px] font-mono uppercase shrink-0 ${
             isNight ? 'border-hardware-night bg-red-950/90' : isDay ? 'border-hardware-day bg-slate-200/90' : 'border-hardware-dark bg-zinc-900/90'
           }`}>
             <button
               onClick={() => setViewMode('EXECUTIVE')}
-              className={`flex items-center space-x-1.5 px-3.5 py-2 font-bold rounded-lg transition cursor-pointer ${
+              className={`flex-1 md:flex-none justify-center flex items-center space-x-1.5 px-3.5 py-2 font-bold rounded-lg transition cursor-pointer min-h-[40px] ${
                 viewMode === 'EXECUTIVE' ? activeTabClass : inactiveTabClass
               }`}
             >
@@ -378,7 +374,7 @@ export const Header: React.FC<HeaderProps> = ({
             </button>
             <button
               onClick={() => setViewMode('ROUTE')}
-              className={`flex items-center space-x-1.5 px-3.5 py-2 font-bold rounded-lg transition cursor-pointer ${
+              className={`flex-1 md:flex-none justify-center flex items-center space-x-1.5 px-3.5 py-2 font-bold rounded-lg transition cursor-pointer min-h-[40px] ${
                 viewMode === 'ROUTE' ? activeTabClass : inactiveTabClass
               }`}
             >
@@ -387,7 +383,7 @@ export const Header: React.FC<HeaderProps> = ({
             </button>
             <button
               onClick={() => setViewMode('CLI')}
-              className={`flex items-center space-x-1.5 px-3.5 py-2 font-bold rounded-lg transition cursor-pointer ${
+              className={`flex-1 md:flex-none justify-center flex items-center space-x-1.5 px-3.5 py-2 font-bold rounded-lg transition cursor-pointer min-h-[40px] ${
                 viewMode === 'CLI' ? activeTabClass : inactiveTabClass
               }`}
             >
@@ -402,16 +398,23 @@ export const Header: React.FC<HeaderProps> = ({
           <span className={`text-[10px] font-bold uppercase tracking-wider mr-0.5 shrink-0 ${isDay ? 'text-slate-600' : 'text-zinc-400'}`}>QUICK AIRFIELDS:</span>
           {viewMode !== 'ROUTE' ? (
             quickAirports.map((ap) => {
-              const pillClass =
-                ap.type === 'RED'
-                  ? 'glass-pill-red text-red-200'
+              const pillClass = isDay
+                ? ap.type === 'RED'
+                  ? 'bg-red-100 border border-red-400 text-red-950 font-black shadow-sm'
                   : ap.type === 'YELLOW'
-                  ? 'glass-pill-yellow text-amber-200'
-                  : isNight
-                  ? 'bg-red-950/40 border border-red-900/60 text-red-200'
-                  : isDay
-                  ? 'bg-white border border-slate-200 text-slate-800'
-                  : 'bg-zinc-900/90 border border-zinc-800 text-zinc-300 hover:text-white';
+                  ? 'bg-amber-100 border border-amber-400 text-amber-950 font-black shadow-sm'
+                  : 'bg-emerald-100 border border-emerald-400 text-emerald-950 font-black shadow-sm'
+                : isNight
+                ? ap.type === 'RED'
+                  ? 'glass-pill-red text-red-200 font-bold'
+                  : ap.type === 'YELLOW'
+                  ? 'glass-pill-yellow text-amber-200 font-bold'
+                  : 'bg-red-950/40 border border-red-900/60 text-red-200 font-bold'
+                : ap.type === 'RED'
+                ? 'glass-pill-red text-red-200 font-bold'
+                : ap.type === 'YELLOW'
+                ? 'glass-pill-yellow text-amber-200 font-bold'
+                : 'glass-pill-green text-emerald-200 font-bold';
 
               const ledGlowClass =
                 ap.type === 'RED'

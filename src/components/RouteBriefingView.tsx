@@ -49,13 +49,13 @@ export const RouteBriefingView: React.FC<RouteBriefingViewProps> = ({
               <Compass className="h-4 w-4 opacity-80" />
               <span>FLIGHT ROUTE CORRIDOR BRIEFING</span>
             </div>
-            <div className="mt-2 flex flex-wrap items-center space-x-4 text-3xl font-black tracking-tighter">
+            <div className="mt-2 flex flex-wrap items-center gap-2 sm:gap-3 text-xl sm:text-3xl font-black tracking-tighter">
               <span>{routeData.origin.icao}</span>
-              <ArrowRight className="h-6 w-6 opacity-40" />
+              <ArrowRight className="h-5 w-5 sm:h-6 sm:w-6 opacity-40 shrink-0" />
               {routeData.alternatesAndWaypoints.map((w) => (
                 <React.Fragment key={w.icao}>
-                  <span className="opacity-70 text-xl font-bold">{w.icao}</span>
-                  <ArrowRight className="h-5 w-5 opacity-40" />
+                  <span className="opacity-70 text-base sm:text-xl font-bold">{w.icao}</span>
+                  <ArrowRight className="h-4 w-4 sm:h-5 sm:w-5 opacity-40 shrink-0" />
                 </React.Fragment>
               ))}
               <span>{routeData.destination.icao}</span>
@@ -74,18 +74,30 @@ export const RouteBriefingView: React.FC<RouteBriefingViewProps> = ({
               </div>
               <div className="flex items-center space-x-2 text-xs font-black uppercase tracking-widest">
                 {totalCriticals > 0 ? (
-                  <span className="glass-pill-red text-red-100 px-3 py-1.5 rounded-xl flex items-center space-x-1.5 shadow-sm font-bold">
-                    <AlertTriangle className="h-4 w-4 text-red-400" />
+                  <span className={`px-3 py-1.5 rounded-xl flex items-center space-x-1.5 shadow-sm font-bold border ${
+                    isDay
+                      ? 'bg-red-100 border-red-400 text-red-950'
+                      : 'glass-pill-red text-red-100'
+                  }`}>
+                    <AlertTriangle className={`h-4 w-4 ${isDay ? 'text-red-800' : 'text-red-400'}`} />
                     <span>HIGH RISK ({totalCriticals} CRITICAL)</span>
                   </span>
                 ) : totalWarnings > 0 ? (
-                  <span className="glass-pill-yellow text-amber-100 px-3 py-1.5 rounded-xl flex items-center space-x-1.5 shadow-sm font-bold">
-                    <ShieldCheck className="h-4 w-4 text-amber-400" />
+                  <span className={`px-3 py-1.5 rounded-xl flex items-center space-x-1.5 shadow-sm font-bold border ${
+                    isDay
+                      ? 'bg-amber-100 border-amber-400 text-amber-950'
+                      : 'glass-pill-yellow text-amber-100'
+                  }`}>
+                    <ShieldCheck className={`h-4 w-4 ${isDay ? 'text-amber-800' : 'text-amber-400'}`} />
                     <span>MODERATE ADVISORY ({totalWarnings} WARNINGS)</span>
                   </span>
                 ) : (
-                  <span className="glass-pill-green text-emerald-100 px-3 py-1.5 rounded-xl flex items-center space-x-1.5 shadow-sm font-bold">
-                    <CheckCircle2 className="h-4 w-4 text-emerald-400" />
+                  <span className={`px-3 py-1.5 rounded-xl flex items-center space-x-1.5 shadow-sm font-bold border ${
+                    isDay
+                      ? 'bg-emerald-100 border-emerald-400 text-emerald-950'
+                      : 'glass-pill-green text-emerald-100'
+                  }`}>
+                    <CheckCircle2 className={`h-4 w-4 ${isDay ? 'text-emerald-800' : 'text-emerald-400'}`} />
                     <span>CLEAR CORRIDOR</span>
                   </span>
                 )}

@@ -99,17 +99,28 @@ export function formatZuluAndLocalTime(icaoCode: string, utcDate: Date = new Dat
  */
 export function evaluateNotamStatusWindow(
   effectiveStart?: string,
-  effectiveEnd?: string
+  effectiveEnd?: string,
+  isDay?: boolean
 ): {
   status: 'ACTIVE NOW' | 'SCHEDULED (FUTURE)' | 'EXPIRED';
   label: string;
   badgeClass: string;
 } {
+  const activeClass = isDay
+    ? 'bg-emerald-100 border border-emerald-400 text-emerald-950 font-bold shadow-sm'
+    : 'glass-pill-green text-emerald-200 font-bold';
+  const scheduledClass = isDay
+    ? 'bg-amber-100 border border-amber-400 text-amber-950 font-bold shadow-sm'
+    : 'glass-pill-yellow text-amber-200 font-bold';
+  const expiredClass = isDay
+    ? 'bg-slate-200 border border-slate-400 text-slate-800 font-bold'
+    : 'bg-zinc-800/80 border border-zinc-700 text-zinc-400 font-bold';
+
   if (!effectiveStart || !effectiveEnd) {
     return {
       status: 'ACTIVE NOW',
       label: 'ACTIVE NOW',
-      badgeClass: 'glass-pill-green text-emerald-200',
+      badgeClass: activeClass,
     };
   }
 
@@ -121,7 +132,7 @@ export function evaluateNotamStatusWindow(
     return {
       status: 'ACTIVE NOW',
       label: 'ACTIVE NOW',
-      badgeClass: 'glass-pill-green text-emerald-200',
+      badgeClass: activeClass,
     };
   }
 
@@ -129,19 +140,19 @@ export function evaluateNotamStatusWindow(
     return {
       status: 'SCHEDULED (FUTURE)',
       label: 'SCHEDULED (FUTURE)',
-      badgeClass: 'glass-pill-yellow text-amber-200',
+      badgeClass: scheduledClass,
     };
   } else if (now > end) {
     return {
       status: 'EXPIRED',
       label: 'EXPIRED',
-      badgeClass: 'bg-zinc-800/80 border border-zinc-700 text-zinc-400',
+      badgeClass: expiredClass,
     };
   } else {
     return {
       status: 'ACTIVE NOW',
       label: 'ACTIVE NOW',
-      badgeClass: 'glass-pill-green text-emerald-200',
+      badgeClass: activeClass,
     };
   }
 }

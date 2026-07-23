@@ -13,7 +13,7 @@ import { SavedBriefingsDrawer } from './components/SavedBriefingsDrawer';
 import { MonetizationModal, UserTier } from './components/MonetizationModal';
 import { BriefingSummary, RouteLegBriefing, AuditLogEntry } from './types';
 import { generateClientFallbackBriefing, generateClientFallbackRoute } from './lib/clientFallback';
-import { AlertTriangle, ShieldCheck, Zap, WifiOff } from 'lucide-react';
+import { AlertTriangle, ShieldCheck, Zap, WifiOff, Compass } from 'lucide-react';
 
 export default function App() {
   const [theme, setTheme] = useState<DisplayTheme>(() => {
@@ -92,11 +92,6 @@ export default function App() {
       console.warn('Failed to persist tier preference', e);
     }
   };
-
-  // Load default briefing on startup
-  useEffect(() => {
-    fetchSingleBriefing('KJFK');
-  }, []);
 
   // Save history to localStorage
   useEffect(() => {
@@ -257,12 +252,12 @@ export default function App() {
   const getThemeWrapperClass = () => {
     switch (theme) {
       case 'NIGHT_RED':
-        return 'bg-[#0a0202] text-[#ff4444] min-h-screen selection:bg-red-900 selection:text-white py-4 sm:py-8 px-3 sm:px-6 relative overflow-x-hidden font-sans transition-colors duration-300';
+        return 'bg-[#0a0202] text-[#ff4444] min-h-screen selection:bg-red-900 selection:text-white py-2 sm:py-6 px-1.5 sm:px-4 md:px-6 relative overflow-x-hidden font-sans transition-colors duration-300';
       case 'DAY_FLIGHT':
-        return 'bg-[#f4f4f7] text-slate-900 min-h-screen selection:bg-blue-200 selection:text-black py-4 sm:py-8 px-3 sm:px-6 relative overflow-x-hidden font-sans transition-colors duration-300';
+        return 'theme-day-flight bg-[#f4f4f7] text-slate-900 min-h-screen selection:bg-blue-200 selection:text-black py-2 sm:py-6 px-1.5 sm:px-4 md:px-6 relative overflow-x-hidden font-sans transition-colors duration-300';
       case 'DARK_COCKPIT':
       default:
-        return 'bg-[#030305] text-zinc-100 min-h-screen selection:bg-zinc-800 selection:text-white py-4 sm:py-8 px-3 sm:px-6 relative overflow-x-hidden font-sans transition-colors duration-300';
+        return 'bg-[#030305] text-zinc-100 min-h-screen selection:bg-zinc-800 selection:text-white py-2 sm:py-6 px-1.5 sm:px-4 md:px-6 relative overflow-x-hidden font-sans transition-colors duration-300';
     }
   };
 
@@ -377,7 +372,75 @@ export default function App() {
                   onOpenDispatchModal={() => setIsDispatchModalOpen(true)}
                   onSearchSingle={fetchSingleBriefing}
                 />
-              ) : null}
+              ) : (
+                /* LANDING SEARCH PORTAL (NO DEFAULT BRIEFING LOADED) */
+                <div className="py-10 px-4 max-w-4xl mx-auto text-center font-sans">
+                  <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-mono font-bold mb-4 border bg-blue-500/10 border-blue-500/30 text-blue-500">
+                    <Compass className="w-4 h-4" />
+                    <span>AIRSPACE BRIEFING DISPATCH PORTAL</span>
+                  </div>
+                  <h2 className={`text-3xl sm:text-5xl font-mono font-black tracking-tight mb-3 ${
+                    theme === 'NIGHT_RED' ? 'text-red-400' : theme === 'DAY_FLIGHT' ? 'text-slate-900' : 'text-white'
+                  }`}>
+                    SEARCH AIRSPACE OR SELECT A HUB
+                  </h2>
+                  <p className={`text-xs sm:text-sm max-w-xl mx-auto mb-8 font-sans ${
+                    theme === 'NIGHT_RED' ? 'text-red-300/80' : theme === 'DAY_FLIGHT' ? 'text-slate-600 font-medium' : 'text-zinc-400'
+                  }`}>
+                    Enter any ICAO or IATA airfield code in the search bar above (e.g. VIDP, VABB, VOBL, KJFK), or launch an instant pre-flight briefing for major hubs below:
+                  </p>
+
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-left">
+                    {[
+                      { code: 'VIDP', name: 'Indira Gandhi Intl', city: 'Delhi, India', cat: 'VFR' },
+                      { code: 'VABB', name: 'Chhatrapati Shivaji', city: 'Mumbai, India', cat: 'MVFR' },
+                      { code: 'VOBL', name: 'Kempegowda Intl', city: 'Bengaluru, India', cat: 'VFR' },
+                      { code: 'VDGO', name: 'Manohar Intl', city: 'Goa Mopa, India', cat: 'IFR' },
+                      { code: 'VOHS', name: 'Rajiv Gandhi Intl', city: 'Hyderabad, India', cat: 'VFR' },
+                      { code: 'VOMM', name: 'Chennai Intl', city: 'Chennai, India', cat: 'VFR' },
+                      { code: 'KJFK', name: 'John F. Kennedy', city: 'New York, USA', cat: 'VFR' },
+                      { code: 'EGLL', name: 'London Heathrow', city: 'London, UK', cat: 'VFR' },
+                    ].map((hub) => (
+                      <button
+                        key={hub.code}
+                        onClick={() => fetchSingleBriefing(hub.code)}
+                        className={`p-4 rounded-2xl border transition-all text-left group cursor-pointer shadow-sm hover:scale-[1.02] active:scale-[0.98] ${
+                          theme === 'NIGHT_RED'
+                            ? 'glass-card-night border-red-900/60 hover:border-red-500 text-red-100'
+                            : theme === 'DAY_FLIGHT'
+                            ? 'bg-white border-slate-200 hover:border-blue-500 hover:bg-slate-50 text-slate-900 shadow-sm'
+                            : 'glass-card-dark border-zinc-800 hover:border-zinc-500 text-white'
+                        }`}
+                      >
+                        <div className="flex justify-between items-start mb-2">
+                          <span className="text-xl font-mono font-black tracking-wider text-blue-500 group-hover:text-blue-600">
+                            {hub.code}
+                          </span>
+                          <span className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded-md border ${
+                            hub.cat === 'VFR'
+                              ? theme === 'DAY_FLIGHT' ? 'bg-emerald-100 text-emerald-950 border-emerald-400 font-bold' : 'glass-pill-green text-emerald-200 font-bold'
+                              : hub.cat === 'MVFR'
+                              ? theme === 'DAY_FLIGHT' ? 'bg-amber-100 text-amber-950 border-amber-400 font-bold' : 'glass-pill-yellow text-amber-200 font-bold'
+                              : theme === 'DAY_FLIGHT' ? 'bg-red-100 text-red-950 border-red-400 font-bold' : 'glass-pill-red text-red-200 font-bold'
+                          }`}>
+                            {hub.cat}
+                          </span>
+                        </div>
+                        <div className={`text-xs font-bold leading-snug line-clamp-1 ${
+                          theme === 'DAY_FLIGHT' ? 'text-slate-900' : 'text-zinc-200'
+                        }`}>
+                          {hub.name}
+                        </div>
+                        <div className={`text-[11px] mt-0.5 ${
+                          theme === 'DAY_FLIGHT' ? 'text-slate-500' : 'text-zinc-500'
+                        }`}>
+                          {hub.city}
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
             </>
           )}
         </div>

@@ -38,18 +38,31 @@ export const ExecutiveBriefingView: React.FC<ExecutiveBriefingViewProps> = ({
 
   const getWeatherPillCategory = (category: FlightCategory) => {
     if (isNight) {
-      return { dot: '🔴', label: category, colorClass: 'glass-pill-red text-red-200' };
+      return { dot: '🔴', label: category, colorClass: 'glass-pill-red text-red-200 font-bold' };
+    }
+    if (isDay) {
+      switch (category) {
+        case 'VFR':
+          return { dot: '🟢', label: 'VFR', colorClass: 'bg-emerald-100 border border-emerald-500 text-emerald-950 font-black shadow-sm' };
+        case 'MVFR':
+          return { dot: '🟡', label: 'MVFR', colorClass: 'bg-amber-100 border border-amber-500 text-amber-950 font-black shadow-sm' };
+        case 'IFR':
+        case 'LIFR':
+          return { dot: '🔴', label: category, colorClass: 'bg-red-100 border border-red-500 text-red-950 font-black shadow-sm' };
+        default:
+          return { dot: '⚪', label: 'UNK', colorClass: 'bg-slate-200 border border-slate-400 text-slate-900 font-black shadow-sm' };
+      }
     }
     switch (category) {
       case 'VFR':
-        return { dot: '🟢', label: 'VFR', colorClass: 'glass-pill-green text-emerald-200' };
+        return { dot: '🟢', label: 'VFR', colorClass: 'glass-pill-green text-emerald-200 font-bold' };
       case 'MVFR':
-        return { dot: '🟡', label: 'MVFR', colorClass: 'glass-pill-yellow text-amber-200' };
+        return { dot: '🟡', label: 'MVFR', colorClass: 'glass-pill-yellow text-amber-200 font-bold' };
       case 'IFR':
       case 'LIFR':
-        return { dot: '🔴', label: category, colorClass: 'glass-pill-red text-red-200' };
+        return { dot: '🔴', label: category, colorClass: 'glass-pill-red text-red-200 font-bold' };
       default:
-        return { dot: '⚪', label: 'UNK', colorClass: 'glass-pill-neutral text-zinc-300' };
+        return { dot: '⚪', label: 'UNK', colorClass: 'glass-pill-neutral text-zinc-300 font-bold' };
     }
   };
 
@@ -99,12 +112,12 @@ ADVISORY ONLY: Informational pre-flight awareness utility under DGCA and FAA reg
         isNight
           ? 'bg-red-950/60 border-red-800/80 text-red-300'
           : isDay
-          ? 'bg-amber-50 border-amber-300 text-amber-950'
+          ? 'bg-amber-100/90 border-amber-400 text-amber-950'
           : 'bg-zinc-900/80 border-zinc-700/80 text-zinc-300'
       }`}>
-        <AlertTriangle className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
+        <AlertTriangle className={`w-4 h-4 shrink-0 mt-0.5 ${isDay ? 'text-amber-900' : 'text-amber-400'}`} />
         <div className="leading-snug">
-          <strong className="font-bold uppercase tracking-wider text-amber-400">FAR PART 91.3 PIC RESPONSIBILITY DISCLAIMER:</strong>{' '}
+          <strong className={`font-bold uppercase tracking-wider ${isDay ? 'text-amber-900 font-black' : 'text-amber-400'}`}>FAR PART 91.3 PIC RESPONSIBILITY DISCLAIMER:</strong>{' '}
           Project VAYU is an informational pre-flight awareness utility. It does not replace official FAA briefings via 1800wxbrief.com or official flight service stations. The Pilot-in-Command retains sole operational authority.
         </div>
       </div>
@@ -130,16 +143,16 @@ ADVISORY ONLY: Informational pre-flight awareness utility under DGCA and FAA reg
           <span>{timeInfo.combinedString}</span>
         </div>
 
-        <div>
+        <div className="flex justify-center px-2">
           {/* Centered Weather Pill */}
-          <div className={`inline-flex items-center gap-2 px-4 py-1.5 rounded-full border text-xs font-mono font-medium shadow-inner ${weatherConfig.colorClass}`}>
-            <span className={`w-2.5 h-2.5 rounded-full inline-block ${
+          <div className={`inline-flex items-center justify-center gap-2 px-3.5 sm:px-5 py-2 rounded-full border text-xs font-mono font-medium shadow-inner flex-wrap max-w-full ${weatherConfig.colorClass}`}>
+            <span className={`w-2.5 h-2.5 rounded-full inline-block shrink-0 ${
               isNight ? 'led-glow-red' : weatherConfig.label === 'VFR' ? 'led-glow-green' : weatherConfig.label === 'MVFR' ? 'led-glow-yellow' : 'led-glow-red'
             }`} />
             <span className="font-bold">{weatherConfig.label}</span>
-            <span className="opacity-40">•</span>
+            <span className="opacity-40 hidden sm:inline">•</span>
             <span>Winds {briefing.weather.windInfo}</span>
-            <span className="opacity-40">•</span>
+            <span className="opacity-40 hidden sm:inline">•</span>
             <span>Vis {briefing.weather.visibilityInfo}</span>
           </div>
         </div>
@@ -147,15 +160,17 @@ ADVISORY ONLY: Informational pre-flight awareness utility under DGCA and FAA reg
 
       {/* CRITICAL ATTENTION SECTION */}
       <div className="mb-6">
-        <div className="flex items-center gap-2 text-xs font-mono font-bold text-red-500 tracking-wider uppercase mb-3">
-          <span className="w-3 h-3 rounded-full led-glow-red inline-block" />
+        <div className={`flex items-center gap-2 text-xs font-mono font-bold tracking-wider uppercase mb-3 ${
+          isNight ? 'text-red-500' : isDay ? 'text-red-700 font-black' : 'text-red-500'
+        }`}>
+          <span className="w-3 h-3 rounded-full led-glow-red inline-block shrink-0" />
           <span>CRITICAL ATTENTION ({briefing.criticalCount})</span>
         </div>
 
         {briefing.criticalAlerts.length > 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3.5">
             {briefing.criticalAlerts.map((alert, idx) => {
-              const notamWindow = evaluateNotamStatusWindow(alert.rawSnippet);
+              const notamWindow = evaluateNotamStatusWindow(alert.rawSnippet, undefined, isDay);
 
               return (
                 <div
@@ -231,7 +246,7 @@ ADVISORY ONLY: Informational pre-flight awareness utility under DGCA and FAA reg
         </div>
 
         {briefing.warnings.length > 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3.5">
             {briefing.warnings.map((warn, idx) => (
               <div
                 key={warn.id || idx}
