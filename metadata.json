@@ -1,0 +1,6 @@
+{
+  "name": "Project VAYU - NOTAM Intelligence Platform",
+  "description": "Next-Gen AI Pre-Flight Briefing & NOTAM Intelligence Platform converting cryptic aviation NOTAMs and weather feeds into plain-English briefing intelligence for pilots.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

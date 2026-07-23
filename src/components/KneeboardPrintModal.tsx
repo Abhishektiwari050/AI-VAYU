@@ -1,0 +1,123 @@
+import React from 'react';
+import { BriefingSummary } from '../types';
+import { X, Printer, FileText, AlertTriangle } from 'lucide-react';
+
+interface KneeboardPrintModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  briefing: BriefingSummary | null;
+}
+
+export const KneeboardPrintModal: React.FC<KneeboardPrintModalProps> = ({
+  isOpen,
+  onClose,
+  briefing,
+}) => {
+  if (!isOpen || !briefing) return null;
+
+  const handlePrint = () => {
+    window.print();
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 backdrop-blur-md p-4 font-mono">
+      <div className="w-full max-w-2xl border border-black bg-white p-6 text-black shadow-2xl space-y-4 max-h-[92vh] overflow-y-auto rounded-2xl">
+        {/* Modal Topbar */}
+        <div className="flex items-center justify-between border-b-2 border-black pb-3">
+          <div className="flex items-center space-x-2">
+            <FileText className="h-5 w-5 text-black" />
+            <h2 className="text-sm font-black uppercase tracking-[0.2em] text-black">
+              PILOT KNEEBOARD CARD — {briefing.icao}
+            </h2>
+          </div>
+          <div className="flex items-center space-x-2">
+            <button
+              onClick={handlePrint}
+              className="px-3 py-1 bg-black text-white text-xs font-bold font-mono hover:bg-zinc-800 transition flex items-center space-x-1 cursor-pointer"
+            >
+              <Printer className="h-3.5 w-3.5" />
+              <span>PRINT / PDF</span>
+            </button>
+            <button
+              onClick={onClose}
+              className="p-1 text-black hover:bg-black hover:text-white transition border border-black cursor-pointer"
+            >
+              <X className="h-5 w-5" />
+            </button>
+          </div>
+        </div>
+
+        {/* Printable Kneeboard Content */}
+        <div className="space-y-4 font-mono text-xs text-black print:text-black">
+          {/* Header Block */}
+          <div className="border-2 border-black p-4 flex justify-between items-center">
+            <div>
+              <div className="text-2xl font-black tracking-tight">{briefing.icao} - {briefing.airportName}</div>
+              <div className="text-[10px] uppercase font-bold text-black/70">DATE: {new Date(briefing.generatedAtUtc).toUTCString()}</div>
+            </div>
+            <div className="border-2 border-black bg-black text-white px-3 py-1 font-black text-sm uppercase tracking-widest">
+              CAT: {briefing.weather.flightCategory}
+            </div>
+          </div>
+
+          {/* PIC Note */}
+          <div className="border-2 border-black bg-zinc-100 p-3 font-bold text-xs uppercase leading-snug">
+            ⚠️ PIC TAKEAWAY: {briefing.picTakeaway}
+          </div>
+
+          {/* Weather */}
+          <div className="border-2 border-black p-3 space-y-2">
+            <div className="font-black text-xs uppercase border-b border-black/20 pb-1 tracking-widest">WEATHER & METAR</div>
+            <div className="font-mono text-[11px] font-bold bg-zinc-100 p-2 border border-black/20">{briefing.weather.rawMetar}</div>
+            <div className="text-xs font-sans font-semibold">{briefing.weather.plainEnglishSummary}</div>
+          </div>
+
+          {/* Critical Alerts */}
+          <div className="border-2 border-black p-3 space-y-2">
+            <div className="font-black text-xs uppercase text-red-700 border-b border-black/20 pb-1 tracking-widest">
+              🔴 CRITICAL CLOSURES & TFRs ({briefing.criticalCount})
+            </div>
+            {briefing.criticalAlerts.length === 0 ? (
+              <div className="text-xs text-zinc-600 font-bold">None reported.</div>
+            ) : (
+              briefing.criticalAlerts.map((c, i) => (
+                <div key={i} className="border-l-4 border-red-700 pl-3 py-1">
+                  <div className="font-black uppercase">{c.title}</div>
+                  <div className="font-sans font-medium text-xs">{c.plainEnglish}</div>
+                  <div className="text-[10px] text-zinc-600 font-mono">RAW: {c.rawSnippet}</div>
+                </div>
+              ))
+            )}
+          </div>
+
+          {/* Warnings */}
+          <div className="border-2 border-black p-3 space-y-2">
+            <div className="font-black text-xs uppercase border-b border-black/20 pb-1 tracking-widest">
+              🟡 WARNINGS & NAVAIDS ({briefing.warningCount})
+            </div>
+            {briefing.warnings.length === 0 ? (
+              <div className="text-xs text-zinc-600 font-bold">None reported.</div>
+            ) : (
+              briefing.warnings.map((w, i) => (
+                <div key={i} className="border-l-4 border-amber-600 pl-3 py-1">
+                  <div className="font-black uppercase">{w.title}</div>
+                  <div className="font-sans font-medium text-xs">{w.plainEnglish}</div>
+                  <div className="text-[10px] text-zinc-600 font-mono">RAW: {w.rawSnippet}</div>
+                </div>
+              ))
+            )}
+          </div>
+
+          {/* MANDATORY LEGAL FAR PART 91.3 DISCLAIMER */}
+          <div className="border-2 border-black p-3 text-[10px] font-mono leading-tight bg-zinc-100">
+            <div className="font-bold uppercase flex items-center space-x-1 mb-1 text-black">
+              <AlertTriangle className="h-3 w-3 text-black" />
+              <span>MANDATORY FAR PART 91.3 LEGAL ADVISORY:</span>
+            </div>
+            ADVISORY ONLY: Project VAYU is an informational pre-flight awareness utility. Pilots retain sole operational authority under DGCA and FAA regulations.
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
