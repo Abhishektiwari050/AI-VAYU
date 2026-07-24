@@ -66,7 +66,7 @@ export async function processMessagingBotRequest(payload: MessagingBotWebhookPay
     `🟡 AIRPORT ADVISORIES (${warnings.length}):\n` +
     (warnings.map((w) => ` • ${w.category.replace('_', ' ')}: ${w.rawText.slice(0, 80)}...`).join('\n') || ' • None reported.') +
     `\n----------------------------------------\n` +
-    `🔗 Interactive Briefing & Radar: https://vayu.aero/#${cleanCode}\n` +
+    `🔗 Interactive Briefing & Radar: https://ai-vayu.vercel.app/#${cleanCode}\n` +
     `FAR Part 91/135 Informational Safety Utility`;
 
   return {

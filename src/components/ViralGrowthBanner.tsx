@@ -13,7 +13,7 @@ export const ViralGrowthBanner: React.FC<ViralGrowthBannerProps> = ({ theme, cur
   const isNight = theme === 'NIGHT_RED';
   const isDay = theme === 'DAY_FLIGHT';
 
-  const shareUrl = typeof window !== 'undefined' ? `${window.location.origin}/#${currentIcao}` : `https://vayu.aero/#${currentIcao}`;
+  const shareUrl = typeof window !== 'undefined' ? `${window.location.origin}/#${currentIcao}` : `https://ai-vayu.vercel.app/#${currentIcao}`;
 
   const shareText = `✈ I'm using Project VAYU for instant AI Pre-Flight Briefings & plain-English NOTAMs! Check briefing for ${currentIcao}: ${shareUrl}`;
 

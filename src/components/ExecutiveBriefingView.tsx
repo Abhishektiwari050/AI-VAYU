@@ -85,7 +85,7 @@ export const ExecutiveBriefingView: React.FC<ExecutiveBriefingViewProps> = ({
   };
 
   const handleCopySummary = () => {
-    const briefingUrl = typeof window !== 'undefined' ? `${window.location.origin}/#${briefing.icao}` : `https://vayu.aero/#${briefing.icao}`;
+    const briefingUrl = typeof window !== 'undefined' ? `${window.location.origin}/#${briefing.icao}` : `https://ai-vayu.vercel.app/#${briefing.icao}`;
     const text = `✈ VAYU Briefing: ${briefing.icao} (${timeInfo.combinedString})
 ------------------------------
 🌤 Weather: ${briefing.weather.flightCategory} (${briefing.weather.plainEnglishSummary})

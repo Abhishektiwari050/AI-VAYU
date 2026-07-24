@@ -1,8 +1,8 @@
-# Project VAYU — Robots.txt for Global Search Engine Indexing
+# AI-VAYU — Robots.txt for Global Search Engine Indexing
 User-agent: *
 Allow: /
 Allow: /api/briefing
 Allow: /#*
 
 # Dynamic Sitemap
-Sitemap: https://vayu.aero/sitemap.xml
+Sitemap: https://ai-vayu.vercel.app/sitemap.xml
