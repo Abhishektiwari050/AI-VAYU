@@ -60,8 +60,20 @@ export default function App() {
 
   const [briefing, setBriefing] = useState<BriefingSummary | null>(null);
   const [routeBriefing, setRouteBriefing] = useState<RouteLegBriefing | null>(null);
-  const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [error, setError] = useState<string | null>(null);
+  const [is404Route, setIs404Route] = useState<boolean>(() => {
+    const path = window.location.pathname;
+    return path !== '/' && path !== '' && !path.startsWith('/#');
+  });
+
+  // Listen to browser popstate (back/forward)
+  useEffect(() => {
+    const handleLocation = () => {
+      const path = window.location.pathname;
+      setIs404Route(path !== '/' && path !== '' && !path.startsWith('/#'));
+    };
+    window.addEventListener('popstate', handleLocation);
+    return () => window.removeEventListener('popstate', handleLocation);
+  }, []);
 
   const [isAudioPlaying, setIsAudioPlaying] = useState<boolean>(false);
   const [isOnline, setIsOnline] = useState<boolean>(true);
@@ -424,7 +436,14 @@ export default function App() {
           {/* Active View Render */}
           {!isLoading && (
             <>
-              {viewMode === 'ROUTE' && routeBriefing ? (
+              {is404Route ? (
+                <NotFoundPage
+                  onReturnHome={() => {
+                    window.history.pushState({}, '', '/');
+                    setIs404Route(false);
+                  }}
+                />
+              ) : viewMode === 'ROUTE' && routeBriefing ? (
                 <RouteBriefingView
                   routeData={routeBriefing}
                   theme={theme}
