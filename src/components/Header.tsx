@@ -61,7 +61,7 @@ export const Header: React.FC<HeaderProps> = ({
   userTier,
   onSearchSingle,
   onSearchRoute,
-  isLoading,
+  isLoading = false,
   activeIcao = 'VIDP',
   userEmail,
 }) => {
