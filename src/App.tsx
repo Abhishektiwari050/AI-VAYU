@@ -16,6 +16,7 @@ import { BriefingSummary, RouteLegBriefing, AuditLogEntry } from './types';
 import { generateClientFallbackBriefing, generateClientFallbackRoute } from './lib/clientFallback';
 import { supabase, getUserProfile, UserProfile, recordBriefingAudit } from './lib/supabaseClient';
 import { SaaSAppShell, SaaSTab } from './components/SaaSAppShell';
+import { NotFoundPage } from './components/NotFoundPage';
 import { AlertTriangle, ShieldCheck, Zap, WifiOff, Compass } from 'lucide-react';
 
 export default function App() {
