@@ -15,6 +15,7 @@ import { AuthModal } from './components/AuthModal';
 import { BriefingSummary, RouteLegBriefing, AuditLogEntry } from './types';
 import { generateClientFallbackBriefing, generateClientFallbackRoute } from './lib/clientFallback';
 import { supabase, getUserProfile, UserProfile, recordBriefingAudit } from './lib/supabaseClient';
+import { SaaSAppShell, SaaSTab } from './components/SaaSAppShell';
 import { AlertTriangle, ShieldCheck, Zap, WifiOff, Compass } from 'lucide-react';
 
 export default function App() {
@@ -28,6 +29,19 @@ export default function App() {
 
   const [fontSize, setFontSize] = useState<FontSizeSetting>('NORMAL');
   const [viewMode, setViewMode] = useState<'EXECUTIVE' | 'CLI' | 'ROUTE'>('EXECUTIVE');
+  const [saasTab, setSaasTab] = useState<SaaSTab>('BRIEFING');
+
+  const handleSaasTabChange = (tab: SaaSTab) => {
+    setSaasTab(tab);
+    if (tab === 'BRIEFING') setViewMode('EXECUTIVE');
+    if (tab === 'ROUTE') setViewMode('ROUTE');
+    if (tab === 'DISPATCH') setIsDispatchModalOpen(true);
+    if (tab === 'BILLING') setIsMonetizationModalOpen(true);
+    if (tab === 'FLEET') setIsMonetizationModalOpen(true);
+    if (tab === 'BOT') {
+      alert('📱 WhatsApp Briefing Bot active on +1 (800) VAYU-BOT. Text any ICAO code (e.g. "VIDP") for instant cards!');
+    }
+  };
 
   const [currentUser, setCurrentUser] = useState<UserProfile | null>(null);
 
@@ -345,7 +359,18 @@ export default function App() {
   };
 
   return (
-    <div className={getThemeWrapperClass()}>
+    <SaaSAppShell
+      activeTab={saasTab}
+      setActiveTab={handleSaasTabChange}
+      userTier={userTier}
+      onOpenMonetization={() => setIsMonetizationModalOpen(true)}
+      onOpenAuth={() => setIsAuthModalOpen(true)}
+      onOpenDispatchModal={() => setIsDispatchModalOpen(true)}
+      userEmail={currentUser?.email}
+      theme={theme}
+      activeIcao={briefing?.icao}
+    >
+      <div className={getThemeWrapperClass()}>
       {/* Ambient Soft Glow Background Accent */}
       <div className={`fixed top-1/4 left-1/2 -translate-x-1/2 w-[800px] h-[400px] blur-[180px] pointer-events-none rounded-full z-0 transition-all duration-700 ${
         theme === 'NIGHT_RED' ? 'bg-red-600/10' : theme === 'DAY_FLIGHT' ? 'bg-blue-500/10' : 'bg-blue-600/3'
@@ -604,5 +629,6 @@ export default function App() {
         currentTier={userTier}
       />
     </div>
+    </SaaSAppShell>
   );
 }
