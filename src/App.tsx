@@ -71,6 +71,8 @@ export default function App() {
       return null;
     }
   });
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string | null>(null);
   const [routeBriefing, setRouteBriefing] = useState<RouteLegBriefing | null>(null);
   const [is404Route, setIs404Route] = useState<boolean>(() => {
     const path = window.location.pathname;
