@@ -64,7 +64,13 @@ export default function App() {
   const [briefsUsedToday, setBriefsUsedToday] = useState<number>(1);
   const maxFreeBriefs = 3;
 
-  const [briefing, setBriefing] = useState<BriefingSummary | null>(null);
+  const [briefing, setBriefing] = useState<BriefingSummary | null>(() => {
+    try {
+      return generateClientFallbackBriefing('VIDP');
+    } catch {
+      return null;
+    }
+  });
   const [routeBriefing, setRouteBriefing] = useState<RouteLegBriefing | null>(null);
   const [is404Route, setIs404Route] = useState<boolean>(() => {
     const path = window.location.pathname;

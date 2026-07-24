@@ -116,7 +116,8 @@ ADVISORY ONLY: Informational pre-flight awareness utility under DGCA and FAA reg
     window.open(`sms:?body=${encodeURIComponent(text)}`, '_blank');
   };
 
-  const weatherConfig = getWeatherPillCategory(briefing.weather.flightCategory);
+  const flightCat = briefing?.weather?.flightCategory || 'VFR';
+  const weatherConfig = getWeatherPillCategory(flightCat) || { label: 'VFR', bg: 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30' };
 
   const cardGlassClass = isNight
     ? 'glass-card-night text-red-100'
@@ -130,23 +131,23 @@ ADVISORY ONLY: Informational pre-flight awareness utility under DGCA and FAA reg
     ? 'glass-card-advisory-night text-red-100'
     : 'cirrus-card bg-amber-50/70 border-amber-200 text-[#0e1116]';
 
-  const allLedgerItems = briefing.allNotamsLedger || [];
+  const allLedgerItems = briefing?.allNotamsLedger || [];
   const filteredLedger = allLedgerItems.filter((item) => {
     const matchesBucket = activeLedgerBucket === 'ALL' || item.category === activeLedgerBucket;
     const matchesSearch =
       !ledgerSearchTerm ||
-      item.rawText.toLowerCase().includes(ledgerSearchTerm.toLowerCase()) ||
-      item.id.toLowerCase().includes(ledgerSearchTerm.toLowerCase());
+      item.rawText?.toLowerCase().includes(ledgerSearchTerm.toLowerCase()) ||
+      item.id?.toLowerCase().includes(ledgerSearchTerm.toLowerCase());
     return matchesBucket && matchesSearch;
   });
 
-  const counts = briefing.bucketCounts || {
-    RUNWAYS_TFRS: briefing.criticalAlerts.length,
-    PROCEDURES_NAVAIDS: briefing.warnings.length,
+  const counts = briefing?.bucketCounts || {
+    RUNWAYS_TFRS: briefing?.criticalAlerts?.length || 0,
+    PROCEDURES_NAVAIDS: briefing?.warnings?.length || 0,
     TAXIWAYS_APRON: 0,
     OBSTACLES_LIGHTING: 0,
     FIR_ENROUTE: 0,
-    GENERAL: briefing.infoItems.length,
+    GENERAL: briefing?.infoItems?.length || 0,
   };
 
   return (
