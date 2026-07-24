@@ -24,6 +24,7 @@ import { formatZuluAndLocalTime, evaluateNotamStatusWindow } from '../lib/timezo
 import { AerodromeRadarMap } from './AerodromeRadarMap';
 import { CockpitAudioReadout } from './CockpitAudioReadout';
 import { InteractiveAirportDiagram } from './InteractiveAirportDiagram';
+import { ViralGrowthBanner } from './ViralGrowthBanner';
 
 interface ExecutiveBriefingViewProps {
   briefing: BriefingSummary;
@@ -159,6 +160,9 @@ ADVISORY ONLY: Informational pre-flight awareness utility under DGCA and FAA reg
       isNight ? 'text-red-100' : isDay ? 'text-slate-900' : 'text-white'
     }`}>
       
+      {/* VIRAL GROWTH & FLIGHT CREW RECREATION SHARE BANNER */}
+      <ViralGrowthBanner theme={theme} currentIcao={briefing.icao} />
+
       {/* MANDATORY LEGAL FAR PART 91.3 ADVISORY DISCLAIMER BANNER */}
       <div className={`p-3 rounded-2xl border text-[11px] font-mono mb-6 flex items-start gap-2.5 shadow-sm ${
         isNight
