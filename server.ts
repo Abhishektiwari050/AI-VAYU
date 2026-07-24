@@ -3,15 +3,23 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import { createServer as createViteServer } from 'vite';
 import { GoogleGenAI, Type } from '@google/genai';
+import Stripe from 'stripe';
 import { runDeterministicSafetyEngine } from './src/lib/deterministicEngine.js';
 import { generateSyntheticMetar, generateSyntheticNotams } from './src/lib/mockAviationData.js';
 import { lookupAirport, normalizeAirportCode } from './src/lib/airportData.js';
+import { checkBriefingUsageMiddleware } from './src/middleware.js';
 import { BriefingSummary, RawNotam, MetarData } from './src/types.js';
 
 const app = express();
 const PORT = 3000;
 
 app.use(express.json());
+
+// Initialize Stripe Client
+const stripeSecretKey = process.env.STRIPE_SECRET_KEY || 'sk_test_mock_vayu_stripe_key';
+const stripe = new Stripe(stripeSecretKey, {
+  apiVersion: '2025-02-24.acacia' as any,
+});
 
 // Initialize server-side Gemini API client
 const getAiClient = () => {
@@ -70,18 +78,68 @@ async function fetchLiveMetar(icao: string): Promise<MetarData> {
   return generateSyntheticMetar(code);
 }
 
+function lookupFirCode(icao: string): string {
+  const code = icao.trim().toUpperCase();
+  if (code === 'VIDP' || code === 'VIAR' || code === 'VICG') return 'VIDF'; // Delhi FIR
+  if (code === 'VABB' || code === 'VDGO' || code === 'VANP') return 'VABF'; // Mumbai FIR
+  if (code === 'VOBL' || code === 'VOMM' || code === 'VOCI') return 'VOMF'; // Chennai FIR
+  if (code === 'VECC' || code === 'VVEI' || code === 'VEPT') return 'VECF'; // Kolkata FIR
+  if (code.startsWith('KJFK') || code.startsWith('KLGA') || code.startsWith('KEWR')) return 'KZNY'; // New York FIR
+  if (code.startsWith('KLAX') || code.startsWith('KSAN') || code.startsWith('KSNA')) return 'KZLA'; // LA FIR
+  if (code.startsWith('KDFW') || code.startsWith('KDAL')) return 'KZFW'; // Fort Worth FIR
+  if (code.startsWith('KORD') || code.startsWith('KMDW')) return 'KZAU'; // Chicago FIR
+  if (code.startsWith('EG')) return 'EGTT'; // London FIR
+  return `${code.slice(0, 1)}FIR`;
+}
+
+// Helper to fetch live TAF forecast data
+async function fetchLiveTaf(icao: string): Promise<string> {
+  const code = icao.trim().toUpperCase();
+  try {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 3500);
+    const res = await fetch(`https://aviationweather.gov/api/data/taf?ids=${code}&format=raw`, {
+      signal: controller.signal,
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+        'Accept': 'text/plain, */*',
+      },
+    });
+    clearTimeout(timeout);
+
+    if (res.ok) {
+      const text = await res.text();
+      if (text && text.trim().length > 5) {
+        return text.trim();
+      }
+    }
+  } catch (err) {
+    console.log(`[TAF Fetch] Live TAF fetch status for ${code}: using backup data stream.`);
+  }
+
+  return generateSyntheticTaf(code);
+}
+
+function decodeTafSummary(tafRaw: string): string {
+  if (!tafRaw) return 'No terminal forecast available.';
+  const lines = tafRaw.split(/\b(?=FM|TEMPO|BECMG|PROB)/);
+  const formattedLines = lines.map((l) => l.trim()).filter(Boolean);
+  return formattedLines.slice(0, 4).join('\n• ');
+}
+
 // Helper to fetch live NOTAM data with fast 3.5s fallback & international ICAO exchange
 async function fetchLiveNotams(icao: string): Promise<RawNotam[]> {
   const code = icao.trim().toUpperCase();
+  const firCode = lookupFirCode(code);
 
   // 1. Check environment variable for optional global NOTAM API
   if (process.env.GLOBAL_NOTAM_API_URL) {
     try {
       const controller = new AbortController();
       const timeout = setTimeout(() => controller.abort(), 3500);
-      const res = await fetch(`${process.env.GLOBAL_NOTAM_API_URL}?icao=${code}`, {
+      const res = await fetch(`${process.env.GLOBAL_NOTAM_API_URL}?icao=${code},${firCode}`, {
         signal: controller.signal,
-        headers: { 'Accept': 'application/json' },
+        headers: { Accept: 'application/json' },
       });
       clearTimeout(timeout);
 
@@ -90,11 +148,13 @@ async function fetchLiveNotams(icao: string): Promise<RawNotam[]> {
         if (Array.isArray(data) && data.length > 0) {
           return data.map((item: any, idx: number) => ({
             id: item.notamId || `GLOBAL-${code}-${idx}`,
-            icao: code,
+            icao: item.icao || code,
             rawText: item.icaoMessage || item.rawText || item.raw || JSON.stringify(item),
             effectiveStart: item.effectiveStart,
             effectiveEnd: item.effectiveEnd,
             type: item.type,
+            isFir: item.icao === firCode || (item.rawText && item.rawText.includes('FIR')),
+            firIcao: firCode,
           }));
         }
       }
@@ -103,16 +163,16 @@ async function fetchLiveNotams(icao: string): Promise<RawNotam[]> {
     }
   }
 
-  // 2. Default FAA / NOAA Aviation Weather API
+  // 2. Default FAA / NOAA Aviation Weather API (Aerodrome + FIR)
   try {
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), 3500);
 
-    const res = await fetch(`https://aviationweather.gov/api/data/notam?ids=${code}`, {
+    const res = await fetch(`https://aviationweather.gov/api/data/notam?ids=${code},${firCode}`, {
       signal: controller.signal,
-      headers: { 
+      headers: {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-        'Accept': 'application/json, text/plain, */*'
+        Accept: 'application/json, text/plain, */*',
       },
     });
     clearTimeout(timeout);
@@ -120,18 +180,24 @@ async function fetchLiveNotams(icao: string): Promise<RawNotam[]> {
     if (res.ok) {
       const data = await res.json();
       if (Array.isArray(data) && data.length > 0) {
-        return data.map((item: any, idx: number) => ({
-          id: item.notamId || `LIVE-${code}-${idx}`,
-          icao: code,
-          rawText: item.icaoMessage || item.raw || JSON.stringify(item),
-          effectiveStart: item.effectiveStart,
-          effectiveEnd: item.effectiveEnd,
-          type: item.type,
-        }));
+        return data.map((item: any, idx: number) => {
+          const raw = item.icaoMessage || item.raw || JSON.stringify(item);
+          const isFirItem = item.icao === firCode || raw.includes('FIR') || raw.includes('Q)');
+          return {
+            id: item.notamId || `LIVE-${code}-${idx}`,
+            icao: item.icao || code,
+            rawText: raw,
+            effectiveStart: item.effectiveStart,
+            effectiveEnd: item.effectiveEnd,
+            type: item.type,
+            isFir: isFirItem,
+            firIcao: firCode,
+          };
+        });
       }
     }
   } catch (err) {
-    console.log(`[NOTAM Fetch] Live fetch status for ${code}: using backup data stream.`);
+    console.log(`[NOTAM Fetch] Live fetch status for ${code}/${firCode}: using backup data stream.`);
   }
 
   return generateSyntheticNotams(code);
@@ -142,9 +208,75 @@ app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', system: 'Project VAYU Pre-Flight Briefing API', version: '1.0.0' });
 });
 
+// Stripe Checkout Session Handler
+app.post('/api/stripe/create-checkout-session', async (req, res) => {
+  try {
+    const { planTier, userEmail, currency = 'USD' } = req.body;
+
+    const unitAmount = planTier === 'FLEET'
+      ? (currency === 'INR' ? 399900 : 4900)
+      : (currency === 'INR' ? 79900 : 999);
+
+    const priceName = planTier === 'FLEET' ? 'VAYU Fleet / Flight School Tier' : 'VAYU Pro Pilot Tier';
+
+    // In local/preview environment without live Stripe keys, return simulated checkout URL or session
+    if (!process.env.STRIPE_SECRET_KEY) {
+      return res.json({
+        id: `cs_test_mock_${Date.now()}`,
+        url: null,
+        message: 'Mock Stripe Session initialized. Upgrading user directly.',
+      });
+    }
+
+    const session = await stripe.checkout.sessions.create({
+      payment_method_types: ['card'],
+      customer_email: userEmail || 'pic.pilot@vayu.aero',
+      line_items: [
+        {
+          price_data: {
+            currency: currency.toLowerCase(),
+            product_data: {
+              name: priceName,
+              description: 'FAR Part 91/121/135 Compliant Pre-Flight Intelligence Engine',
+            },
+            unit_amount: unitAmount,
+            recurring: { interval: 'month' },
+          },
+          quantity: 1,
+        },
+      ],
+      mode: 'subscription',
+      success_url: `${req.headers.origin || 'http://localhost:3000'}?payment=success&tier=${planTier}`,
+      cancel_url: `${req.headers.origin || 'http://localhost:3000'}?payment=cancel`,
+    });
+
+    return res.json({ id: session.id, url: session.url });
+  } catch (err: any) {
+    console.error('Stripe Checkout Session error:', err);
+    return res.status(500).json({ error: err.message || 'Failed to create Stripe Checkout session.' });
+  }
+});
+
+// Stripe Webhook Endpoint
+app.post('/api/webhooks/stripe', async (req, res) => {
+  try {
+    const event = req.body;
+    console.log(`[Stripe Express Webhook] Event received: ${event.type || 'generic_event'}`);
+    return res.json({ received: true });
+  } catch (err: any) {
+    return res.status(400).send(`Webhook Error: ${err.message}`);
+  }
+});
+
 // Single Airport Briefing API
 app.post('/api/briefing', async (req, res) => {
   try {
+    // Paywall Middleware Check
+    const usageCheck = await checkBriefingUsageMiddleware(req);
+    if (!usageCheck.allowed && usageCheck.errorPayload) {
+      return res.status(402).json(usageCheck.errorPayload);
+    }
+
     const { icao } = req.body;
     if (!icao || typeof icao !== 'string') {
       return res.status(400).json({ error: 'Airport identifier is required.' });
@@ -157,9 +289,10 @@ app.post('/api/briefing', async (req, res) => {
 
     const airportInfo = lookupAirport(cleanIcao);
 
-    // Parallel Data Ingestion
-    const [metar, rawNotams] = await Promise.all([
+    // Parallel Data Ingestion (METAR + TAF + NOTAMs)
+    const [metar, tafRaw, rawNotams] = await Promise.all([
       fetchLiveMetar(cleanIcao),
+      fetchLiveTaf(cleanIcao),
       fetchLiveNotams(cleanIcao),
     ]);
 
@@ -170,6 +303,15 @@ app.post('/api/briefing', async (req, res) => {
     const warningCount = flaggedNotams.filter((n) => n.severity === 'WARNING').length;
     const totalNotams = flaggedNotams.length;
 
+    const bucketCounts = {
+      RUNWAYS_TFRS: flaggedNotams.filter((n) => n.category === 'RUNWAYS_TFRS').length,
+      PROCEDURES_NAVAIDS: flaggedNotams.filter((n) => n.category === 'PROCEDURES_NAVAIDS').length,
+      TAXIWAYS_APRON: flaggedNotams.filter((n) => n.category === 'TAXIWAYS_APRON').length,
+      OBSTACLES_LIGHTING: flaggedNotams.filter((n) => n.category === 'OBSTACLES_LIGHTING').length,
+      FIR_ENROUTE: flaggedNotams.filter((n) => n.category === 'FIR_ENROUTE').length,
+      GENERAL: flaggedNotams.filter((n) => n.category === 'GENERAL').length,
+    };
+
     let briefingResult: BriefingSummary;
 
     // Call Gemini API if Key Available
@@ -178,19 +320,21 @@ app.post('/api/briefing', async (req, res) => {
         const ai = getAiClient();
         const prompt = `
 You are an expert aviation flight dispatcher and pilot safety evaluator for Project VAYU.
-Convert the provided raw METAR weather and flagged NOTAM strings into an executive, plain-English pre-flight briefing.
+Convert the provided raw METAR weather, raw TAF forecast, and flagged NOTAM strings into an executive, plain-English pre-flight briefing.
 
 Airport ICAO: ${cleanIcao} (${airportInfo?.name || cleanIcao})
 RAW METAR: ${metar.rawText}
-RAW NOTAMS & REGEX SEVERITY SCAN:
+RAW TAF FORECAST: ${tafRaw}
+RAW NOTAMS & 5-BUCKET REGEX SEVERITY SCAN:
 ${JSON.stringify(flaggedNotams, null, 2)}
 
 INSTRUCTIONS:
 1. Translate METAR into concise plain English (wind, visibility, clouds, temperature/dewpoint, flight rules category).
-2. For CRITICAL ALERTS (Severity: CRITICAL): Provide a short headline, 1-2 sentence plain-English explanation of why it is dangerous, raw snippet, category, and PIC action required.
-3. For WARNINGS (Severity: WARNING): Provide plain-English explanation, raw snippet, and category.
-4. For INFO (Severity: INFO): Short bullet points summarizing remaining minor notices.
-5. Provide a 1-2 sentence Pilot-in-Command (PIC) Takeaway summary.
+2. Summarize TAF forecast trends in 2-3 concise bullets.
+3. For CRITICAL ALERTS (Severity: CRITICAL): Provide a short headline, 1-2 sentence plain-English explanation of why it is dangerous, raw snippet, category, effective window, and PIC action required.
+4. For WARNINGS (Severity: WARNING): Provide plain-English explanation, raw snippet, category, and effective window.
+5. For INFO (Severity: INFO): Short bullet points summarizing remaining minor notices.
+6. Provide a 1-2 sentence Pilot-in-Command (PIC) Takeaway summary.
 `;
 
         let responseText: string | null = null;
@@ -211,6 +355,7 @@ INSTRUCTIONS:
                       type: Type.OBJECT,
                       properties: {
                         plainEnglishSummary: { type: Type.STRING },
+                        tafDecodedSummary: { type: Type.STRING },
                         flightCategory: { type: Type.STRING },
                         windInfo: { type: Type.STRING },
                         visibilityInfo: { type: Type.STRING },
@@ -230,6 +375,7 @@ INSTRUCTIONS:
                           rawSnippet: { type: Type.STRING },
                           category: { type: Type.STRING },
                           actionRequired: { type: Type.STRING },
+                          effectiveWindow: { type: Type.STRING },
                         },
                         required: ['title', 'plainEnglish', 'rawSnippet'],
                       },
@@ -244,6 +390,7 @@ INSTRUCTIONS:
                           plainEnglish: { type: Type.STRING },
                           rawSnippet: { type: Type.STRING },
                           category: { type: Type.STRING },
+                          effectiveWindow: { type: Type.STRING },
                         },
                         required: ['title', 'plainEnglish', 'rawSnippet'],
                       },
@@ -286,6 +433,8 @@ INSTRUCTIONS:
             generatedAtUtc: new Date().toISOString(),
             weather: {
               rawMetar: metar.rawText,
+              rawTaf: tafRaw,
+              tafDecodedSummary: parsed.weather?.tafDecodedSummary || decodeTafSummary(tafRaw),
               plainEnglishSummary: parsed.weather?.plainEnglishSummary || 'Standard meteorological conditions.',
               flightCategory: (parsed.weather?.flightCategory as any) || metar.flightCategory,
               windInfo: parsed.weather?.windInfo || 'Winds normal',
@@ -293,9 +442,20 @@ INSTRUCTIONS:
               cloudInfo: parsed.weather?.cloudInfo || metar.clouds || 'Clear skies',
               tempDewInfo: parsed.weather?.tempDewInfo || `${metar.tempC ?? 20}°C`,
             },
-            criticalAlerts: parsed.criticalAlerts || [],
-            warnings: parsed.warnings || [],
-            infoItems: parsed.infoItems || [],
+            criticalAlerts: (parsed.criticalAlerts || []).map((c: any, i: number) => ({
+              ...c,
+              isFir: flaggedNotams.find((fn) => fn.id === c.id)?.isFir,
+            })),
+            warnings: (parsed.warnings || []).map((w: any) => ({
+              ...w,
+              isFir: flaggedNotams.find((fn) => fn.id === w.id)?.isFir,
+            })),
+            infoItems: (parsed.infoItems || []).map((inf: any) => ({
+              ...inf,
+              isFir: flaggedNotams.find((fn) => fn.id === inf.id)?.isFir,
+            })),
+            allNotamsLedger: flaggedNotams,
+            bucketCounts,
             picTakeaway: parsed.picTakeaway || 'Review all critical runway closures before engine start.',
             totalNotamsIngested: totalNotams,
             criticalCount,
@@ -304,14 +464,14 @@ INSTRUCTIONS:
           };
         } else {
           console.log(`[Project VAYU] Gemini LLM unavailable. Engaging deterministic safety engine for ${cleanIcao}.`);
-          briefingResult = buildFallbackBriefing(cleanIcao, airportInfo?.name, metar, flaggedNotams);
+          briefingResult = buildFallbackBriefing(cleanIcao, airportInfo?.name, metar, tafRaw, flaggedNotams);
         }
       } catch (aiError: any) {
         console.log('[Project VAYU] Soft fallback to deterministic safety engine:', aiError?.message || aiError);
-        briefingResult = buildFallbackBriefing(cleanIcao, airportInfo?.name, metar, flaggedNotams);
+        briefingResult = buildFallbackBriefing(cleanIcao, airportInfo?.name, metar, tafRaw, flaggedNotams);
       }
     } else {
-      briefingResult = buildFallbackBriefing(cleanIcao, airportInfo?.name, metar, flaggedNotams);
+      briefingResult = buildFallbackBriefing(cleanIcao, airportInfo?.name, metar, tafRaw, flaggedNotams);
     }
 
     return res.json(briefingResult);
@@ -326,11 +486,21 @@ function buildFallbackBriefing(
   icao: string,
   airportName: string | undefined,
   metar: MetarData,
+  tafRaw: string,
   flaggedNotams: ReturnType<typeof runDeterministicSafetyEngine>
 ): BriefingSummary {
   const criticals = flaggedNotams.filter((n) => n.severity === 'CRITICAL');
   const warnings = flaggedNotams.filter((n) => n.severity === 'WARNING');
   const infos = flaggedNotams.filter((n) => n.severity === 'INFO');
+
+  const bucketCounts = {
+    RUNWAYS_TFRS: flaggedNotams.filter((n) => n.category === 'RUNWAYS_TFRS').length,
+    PROCEDURES_NAVAIDS: flaggedNotams.filter((n) => n.category === 'PROCEDURES_NAVAIDS').length,
+    TAXIWAYS_APRON: flaggedNotams.filter((n) => n.category === 'TAXIWAYS_APRON').length,
+    OBSTACLES_LIGHTING: flaggedNotams.filter((n) => n.category === 'OBSTACLES_LIGHTING').length,
+    FIR_ENROUTE: flaggedNotams.filter((n) => n.category === 'FIR_ENROUTE').length,
+    GENERAL: flaggedNotams.filter((n) => n.category === 'GENERAL').length,
+  };
 
   return {
     icao,
@@ -338,6 +508,8 @@ function buildFallbackBriefing(
     generatedAtUtc: new Date().toISOString(),
     weather: {
       rawMetar: metar.rawText,
+      rawTaf: tafRaw,
+      tafDecodedSummary: decodeTafSummary(tafRaw),
       plainEnglishSummary: `METAR for ${icao}: ${metar.rawText}. Conditions rated ${metar.flightCategory}.`,
       flightCategory: metar.flightCategory,
       windInfo: metar.windSpeedKts ? `${metar.windDirDeg}° at ${metar.windSpeedKts} kts` : 'Winds variable',
@@ -347,27 +519,32 @@ function buildFallbackBriefing(
     },
     criticalAlerts: criticals.map((c) => ({
       id: c.id,
-      title: `CRITICAL SAFETY ALERT: ${c.category}`,
-      plainEnglish: `Deterministic rule matched keywords [${c.matchedKeywords.join(', ')}]. Immediate attention required for ${c.category.toLowerCase()} operational status.`,
+      title: `CRITICAL SAFETY ALERT: ${c.category.replace('_', ' ')}`,
+      plainEnglish: `Deterministic rule matched keywords [${c.matchedKeywords.join(', ')}]. Immediate attention required for ${c.category.toLowerCase().replace('_', ' ')} operational status.`,
       rawSnippet: c.rawText,
       category: c.category,
       actionRequired: 'Verify runway/airspace status with ATC prior to taxi/departure.',
       effectiveWindow: c.effectiveWindow,
+      isFir: c.isFir,
     })),
     warnings: warnings.map((w) => ({
       id: w.id,
-      title: `OPERATIONAL ADVISORY: ${w.category}`,
+      title: `OPERATIONAL ADVISORY: ${w.category.replace('_', ' ')}`,
       plainEnglish: `Outage or hazard identified [${w.matchedKeywords.join(', ')}]. Check instrument approach minimums and taxipath restrictions.`,
       rawSnippet: w.rawText,
       category: w.category,
       effectiveWindow: w.effectiveWindow,
+      isFir: w.isFir,
     })),
     infoItems: infos.map((i) => ({
       id: i.id,
       title: `GENERAL NOTICE`,
       plainEnglish: `Standard operational info: ${i.rawText}`,
       rawSnippet: i.rawText,
+      isFir: i.isFir,
     })),
+    allNotamsLedger: flaggedNotams,
+    bucketCounts,
     picTakeaway: criticals.length > 0 
       ? `ATTENTION PIC: ${criticals.length} critical safety alert(s) active at ${icao}. Confirm runway closures and airspace limits.`
       : `Normal operations at ${icao}. Maintain standard pre-flight vigilance.`,
@@ -381,6 +558,12 @@ function buildFallbackBriefing(
 // Route Briefing API
 app.post('/api/route-briefing', async (req, res) => {
   try {
+    // Paywall Middleware Check
+    const usageCheck = await checkBriefingUsageMiddleware(req);
+    if (!usageCheck.allowed && usageCheck.errorPayload) {
+      return res.status(402).json(usageCheck.errorPayload);
+    }
+
     const { origin, destination, waypoints = [] } = req.body;
     if (!origin || !destination) {
       return res.status(400).json({ error: 'Origin and Destination airport identifiers are required.' });

@@ -3,6 +3,7 @@ import { RouteLegBriefing } from '../types';
 import { Compass, ArrowRight, AlertTriangle, ShieldCheck, CheckCircle2 } from 'lucide-react';
 import { ExecutiveBriefingView } from './ExecutiveBriefingView';
 import { DisplayTheme, FontSizeSetting } from './Header';
+import { RouteFileDropzone } from './RouteFileDropzone';
 
 interface RouteBriefingViewProps {
   routeData: RouteLegBriefing;
@@ -10,6 +11,7 @@ interface RouteBriefingViewProps {
   fontSize: FontSizeSetting;
   onOpenKneeboard: () => void;
   onOpenDispatchModal: () => void;
+  onSearchRoute?: (origin: string, destination: string, waypoints: string[]) => void;
 }
 
 export const RouteBriefingView: React.FC<RouteBriefingViewProps> = ({
@@ -18,6 +20,7 @@ export const RouteBriefingView: React.FC<RouteBriefingViewProps> = ({
   fontSize,
   onOpenKneeboard,
   onOpenDispatchModal,
+  onSearchRoute,
 }) => {
   const isNight = theme === 'NIGHT_RED';
   const isDay = theme === 'DAY_FLIGHT';
@@ -112,6 +115,11 @@ export const RouteBriefingView: React.FC<RouteBriefingViewProps> = ({
           {routeData.routeSummaryText}
         </p>
       </div>
+
+      {/* Flight Plan File Dropzone Importer */}
+      {onSearchRoute && (
+        <RouteFileDropzone onRouteParsed={onSearchRoute} theme={theme} />
+      )}
 
       {/* Leg Tabs & Individual Airport Cards */}
       <div className="space-y-12">

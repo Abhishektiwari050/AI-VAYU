@@ -120,6 +120,61 @@ export function generateSyntheticMetar(icao: string): MetarData {
       clouds: 'FEW at 2,000ft, BKN at 9,000ft',
     };
   }
+
+  // Dynamic realistic fallback METAR for any requested airport code
+  return {
+    icao: code,
+    rawText: `${code} ${zTime} 27010KT 5000 HZ FEW025 SCT080 30/22 Q1006 NOSIG`,
+    timestamp: zTime,
+    flightCategory: 'VFR',
+    windDirDeg: 270,
+    windSpeedKts: 10,
+    visibilitySm: 3.5,
+    tempC: 30,
+    dewpointC: 22,
+    altimeterInHg: 29.71,
+    clouds: 'FEW at 2,500ft, SCT at 8,000ft (Haze)',
+  };
+}
+
+export function generateSyntheticTaf(icao: string): string {
+  const code = icao.toUpperCase();
+  const date = new Date();
+  const day = String(date.getUTCDate()).padStart(2, '0');
+  const nextDay = String((date.getUTCDate() % 28) + 1).padStart(2, '0');
+  const hour = String(date.getUTCHours()).padStart(2, '0');
+  const issueTime = `${day}${hour}00Z`;
+  const validPeriod = `${day}06/${nextDay}06`;
+
+  if (code === 'KJFK') {
+    return `TAF KJFK ${issueTime} ${validPeriod} 20010KT P6SM FEW030 BKN250 FM241400 18012G20KT P6SM SCT040 TEMPO 2418/2422 5SM TSRA BKN030CB BECMG 2501/2503 24008KT P6SM SKC`;
+  }
+
+  if (code === 'KLAX') {
+    return `TAF KLAX ${issueTime} ${validPeriod} 25008KT 6SM HZ BKN012 FM241800 24012KT P6SM SCT025 BECMG 2503/2505 22006KT 4SM BR OVC010`;
+  }
+
+  if (code === 'KORD') {
+    return `TAF KORD ${issueTime} ${validPeriod} 02015G25KT 2SM -SN OVC008 FM241600 36012KT 4SM -SN OVC015 TEMPO 2420/2500 1SM SN BLSN OVC005 BECMG 2502/2504 33008KT P6SM SCT025`;
+  }
+
+  if (code === 'VIDP') {
+    return `TAF VIDP ${issueTime} ${validPeriod} 28008KT 3000 HZ SCT020 BKN090 BECMG 2412/2414 2000 HZ FEW020 BKN080 TEMPO 2416/2420 1500 TSRA SCT015CB BECMG 2501/2503 26006KT 4000 HZ`;
+  }
+
+  if (code === 'VABB') {
+    return `TAF VABB ${issueTime} ${validPeriod} 24018G28KT 2000 +SHRA FEW010 OVC080 TEMPO 2408/2414 1200 +TSRA BKN008CB BECMG 2418/2420 22012KT 3000 RA BKN015`;
+  }
+
+  if (code === 'VOBL') {
+    return `TAF VOBL ${issueTime} ${validPeriod} 09010KT 6000 SCT025 BKN100 TEMPO 2414/2418 3000 TSRA SCT015CB BECMG 2500/2502 08006KT 5000 HZ`;
+  }
+
+  if (code === 'VDGO') {
+    return `TAF VDGO ${issueTime} ${validPeriod} 26012KT 8000 FEW020 BKN090 TEMPO 2411/2415 4000 -RA BKN030 BECMG 2502/2504 24008KT 9000`;
+  }
+
+  return `TAF ${code} ${issueTime} ${validPeriod} 27010KT 6000 FEW025 SCT080 TEMPO 2414/2418 3000 -TSRA BKN020CB BECMG 2500/2502 24006KT P6SM SKC`;
 }
 
 export function generateSyntheticNotams(icao: string): RawNotam[] {
@@ -168,6 +223,16 @@ export function generateSyntheticNotams(icao: string): RawNotam[] {
         type: 'OBST',
       },
       {
+        id: 'NOTAM-JFK-FIR-001',
+        icao: 'KZNY',
+        rawText: '!ZNY 07/099 ZNY FIR GPS UNRELIABLE EN-ROUTE AIRSPACE FL180-FL400 DUE TACTICAL JAMMING WEF 2607241200-2607242000',
+        effectiveStart: '2026-07-24T12:00Z',
+        effectiveEnd: '2026-07-24T20:00Z',
+        type: 'FIR',
+        isFir: true,
+        firIcao: 'KZNY',
+      },
+      {
         id: 'NOTAM-JFK-006',
         icao: 'KJFK',
         rawText: '!JFK 07/040 JFK AD BIRD ACTIVITY IN VICINITY OF RWY 22L/04R WEF 2607010000-2608312359',
@@ -202,6 +267,16 @@ export function generateSyntheticNotams(icao: string): RawNotam[] {
         rawText: '!LAX 07/018 LAX OBST DRILLING RIG 1.4NM SW 180FT MSL UNLGTD WEF 2607180000-2607302359',
         type: 'OBST',
       },
+      {
+        id: 'NOTAM-LAX-FIR-001',
+        icao: 'KZLA',
+        rawText: '!ZLA 07/050 ZLA FIR DANGER AREA RESTRICTED MILITARY GUNNERY FL190-FL350 ACTIVE WEF 2607240000-2607241800',
+        effectiveStart: '2026-07-24T00:00Z',
+        effectiveEnd: '2026-07-24T18:00Z',
+        type: 'FIR',
+        isFir: true,
+        firIcao: 'KZLA',
+      },
     ];
   }
 
@@ -229,6 +304,16 @@ export function generateSyntheticNotams(icao: string): RawNotam[] {
         rawText: 'A0422/26 NOTAMN Q) VIDF/QOBCE/IV/M/A/000/999/2833N07706E005 A) VIDP B) 2607150000 C) 2608152359 E) CRANE ERECTED HGT 185FT AGL 1.2NM SOUTH OF RWY 28 THRESHOLD LGTD.',
         type: 'OBST',
       },
+      {
+        id: 'NOTAM-VIDF-FIR-001',
+        icao: 'VIDF',
+        rawText: 'A0505/26 NOTAMN Q) VIDF/QGWXX/IV/NBO/E/000/999/2833N07706E100 A) VIDF B) 2607220000 C) 2607282359 E) DELHI FIR GPS UNRELIABLE / JAMMING REPORTED OVER NORTHERN SECTOR DUE TACTICAL EXERCISES.',
+        effectiveStart: '2026-07-22T00:00Z',
+        effectiveEnd: '2026-07-28T23:59Z',
+        type: 'FIR',
+        isFir: true,
+        firIcao: 'VIDF',
+      },
     ];
   }
 
@@ -255,6 +340,16 @@ export function generateSyntheticNotams(icao: string): RawNotam[] {
         icao: 'VABB',
         rawText: 'A0820/26 NOTAMN Q) VABF/QNVAS/IV/BO/A/000/999/1905N07252E005 A) VABB B) 2607200000 C) 2607272359 E) BBB VOR FREQ 116.6MHZ U/S UNSERVICEABLE DUE DOME MAINTENANCE.',
         type: 'NAV',
+      },
+      {
+        id: 'NOTAM-VABF-FIR-001',
+        icao: 'VABF',
+        rawText: 'A0901/26 NOTAMN Q) VABF/QWVLW/IV/NBO/E/000/999/1905N07252E100 A) VABF B) 2607230000 C) 2607262359 E) MUMBAI FIR VOLCANIC ASH ADVISORY / SEVERE MONSOON CONVECTIVE SIGMET ACTIVE IN ARABIAN SEA EN-ROUTE SECTOR.',
+        effectiveStart: '2026-07-23T00:00Z',
+        effectiveEnd: '2026-07-26T23:59Z',
+        type: 'FIR',
+        isFir: true,
+        firIcao: 'VABF',
       },
     ];
   }
@@ -314,6 +409,14 @@ export function generateSyntheticNotams(icao: string): RawNotam[] {
       icao: code,
       rawText: `!${code} 07/103 ${code} OBST CRANE ERECTED 1.0NM NORTH 150FT AGL LGTD WEF 2607150000-2608152359`,
       type: 'OBST',
+    },
+    {
+      id: `NOTAM-${code}-FIR-001`,
+      icao: `${code.slice(0, 1)}FIR`,
+      rawText: `!FIR 07/500 ${code} FIR EN-ROUTE AIRSPACE GPS UNRELIABLE FL200-FL380 WEF 2607241000-2607241800`,
+      type: 'FIR',
+      isFir: true,
+      firIcao: `${code.slice(0, 1)}FIR`,
     },
     {
       id: `NOTAM-${code}-004`,

@@ -2,13 +2,23 @@ export type SeverityLevel = 'CRITICAL' | 'WARNING' | 'INFO';
 
 export type FlightCategory = 'VFR' | 'MVFR' | 'IFR' | 'LIFR' | 'UNKNOWN';
 
+export type NotamBucket =
+  | 'RUNWAYS_TFRS'
+  | 'PROCEDURES_NAVAIDS'
+  | 'TAXIWAYS_APRON'
+  | 'OBSTACLES_LIGHTING'
+  | 'FIR_ENROUTE'
+  | 'GENERAL';
+
 export interface RawNotam {
   id: string;
   icao: string;
   rawText: string;
   effectiveStart?: string;
   effectiveEnd?: string;
-  type?: string; // RWY, TWY, NAV, TFR, OBST, AIRSPACE, OTHER
+  type?: string; // RWY, TWY, NAV, TFR, OBST, AIRSPACE, FIR, OTHER
+  isFir?: boolean;
+  firIcao?: string;
 }
 
 export interface FlaggedNotam {
@@ -16,8 +26,13 @@ export interface FlaggedNotam {
   rawText: string;
   severity: SeverityLevel;
   matchedKeywords: string[];
-  category: 'RUNWAY' | 'TFR' | 'NAVAID' | 'TAXIWAY' | 'OBSTACLE' | 'GENERAL';
+  category: NotamBucket;
+  effectiveStart?: string;
+  effectiveEnd?: string;
   effectiveWindow?: string;
+  effectiveStatus?: 'ACTIVE_NOW' | 'SCHEDULED_FUTURE' | 'EXPIRED' | 'PERMANENT';
+  isFir?: boolean;
+  firIcao?: string;
 }
 
 export interface MetarData {
@@ -41,6 +56,7 @@ export interface BriefingSummary {
   weather: {
     rawMetar: string;
     rawTaf?: string;
+    tafDecodedSummary?: string;
     plainEnglishSummary: string;
     flightCategory: FlightCategory;
     windInfo: string;
@@ -53,24 +69,36 @@ export interface BriefingSummary {
     title: string;
     plainEnglish: string;
     rawSnippet: string;
-    category: string;
+    category: NotamBucket | string;
     actionRequired?: string;
     effectiveWindow?: string;
+    isFir?: boolean;
   }>;
   warnings: Array<{
     id: string;
     title: string;
     plainEnglish: string;
     rawSnippet: string;
-    category: string;
+    category: NotamBucket | string;
     effectiveWindow?: string;
+    isFir?: boolean;
   }>;
   infoItems: Array<{
     id: string;
     title: string;
     plainEnglish: string;
     rawSnippet: string;
+    isFir?: boolean;
   }>;
+  allNotamsLedger: FlaggedNotam[];
+  bucketCounts: {
+    RUNWAYS_TFRS: number;
+    PROCEDURES_NAVAIDS: number;
+    TAXIWAYS_APRON: number;
+    OBSTACLES_LIGHTING: number;
+    FIR_ENROUTE: number;
+    GENERAL: number;
+  };
   picTakeaway: string;
   totalNotamsIngested: number;
   criticalCount: number;

@@ -1,127 +1,282 @@
-import { FlaggedNotam, RawNotam, SeverityLevel } from '../types';
+import { FlaggedNotam, NotamBucket, RawNotam, SeverityLevel } from '../types';
 
 /**
  * Deterministic Safety Rule Engine (Non-LLM)
  * Hardcoded regex scanner to guarantee critical aviation safety items are
  * NEVER missed or hallucinated away.
+ *
+ * Re-architected into 5 distinct operational buckets:
+ * 1. 🔴 RUNWAYS & TFRs (RUNWAYS_TFRS)
+ * 2. 🔵 PROCEDURES & NAVAIDS (PROCEDURES_NAVAIDS)
+ * 3. 🟡 TAXIWAYS & APRON (TAXIWAYS_APRON)
+ * 4. ⚪ OBSTACLES & LIGHTING (OBSTACLES_LIGHTING)
+ * 5. 🟣 FIR & EN-ROUTE AIRSPACE (FIR_ENROUTE)
  */
 
-// Expanded Critical Regex Patterns (Level 1 - RED / Safety-Critical)
-const CRITICAL_PATTERNS = [
+// 1. RUNWAYS & TFRs (Level 1 - Critical Safety / Operational Boundaries)
+const RUNWAYS_TFRS_PATTERNS = [
   /\b(CLSD|CLOSED|CLS)\b/i,
   /\b(TFR|TEMPORARY\s+FLIGHT\s+RESTRICTION)\b/i,
   /\bPROHIBITED\b/i,
   /\bRESTRICTED\s+AREA\b/i,
-  /\bTEMPORARY\s+RESTRICTED\s+AREA\b/i,
-  /\bVIP\s+MOVEMENT\b/i,
-  /\bVIP\s+AIRSPACE\b/i,
-  /\bMONSOON\b/i,
-  /\bWATER\s+LOGGING\b/i,
-  /\bSKIDDING\s+HAZARD\b/i,
-  /\bPOOR\s+BRAKING\b|\bNIL\s+BRAKING\b/i,
-  /\bUNSERVICEABLE\b/i,
-  /\bU\/S\b/i,
-  /\bHAZARD\b/i,
-  /\bNIL\b/i,
-  /\bAUTOBRAKE\b/i,
-  /\bOTS\b/i,
-  /\bOUT\s+OF\s+SERVICE\b/i,
-  /\bOUT\s+OF\s+SVC\b/i,
-  /\b(RWY|RUNWAY)\b.*\b(CLOSED|CLSD|CLS)\b/i,
+  /\bVIP\s+MOVEMENT\b|\bVIP\s+AIRSPACE\b/i,
+  /\bSKIDDING\s+HAZARD\b|\bWATER\s+LOGGING\b/i,
+  /\b(POOR|NIL)\s+BRAKING\b|\bBRAKING\s+ACTION\s+(POOR|NIL)\b/i,
+  /\bAUTOBRAKE\b|\bAUTOBRAKE\s+UNAVAIL\b/i,
+  /\b(RWY|RUNWAY)\b.*\b(CLOSED|CLSD|CLS|MAINT|WORK)\b/i,
   /\b(CLOSED|CLSD|CLS)\b.*\b(RWY|RUNWAY)\b/i,
-  /\bRUNWAY\s+INCURSION\b/i,
+  /\bAD\s+CLSD\b|\bAIRPORT\s+CLOSED\b/i,
   /\bEMERGENCY\s+ONLY\b/i,
-  /\bAIRSPACE\s+CLOSED\b/i,
-  /\bAD\s+CLSD\b/i, // Aerodrome closed
-  /\bAIRPORT\s+CLOSED\b/i,
-  // Expanded FAR/Safety Critical Patterns
-  /\b(BRAKING\s+ACTION|BA)\b.*\b(NIL|POOR)\b/i, // Braking Action NIL/POOR
-  /\bAUTOBRAKE\s+UNAVAIL\b/i,
-  /\b(IAP|INSTRUMENT\s+APPROACH)\b.*\b(CANCELLED|CNL|DELETED|UNAVAIL)\b/i, // Approach Cancellations
-  /\bFDC\s+NOTAM\b/i, // Flight Data Center procedure updates
-  /\bSURFACE\s+HAZARD\b/i,
-  /\bACTIVE\s+SHOOTING\b|\bMILITARY\s+EXERCISE\b/i,
 ];
 
-// Expanded Warning Regex Patterns (Level 2 - YELLOW)
-const WARNING_PATTERNS = [
-  /\bWIP\b/i, // Work in progress
-  /\bWORK\s+IN\s+PROGRESS\b/i,
-  /\bGRASS\s+CUTTING\b/i,
-  /\bBIRD\s+ACTIVITY\b|\bMIGRATORY\s+BIRDS\b/i,
-  /\bDOG\s+MENACE\b|\bSTRAY\s+ANIMALS\b/i,
-  /\bLASER\s+BEAM\b|\bLASER\s+HAZARD\b/i,
-  /\bCRANE\s+ERECTED\b|\bCRANE\b/i,
-  /\bAERODROME\s+BEACON\s+OTS\b/i,
-  /\bTWY\b.*\b(CLOSED|CLSD|RESTRICTED)\b/i,
-  /\bTAXIWAY\b.*\b(CLOSED|CLSD|RESTRICTED)\b/i,
+// 2. PROCEDURES & NAVAIDS
+const PROCEDURES_NAVAIDS_PATTERNS = [
   /\bILS\b.*\b(U\/S|OTS|UNSERVICEABLE|DEGRADED)\b/i,
-  /\bGLIDE\s+PATH\b.*\b(U\/S|OTS|UNSERVICEABLE)\b/i,
-  /\bLOC\b.*\b(U\/S|OTS|UNSERVICEABLE)\b/i,
-  /\bPAPI\b.*\b(U\/S|OTS|UNSERVICEABLE)\b/i,
-  /\bVASI\b.*\b(U\/S|OTS|UNSERVICEABLE)\b/i,
-  /\bVOR\b.*\b(U\/S|OTS|UNSERVICEABLE)\b/i,
-  /\bNDB\b.*\b(U\/S|OTS|UNSERVICEABLE)\b/i,
-  /\bOBST\b/i, // Obstacles / Tower lights
-  /\bOBSTACLE\b/i,
-  /\bTOWER\s+LIGHT\b|\bLGT\s+OUT\b/i,
-  /\bLIGHTING\b.*\b(U\/S|OTS|OUT)\b/i,
-  /\bLGT\b.*\b(U\/S|OTS|OUT)\b/i,
-  /\bFUEL\s+UNAVAIL\b/i,
-  /\bAPCH\b/i, // Approach procedure modifications
-  /\bACT\b|\bACTIVE\b/i,
+  /\bGLIDE\s+PATH\b|\bGLIDESLOPE\b|\bGP\b/i,
+  /\bVOR\b|\bDME\b|\bNDB\b/i,
+  /\bIAP\b|\bINSTRUMENT\s+APPROACH\b|\bAPPROACH\b/i,
+  /\bSID\b|\bSTAR\b|\bPROCEDURE\b/i,
+  /\bMISSED\s+APCH\b|\bMISSED\s+APPROACH\b/i,
+  /\bLOC\b|\bLOCALIZER\b/i,
+  /\bPAPI\b|\bVASI\b/i,
+  /\bNAV\b/i,
 ];
+
+// 3. TAXIWAYS & APRON
+const TAXIWAYS_APRON_PATTERNS = [
+  /\bTWY\b|\bTAXIWAY\b/i,
+  /\bAPRON\b|\bRAMP\b|\bGROUND\b/i,
+  /\bWIP\b|\bWORK\s+IN\s+PROGRESS\b/i,
+  /\bPUSHBACK\b|\bSTAND\b/i,
+];
+
+// 4. OBSTACLES & LIGHTING
+const OBSTACLES_LIGHTING_PATTERNS = [
+  /\bCRANE\b|\bCRANE\s+ERECTED\b/i,
+  /\bOBST\b|\bOBSTACLE\b|\bTOWER\b|\bRIG\b|\bMAST\b/i,
+  /\bLGT\b|\bLIGHTING\b|\bTOWER\s+LIGHT\b|\bLGT\s+OUT\b/i,
+  /\bBIRD\b|\bBIRD\s+ACTIVITY\b|\bWILDLIFE\b|\bDOG\s+MENACE\b/i,
+  /\bLASER\b|\bLASER\s+BEAM\b|\bHAZARD\b|\bKITE\b/i,
+];
+
+// 5. FIR & EN-ROUTE AIRSPACE
+const FIR_ENROUTE_PATTERNS = [
+  /\bGPS\s+UNRELIABLE\b|\bGPS\s+JAMMING\b|\bJAMMING\b/i,
+  /\bDANGER\s+AREA\b|\bVOLCANIC\b|\bSIGMET\b/i,
+  /\bFIR\b|\bEN-ROUTE\b|\bENROUTE\b/i,
+  /\bMILITARY\s+EXERCISE\b|\bGUNNERY\b|\bARTCC\b/i,
+];
+
+/**
+ * Temporal Active Window Parser
+ * Extracts WEF / TIL or B) / C) timestamp codes and evaluates status.
+ */
+export function parseTemporalWindow(
+  rawText: string,
+  startIso?: string,
+  endIso?: string
+): {
+  status: 'ACTIVE_NOW' | 'SCHEDULED_FUTURE' | 'EXPIRED' | 'PERMANENT';
+  windowText: string;
+} {
+  const text = rawText.toUpperCase();
+
+  // Check for PERM / PERMANENT
+  if (text.includes('PERM') || text.includes('PERMANENT')) {
+    return {
+      status: 'PERMANENT',
+      windowText: 'PERMANENT EFFECTIVE (PERM)',
+    };
+  }
+
+  // Attempt regex extraction for WEF / TIL
+  // Example: WEF 2607221200-2607291800 or B) 2607231000 C) 2607231400
+  let startDate: Date | null = startIso ? new Date(startIso) : null;
+  let endDate: Date | null = endIso ? new Date(endIso) : null;
+
+  if (!startDate) {
+    const wefMatch = text.match(/\b(WEF|B\))\s*(\d{10})/i);
+    if (wefMatch) {
+      startDate = parseAviationTimestamp(wefMatch[2]);
+    }
+  }
+
+  if (!endDate) {
+    const tilMatch = text.match(/\b(TIL|C\))\s*(\d{10}|EST|PERM)/i);
+    if (tilMatch && tilMatch[2] !== 'PERM') {
+      endDate = parseAviationTimestamp(tilMatch[2]);
+    } else if (text.match(/WEF\s*\d{10}-(\d{10})/i)) {
+      const match = text.match(/WEF\s*\d{10}-(\d{10})/i);
+      if (match) endDate = parseAviationTimestamp(match[1]);
+    }
+  }
+
+  const now = new Date();
+
+  if (startDate && endDate) {
+    const formatS = formatShortUtc(startDate);
+    const formatE = formatShortUtc(endDate);
+
+    if (now >= startDate && now <= endDate) {
+      return {
+        status: 'ACTIVE_NOW',
+        windowText: `ACTIVE NOW (WEF ${formatS} → TIL ${formatE})`,
+      };
+    } else if (now < startDate) {
+      return {
+        status: 'SCHEDULED_FUTURE',
+        windowText: `SCHEDULED (WEF ${formatS} → TIL ${formatE})`,
+      };
+    } else {
+      return {
+        status: 'EXPIRED',
+        windowText: `EXPIRED (${formatS} → ${formatE})`,
+      };
+    }
+  } else if (startDate) {
+    const formatS = formatShortUtc(startDate);
+    if (now >= startDate) {
+      return { status: 'ACTIVE_NOW', windowText: `ACTIVE NOW (WEF ${formatS})` };
+    } else {
+      return { status: 'SCHEDULED_FUTURE', windowText: `SCHEDULED (WEF ${formatS})` };
+    }
+  }
+
+  return {
+    status: 'ACTIVE_NOW',
+    windowText: 'ACTIVE / EFFECTIVE IMMEDIATELY',
+  };
+}
+
+function parseAviationTimestamp(code: string): Date | null {
+  // Format: YYMMDDHHMM (e.g., 2607221200 -> 2026-07-22 12:00 UTC)
+  if (!code || code.length < 10) return null;
+  const yy = parseInt(code.substring(0, 2), 10) + 2000;
+  const mm = parseInt(code.substring(2, 4), 10) - 1;
+  const dd = parseInt(code.substring(4, 6), 10);
+  const hh = parseInt(code.substring(6, 8), 10);
+  const min = parseInt(code.substring(8, 10), 10);
+
+  const d = new Date(Date.UTC(yy, mm, dd, hh, min));
+  return isNaN(d.getTime()) ? null : d;
+}
+
+function formatShortUtc(d: Date): string {
+  const yy = String(d.getUTCFullYear()).slice(-2);
+  const mm = String(d.getUTCMonth() + 1).padStart(2, '0');
+  const dd = String(d.getUTCDate()).padStart(2, '0');
+  const hh = String(d.getUTCHours()).padStart(2, '0');
+  const min = String(d.getUTCMinutes()).padStart(2, '0');
+  return `${yy}/${mm}/${dd} ${hh}:${min}Z`;
+}
 
 export function runDeterministicSafetyEngine(rawNotams: RawNotam[]): FlaggedNotam[] {
   return rawNotams.map((notam) => {
     const text = notam.rawText;
-    const criticalMatches: string[] = [];
-    const warningMatches: string[] = [];
+    const isFir = notam.isFir || text.includes('FIR') || text.includes('Q) V') || text.includes('Q) Z');
 
-    // Check critical regexes
-    for (const pattern of CRITICAL_PATTERNS) {
-      const match = text.match(pattern);
-      if (match) {
-        criticalMatches.push(match[0]);
+    const matchedKeywords: string[] = [];
+
+    // Bucket matching
+    let category: NotamBucket = 'GENERAL';
+
+    // 1. Check FIR_ENROUTE if explicitly marked FIR or keywords match
+    let isFirMatch = false;
+    for (const pat of FIR_ENROUTE_PATTERNS) {
+      const m = text.match(pat);
+      if (m) {
+        matchedKeywords.push(m[0]);
+        isFirMatch = true;
       }
     }
 
-    // Check warning regexes
-    for (const pattern of WARNING_PATTERNS) {
-      const match = text.match(pattern);
-      if (match) {
-        warningMatches.push(match[0]);
+    if (isFir || isFirMatch) {
+      category = 'FIR_ENROUTE';
+    }
+
+    // 2. Check RUNWAYS_TFRS
+    let isRwyMatch = false;
+    for (const pat of RUNWAYS_TFRS_PATTERNS) {
+      const m = text.match(pat);
+      if (m) {
+        matchedKeywords.push(m[0]);
+        isRwyMatch = true;
+      }
+    }
+    if (isRwyMatch && !isFir) {
+      category = 'RUNWAYS_TFRS';
+    }
+
+    // 3. Check PROCEDURES_NAVAIDS
+    if (category === 'GENERAL' || category === 'FIR_ENROUTE') {
+      let isProcMatch = false;
+      for (const pat of PROCEDURES_NAVAIDS_PATTERNS) {
+        const m = text.match(pat);
+        if (m) {
+          matchedKeywords.push(m[0]);
+          isProcMatch = true;
+        }
+      }
+      if (isProcMatch && !isFir) {
+        category = 'PROCEDURES_NAVAIDS';
       }
     }
 
+    // 4. Check TAXIWAYS_APRON
+    if (category === 'GENERAL') {
+      let isTwyMatch = false;
+      for (const pat of TAXIWAYS_APRON_PATTERNS) {
+        const m = text.match(pat);
+        if (m) {
+          matchedKeywords.push(m[0]);
+          isTwyMatch = true;
+        }
+      }
+      if (isTwyMatch) {
+        category = 'TAXIWAYS_APRON';
+      }
+    }
+
+    // 5. Check OBSTACLES_LIGHTING
+    if (category === 'GENERAL') {
+      let isObstMatch = false;
+      for (const pat of OBSTACLES_LIGHTING_PATTERNS) {
+        const m = text.match(pat);
+        if (m) {
+          matchedKeywords.push(m[0]);
+          isObstMatch = true;
+        }
+      }
+      if (isObstMatch) {
+        category = 'OBSTACLES_LIGHTING';
+      }
+    }
+
+    // Assign Severity
     let severity: SeverityLevel = 'INFO';
-    let matchedKeywords: string[] = [];
-
-    if (criticalMatches.length > 0) {
+    if (category === 'RUNWAYS_TFRS' || category === 'FIR_ENROUTE') {
       severity = 'CRITICAL';
-      matchedKeywords = Array.from(new Set(criticalMatches));
-    } else if (warningMatches.length > 0) {
+    } else if (category === 'PROCEDURES_NAVAIDS' || category === 'TAXIWAYS_APRON') {
       severity = 'WARNING';
-      matchedKeywords = Array.from(new Set(warningMatches));
+    } else if (category === 'OBSTACLES_LIGHTING') {
+      severity = 'WARNING';
     }
 
-    // Categorization helper
-    let category: FlaggedNotam['category'] = 'GENERAL';
-    if (/\b(RWY|RUNWAY|BA|BRAKING)\b/i.test(text)) category = 'RUNWAY';
-    else if (/\b(TFR|PROHIBITED|AIRSPACE)\b/i.test(text)) category = 'TFR';
-    else if (/\b(TWY|TAXIWAY|APRON|RAMP)\b/i.test(text)) category = 'TAXIWAY';
-    else if (/\b(ILS|VOR|NDB|NAV|PAPI|VASI|GLIDE|LOC|GPS|IAP|APCH)\b/i.test(text)) category = 'NAVAID';
-    else if (/\b(CRANE|OBST|OBSTACLE|TOWER|RIG|MAST|LGT)\b/i.test(text)) category = 'OBSTACLE';
+    const tempInfo = parseTemporalWindow(text, notam.effectiveStart, notam.effectiveEnd);
 
     return {
       id: notam.id,
       rawText: notam.rawText,
       severity,
-      matchedKeywords,
+      matchedKeywords: Array.from(new Set(matchedKeywords)),
       category,
-      effectiveWindow: notam.effectiveStart && notam.effectiveEnd 
-        ? `${notam.effectiveStart} to ${notam.effectiveEnd}` 
-        : undefined,
+      effectiveStart: notam.effectiveStart,
+      effectiveEnd: notam.effectiveEnd,
+      effectiveWindow: tempInfo.windowText,
+      effectiveStatus: tempInfo.status,
+      isFir,
+      firIcao: notam.firIcao,
     };
   });
 }
+

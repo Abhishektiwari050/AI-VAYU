@@ -34,11 +34,13 @@ interface HeaderProps {
   onOpenHistory: () => void;
   onOpenDispatchModal: () => void;
   onOpenMonetization: () => void;
+  onOpenAuth: () => void;
   userTier: UserTier;
   onSearchSingle: (icao: string) => void;
   onSearchRoute: (origin: string, destination: string, waypoints: string[]) => void;
   isLoading: boolean;
   activeIcao?: string;
+  userEmail?: string;
 }
 
 function normalizeCode(raw: string): string {
@@ -55,11 +57,13 @@ export const Header: React.FC<HeaderProps> = ({
   onOpenHistory,
   onOpenDispatchModal,
   onOpenMonetization,
+  onOpenAuth,
   userTier,
   onSearchSingle,
   onSearchRoute,
   isLoading,
   activeIcao = 'VIDP',
+  userEmail,
 }) => {
   const currentZulu = new Date().toISOString().substring(11, 16);
 
@@ -96,7 +100,10 @@ export const Header: React.FC<HeaderProps> = ({
     { code: 'VIDP', status: '🟢', type: 'GREEN', label: 'DELHI' },
     { code: 'VABB', status: '🟡', type: 'YELLOW', label: 'MUMBAI' },
     { code: 'VOBL', status: '🟢', type: 'GREEN', label: 'BLR' },
+    { code: 'VAID', status: '🟢', type: 'GREEN', label: 'INDORE' },
     { code: 'VDGO', status: '🔴', type: 'RED', label: 'GOA' },
+    { code: 'VIJP', status: '🟢', type: 'GREEN', label: 'JAIPUR' },
+    { code: 'VILK', status: '🟢', type: 'GREEN', label: 'LUCKNOW' },
     { code: 'KJFK', status: '🟢', type: 'GREEN', label: 'NYC' },
     { code: 'EGLL', status: '🟢', type: 'GREEN', label: 'LHR' },
   ];
@@ -110,6 +117,12 @@ export const Header: React.FC<HeaderProps> = ({
     : isDay
     ? 'border-hardware-day'
     : 'border-hardware-dark';
+
+  const headerGlassClass = isNight
+    ? 'glass-card-night text-red-100'
+    : isDay
+    ? 'glass-card-day text-slate-900'
+    : 'glass-card-dark text-white';
 
   const ribbonGlassClass = isNight
     ? 'glass-command-ribbon-night text-red-100'
@@ -148,7 +161,7 @@ export const Header: React.FC<HeaderProps> = ({
     : 'bg-white hover:bg-zinc-200 text-black font-bold shadow-sm';
 
   return (
-    <header className={`w-full p-3.5 sm:p-5 rounded-t-[26px] shadow-2xl relative z-30 font-sans transition-all duration-300 ${ribbonGlassClass}`}>
+    <header className={`w-full p-3.5 sm:p-5 rounded-t-[26px] shadow-2xl relative z-30 font-sans transition-all duration-300 ${headerGlassClass}`}>
       {/* UNIFIED GLASSMORPHIC COMMAND RIBBON */}
       <div className="flex flex-col gap-3">
         
@@ -174,9 +187,21 @@ export const Header: React.FC<HeaderProps> = ({
             </div>
           </div>
 
-          {/* Right: Tier Badge, Zulu Clock & Cockpit Theme Controls */}
+          {/* Right: Tier Badge, Auth, Zulu Clock & Cockpit Theme Controls */}
           <div className="flex items-center space-x-2 sm:space-x-2.5 text-xs">
             
+            {/* Auth Button */}
+            <button
+              onClick={onOpenAuth}
+              className={`flex items-center space-x-1 border px-2 py-1 rounded-lg text-[10px] font-bold font-mono transition cursor-pointer ${
+                userEmail ? 'border-emerald-500/60 bg-emerald-950/40 text-emerald-300' : actionBtnClass
+              }`}
+              title="Supabase Pilot Session"
+            >
+              <ShieldCheck className="h-3 w-3 text-emerald-400" />
+              <span className="hidden sm:inline">{userEmail ? userEmail.split('@')[0].toUpperCase() : 'AUTH'}</span>
+            </button>
+
             {/* Tier / Subscription Badge Button */}
             <button
               onClick={onOpenMonetization}
@@ -281,35 +306,29 @@ export const Header: React.FC<HeaderProps> = ({
           </div>
         </div>
 
-        {/* ROW 2: SINGLE INTEGRATED GLASS COMMAND RIBBON (PRIMARY FOCUS SEARCH BAR + NAVIGATION SWITCHER TABS) */}
-        <div className={`p-2.5 rounded-2xl flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3 transition-all ${
-          isNight
-            ? 'glass-command-ribbon-night'
-            : isDay
-            ? 'glass-command-ribbon-day'
-            : 'glass-command-ribbon-dark'
-        }`}>
+        {/* ROW 2: SINGLE INTEGRATED GLASS COMMAND RIBBON (SEARCH BAR + NAVIGATION SWITCHER TABS) */}
+        <div className={`p-2.5 rounded-2xl flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3 transition-all ${ribbonGlassClass}`}>
           
           {/* PRIMARY FOCUS: SEARCH INPUT FORM */}
           <div className="flex-1">
             {viewMode !== 'ROUTE' ? (
               <form onSubmit={handleSingleSubmit} className="flex items-center gap-2">
                 <div className="relative flex-1">
-                  <Search className={`absolute left-3.5 top-1/2 -translate-y-1/2 w-4.5 h-4.5 ${isNight ? 'text-red-400' : isDay ? 'text-slate-500' : 'text-emerald-400'}`} />
+                  <Search className={`absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 ${isNight ? 'text-red-400' : isDay ? 'text-slate-500' : 'text-emerald-400'}`} />
                   <input
                     type="text"
                     value={singleIcao}
                     onChange={(e) => setSingleIcao(e.target.value.toUpperCase())}
-                    placeholder="ENTER ICAO / FAA AIRPORT CODE (e.g. KJFK, DFW, KLAX)..."
+                    placeholder="ENTER ICAO / FAA AIRPORT CODE (e.g. VIDP, VABB, KJFK)..."
                     maxLength={4}
-                    className={`w-full border rounded-xl py-2.5 pl-11 pr-3 text-xs sm:text-sm font-mono font-bold uppercase tracking-widest focus:outline-none transition-all shadow-inner ${inputBgClass}`}
+                    className={`w-full border rounded-xl py-2 pl-10 pr-3 text-xs sm:text-sm font-mono font-bold uppercase tracking-widest focus:outline-none transition-all shadow-inner ${inputBgClass}`}
                   />
                 </div>
 
                 <button
                   type="submit"
                   disabled={isLoading}
-                  className={`font-mono font-bold text-xs px-5 py-2.5 rounded-xl transition flex items-center gap-1.5 shrink-0 cursor-pointer disabled:opacity-50 ${submitBtnClass}`}
+                  className={`font-mono font-bold text-xs px-4 sm:px-5 py-2.5 rounded-xl transition flex items-center gap-1.5 shrink-0 cursor-pointer disabled:opacity-50 ${submitBtnClass}`}
                 >
                   {isLoading ? (
                     <Zap className="w-4 h-4 animate-spin" />
@@ -350,7 +369,7 @@ export const Header: React.FC<HeaderProps> = ({
                 <button
                   type="submit"
                   disabled={isLoading}
-                  className={`w-full sm:w-auto font-mono font-bold text-xs px-5 py-2.5 rounded-xl transition flex items-center justify-center gap-1.5 shrink-0 cursor-pointer disabled:opacity-50 ${submitBtnClass}`}
+                  className={`w-full sm:w-auto font-mono font-bold text-xs px-4 sm:px-5 py-2.5 rounded-xl transition flex items-center justify-center gap-1.5 shrink-0 cursor-pointer disabled:opacity-50 ${submitBtnClass}`}
                 >
                   {isLoading ? <Zap className="w-4 h-4 animate-spin" /> : <Compass className="w-4 h-4" />}
                   <span className="tracking-wider">Route</span>
@@ -361,11 +380,11 @@ export const Header: React.FC<HeaderProps> = ({
 
           {/* SEAMLESS INTEGRATED NAVIGATION TABS */}
           <div className={`flex items-center justify-around w-full md:w-auto border p-1 rounded-xl text-[11px] font-mono uppercase shrink-0 ${
-            isNight ? 'border-hardware-night bg-red-950/90' : isDay ? 'border-hardware-day bg-slate-200/90' : 'border-hardware-dark bg-zinc-900/90'
+            isNight ? 'border-hardware-night bg-red-950/70' : isDay ? 'border-hardware-day bg-slate-200/80' : 'border-hardware-dark bg-zinc-900/80'
           }`}>
             <button
               onClick={() => setViewMode('EXECUTIVE')}
-              className={`flex-1 md:flex-none justify-center flex items-center space-x-1.5 px-3.5 py-2 font-bold rounded-lg transition cursor-pointer min-h-[40px] ${
+              className={`flex-1 md:flex-none justify-center flex items-center space-x-1.5 px-3.5 py-2 font-bold rounded-lg transition cursor-pointer min-h-[38px] ${
                 viewMode === 'EXECUTIVE' ? activeTabClass : inactiveTabClass
               }`}
             >
@@ -374,7 +393,7 @@ export const Header: React.FC<HeaderProps> = ({
             </button>
             <button
               onClick={() => setViewMode('ROUTE')}
-              className={`flex-1 md:flex-none justify-center flex items-center space-x-1.5 px-3.5 py-2 font-bold rounded-lg transition cursor-pointer min-h-[40px] ${
+              className={`flex-1 md:flex-none justify-center flex items-center space-x-1.5 px-3.5 py-2 font-bold rounded-lg transition cursor-pointer min-h-[38px] ${
                 viewMode === 'ROUTE' ? activeTabClass : inactiveTabClass
               }`}
             >
@@ -383,7 +402,7 @@ export const Header: React.FC<HeaderProps> = ({
             </button>
             <button
               onClick={() => setViewMode('CLI')}
-              className={`flex-1 md:flex-none justify-center flex items-center space-x-1.5 px-3.5 py-2 font-bold rounded-lg transition cursor-pointer min-h-[40px] ${
+              className={`flex-1 md:flex-none justify-center flex items-center space-x-1.5 px-3.5 py-2 font-bold rounded-lg transition cursor-pointer min-h-[38px] ${
                 viewMode === 'CLI' ? activeTabClass : inactiveTabClass
               }`}
             >

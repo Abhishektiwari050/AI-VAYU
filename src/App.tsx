@@ -11,8 +11,10 @@ import { DispatchLogModal } from './components/DispatchLogModal';
 import { KneeboardPrintModal } from './components/KneeboardPrintModal';
 import { SavedBriefingsDrawer } from './components/SavedBriefingsDrawer';
 import { MonetizationModal, UserTier } from './components/MonetizationModal';
+import { AuthModal } from './components/AuthModal';
 import { BriefingSummary, RouteLegBriefing, AuditLogEntry } from './types';
 import { generateClientFallbackBriefing, generateClientFallbackRoute } from './lib/clientFallback';
+import { supabase, getUserProfile, UserProfile, recordBriefingAudit } from './lib/supabaseClient';
 import { AlertTriangle, ShieldCheck, Zap, WifiOff, Compass } from 'lucide-react';
 
 export default function App() {
@@ -26,6 +28,8 @@ export default function App() {
 
   const [fontSize, setFontSize] = useState<FontSizeSetting>('NORMAL');
   const [viewMode, setViewMode] = useState<'EXECUTIVE' | 'CLI' | 'ROUTE'>('EXECUTIVE');
+
+  const [currentUser, setCurrentUser] = useState<UserProfile | null>(null);
 
   const [userTier, setUserTier] = useState<UserTier>(() => {
     try {
@@ -51,6 +55,38 @@ export default function App() {
   const [isKneeboardModalOpen, setIsKneeboardModalOpen] = useState<boolean>(false);
   const [isHistoryDrawerOpen, setIsHistoryDrawerOpen] = useState<boolean>(false);
   const [isMonetizationModalOpen, setIsMonetizationModalOpen] = useState<boolean>(false);
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState<boolean>(false);
+
+  // Supabase Auth Listener
+  useEffect(() => {
+    if (!supabase) return;
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session?.user) {
+        getUserProfile(session.user.id, session.user.email || '').then((prof) => {
+          setCurrentUser(prof);
+          if (prof.subscription_tier) {
+            setUserTier(prof.subscription_tier.toUpperCase() as UserTier);
+          }
+        });
+      }
+    });
+
+    const { data: authListener } = supabase.auth.onAuthStateChange(async (_event, session) => {
+      if (session?.user) {
+        const prof = await getUserProfile(session.user.id, session.user.email || '');
+        setCurrentUser(prof);
+        if (prof.subscription_tier) {
+          setUserTier(prof.subscription_tier.toUpperCase() as UserTier);
+        }
+      } else {
+        setCurrentUser(null);
+      }
+    });
+
+    return () => {
+      authListener.subscription.unsubscribe();
+    };
+  }, []);
 
   // Audit history
   const [history, setHistory] = useState<AuditLogEntry[]>(() => {
@@ -130,12 +166,21 @@ export default function App() {
     try {
       const res = await fetch('/api/briefing', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'x-vayu-tier': userTier,
+        },
         body: JSON.stringify({ icao }),
       });
 
       if (!res.ok) {
         const errData = await res.json().catch(() => ({}));
+        if (res.status === 402) {
+          setIsMonetizationModalOpen(true);
+          setError(errData.message || 'Daily free briefing limit reached. Upgrade to Pro for unlimited corridor briefings.');
+          setIsLoading(false);
+          return;
+        }
         if (res.status === 400 && errData.error) {
           setError(errData.error);
           setIsLoading(false);
@@ -151,6 +196,15 @@ export default function App() {
       try {
         localStorage.setItem(`vayu_cache_${data.icao}`, JSON.stringify(data));
       } catch {}
+
+      // Record audit log to Supabase
+      recordBriefingAudit(currentUser?.id, {
+        icao: data.icao,
+        generated_at_utc: data.generatedAtUtc,
+        critical_count: data.criticalCount,
+        warning_count: data.warningCount,
+        flight_category: data.weather.flightCategory,
+      });
 
       const newEntry: AuditLogEntry = {
         id: `LOG-${data.icao}-${Date.now()}`,
@@ -188,15 +242,32 @@ export default function App() {
     setIsLoading(true);
     setError(null);
 
+    // Free Tier Usage check for route corridor
+    if (userTier === 'FREE' && briefsUsedToday >= maxFreeBriefs) {
+      setIsMonetizationModalOpen(true);
+      setError('Daily free briefing limit reached. Upgrade to Pro for unlimited corridor briefings.');
+      setIsLoading(false);
+      return;
+    }
+
     try {
       const res = await fetch('/api/route-briefing', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'x-vayu-tier': userTier,
+        },
         body: JSON.stringify({ origin, destination, waypoints }),
       });
 
       if (!res.ok) {
         const errData = await res.json().catch(() => ({}));
+        if (res.status === 402) {
+          setIsMonetizationModalOpen(true);
+          setError(errData.message || 'Daily free briefing limit reached. Upgrade to Pro for unlimited corridor briefings.');
+          setIsLoading(false);
+          return;
+        }
         if (res.status === 400 && errData.error) {
           setError(errData.error);
           setIsLoading(false);
@@ -296,7 +367,9 @@ export default function App() {
           onOpenHistory={() => setIsHistoryDrawerOpen(true)}
           onOpenDispatchModal={() => setIsDispatchModalOpen(true)}
           onOpenMonetization={() => setIsMonetizationModalOpen(true)}
+          onOpenAuth={() => setIsAuthModalOpen(true)}
           userTier={userTier}
+          userEmail={currentUser?.email}
           onSearchSingle={fetchSingleBriefing}
           onSearchRoute={fetchRouteBriefing}
           isLoading={isLoading}
@@ -360,6 +433,7 @@ export default function App() {
                   fontSize={fontSize}
                   onOpenKneeboard={() => setIsKneeboardModalOpen(true)}
                   onOpenDispatchModal={() => setIsDispatchModalOpen(true)}
+                  onSearchRoute={fetchRouteBriefing}
                 />
               ) : viewMode === 'CLI' && briefing ? (
                 <TerminalCLIView briefing={briefing} theme={theme} />
@@ -508,6 +582,26 @@ export default function App() {
         briefsUsedToday={briefsUsedToday}
         maxFreeBriefs={maxFreeBriefs}
         theme={theme}
+      />
+
+      <AuthModal
+        isOpen={isAuthModalOpen}
+        onClose={() => setIsAuthModalOpen(false)}
+        currentUser={currentUser}
+        onAuthSuccess={(profile) => {
+          setCurrentUser(profile);
+          if (profile.subscription_tier) {
+            handleSelectTier(profile.subscription_tier.toUpperCase() as UserTier);
+          }
+        }}
+        onLogout={() => {
+          setCurrentUser(null);
+          if (supabase) {
+            supabase.auth.signOut();
+          }
+        }}
+        theme={theme}
+        currentTier={userTier}
       />
     </div>
   );
