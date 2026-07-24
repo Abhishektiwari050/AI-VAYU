@@ -8,6 +8,9 @@ import { runDeterministicSafetyEngine } from './src/lib/deterministicEngine.js';
 import { generateSyntheticMetar, generateSyntheticNotams } from './src/lib/mockAviationData.js';
 import { lookupAirport, normalizeAirportCode } from './src/lib/airportData.js';
 import { checkBriefingUsageMiddleware } from './src/middleware.js';
+import { updateUserSubscriptionTier } from './src/lib/supabase.js';
+import { generateDispatchHtml } from './app/api/export/pdf/route.js';
+import { executeHazardMonitoringScan } from './app/api/cron/monitor/route.js';
 import { BriefingSummary, RawNotam, MetarData } from './src/types.js';
 
 const app = express();
@@ -182,7 +185,7 @@ async function fetchLiveNotams(icao: string): Promise<RawNotam[]> {
       if (Array.isArray(data) && data.length > 0) {
         return data.map((item: any, idx: number) => {
           const raw = item.icaoMessage || item.raw || JSON.stringify(item);
-          const isFirItem = item.icao === firCode || raw.includes('FIR') || raw.includes('Q)');
+          const isFirItem = item.icao === firCode || (item.icao !== code && !raw.includes(`A) ${code}`));
           return {
             id: item.notamId || `LIVE-${code}-${idx}`,
             icao: item.icao || code,
@@ -262,9 +265,77 @@ app.post('/api/webhooks/stripe', async (req, res) => {
   try {
     const event = req.body;
     console.log(`[Stripe Express Webhook] Event received: ${event.type || 'generic_event'}`);
-    return res.json({ received: true });
+
+    const data = event.data?.object || {};
+
+    if (event.type === 'checkout.session.completed') {
+      const clientRefId = data.client_reference_id || data.metadata?.userId;
+      const customerEmail = data.customer_email || data.customer_details?.email;
+      const customerId = data.customer;
+      const subscriptionId = data.subscription;
+
+      await updateUserSubscriptionTier(
+        { userId: clientRefId, email: customerEmail, customerId },
+        'pro',
+        subscriptionId
+      );
+    } else if (event.type === 'customer.subscription.updated') {
+      const customerId = data.customer;
+      const status = data.status;
+      const newTier = (status === 'active' || status === 'trialing') ? 'pro' : 'free';
+
+      await updateUserSubscriptionTier(
+        { customerId, userId: data.metadata?.userId, email: data.metadata?.email },
+        newTier,
+        data.id
+      );
+    } else if (event.type === 'customer.subscription.deleted') {
+      const customerId = data.customer;
+
+      await updateUserSubscriptionTier(
+        { customerId, userId: data.metadata?.userId, email: data.metadata?.email },
+        'free',
+        data.id
+      );
+    }
+
+    return res.json({ received: true, status: 'processed', eventType: event.type });
   } catch (err: any) {
     return res.status(400).send(`Webhook Error: ${err.message}`);
+  }
+});
+
+// Enterprise Dispatch PDF Generator Endpoint
+app.post('/api/export/pdf', async (req, res) => {
+  try {
+    const { briefing, operatorName, picName, tailNumber, dispatchNotes } = req.body;
+    if (!briefing || !briefing.icao) {
+      return res.status(400).json({ error: 'Briefing payload required for PDF export.' });
+    }
+
+    const { html, hash } = await generateDispatchHtml({
+      briefing,
+      operatorName,
+      picName,
+      tailNumber,
+      dispatchNotes,
+    });
+
+    return res.json({ html, hash, generatedAtUtc: new Date().toISOString() });
+  } catch (err: any) {
+    console.error('PDF Export Error:', err);
+    return res.status(500).json({ error: 'Failed to generate dispatch PDF log.' });
+  }
+});
+
+// Real-Time Hazard Monitoring Cron Endpoint
+app.get('/api/cron/monitor', async (req, res) => {
+  try {
+    const result = await executeHazardMonitoringScan();
+    return res.json(result);
+  } catch (err: any) {
+    console.error('Hazard Monitoring Error:', err);
+    return res.status(500).json({ error: 'Hazard monitoring scan failed.' });
   }
 });
 

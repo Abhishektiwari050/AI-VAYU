@@ -82,6 +82,7 @@ export const ExecutiveBriefingView: React.FC<ExecutiveBriefingViewProps> = ({
   };
 
   const handleCopySummary = () => {
+    const briefingUrl = typeof window !== 'undefined' ? `${window.location.origin}/#${briefing.icao}` : `https://vayu.aero/#${briefing.icao}`;
     const text = `✈ VAYU Briefing: ${briefing.icao} (${timeInfo.combinedString})
 ------------------------------
 🌤 Weather: ${briefing.weather.flightCategory} (${briefing.weather.plainEnglishSummary})
@@ -90,6 +91,7 @@ ${briefing.criticalAlerts.map((a) => ` • ${a.title}: ${a.plainEnglish}`).join(
 🟡 Advisories (${briefing.warningCount}):
 ${briefing.warnings.map((w) => ` • ${w.title}: ${w.plainEnglish}`).join('\n') || ' None'}
 ------------------------------
+🔗 Direct Briefing URL: ${briefingUrl}
 ADVISORY ONLY: Informational pre-flight awareness utility under DGCA and FAA regulations.`;
 
     navigator.clipboard.writeText(text);

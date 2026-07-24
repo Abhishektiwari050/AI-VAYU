@@ -1,4 +1,5 @@
 import { UserTier } from './components/MonetizationModal';
+import { mockProfilesDb } from './lib/supabase';
 
 export interface PaywallMiddlewareResult {
   allowed: boolean;
@@ -12,10 +13,14 @@ export interface PaywallMiddlewareResult {
   };
 }
 
-// In-memory or state tracking for IP / Session query rates on FREE tier
-const freeQueryTracker = new Map<string, { count: number; dateString: string }>();
+// In-memory tracking for IP / Session query rates on FREE tier
+export const freeQueryTracker = new Map<string, { count: number; dateString: string }>();
 
 const MAX_FREE_DAILY_QUERIES = 3;
+
+export function resetPaywallTracker() {
+  freeQueryTracker.clear();
+}
 
 /**
  * Stripe & Supabase Usage Paywall Interceptor
@@ -27,18 +32,21 @@ export async function checkBriefingUsageMiddleware(
   userSession?: { userId?: string; userEmail?: string; tier?: UserTier }
 ): Promise<PaywallMiddlewareResult> {
   const authHeader = (req.headers?.authorization as string) || (req.headers?.['x-vayu-tier'] as string);
-  const clientIp = req.ip || (req.headers?.['x-forwarded-for'] as string) || 'client-ip';
+  const clientIp = req.ip || (req.headers?.['x-forwarded-for'] as string) || (req.headers?.['x-client-ip'] as string) || 'client-ip-127-0-0-1';
 
-  // Determine user tier from session or header override
   let currentTier: UserTier = userSession?.tier || 'FREE';
 
-  if (authHeader?.includes('pro') || authHeader?.includes('PRO')) {
+  if (authHeader?.toLowerCase().includes('pro')) {
     currentTier = 'PRO';
-  } else if (authHeader?.includes('fleet') || authHeader?.includes('FLEET')) {
+  } else if (authHeader?.toLowerCase().includes('fleet')) {
     currentTier = 'FLEET';
+  } else if (userSession?.userId && mockProfilesDb.has(userSession.userId)) {
+    const p = mockProfilesDb.get(userSession.userId);
+    if (p?.subscription_tier === 'pro') currentTier = 'PRO';
+    if (p?.subscription_tier === 'fleet') currentTier = 'FLEET';
   }
 
-  // PRO and FLEET tiers bypass query rate limits with full privileges
+  // PRO and FLEET tiers bypass query rate limits completely
   if (currentTier === 'PRO' || currentTier === 'FLEET') {
     return {
       allowed: true,
@@ -46,13 +54,12 @@ export async function checkBriefingUsageMiddleware(
     };
   }
 
-  // FREE TIER ENFORCEMENT
+  // FREE TIER ENFORCEMENT (3 queries / 24h)
   const today = new Date().toISOString().split('T')[0];
-  const trackerKey = userSession?.userId || clientIp || 'default_user';
+  const trackerKey = userSession?.userId || authHeader || clientIp || 'default_user';
 
   const userStats = freeQueryTracker.get(trackerKey) || { count: 0, dateString: today };
 
-  // Reset counter if calendar date changed
   if (userStats.dateString !== today) {
     userStats.count = 0;
     userStats.dateString = today;
@@ -65,14 +72,13 @@ export async function checkBriefingUsageMiddleware(
       tier: 'FREE',
       errorPayload: {
         error: 'LIMIT_REACHED',
-        message: 'Daily free briefing limit reached. Upgrade to Pro for unlimited corridor briefings.',
+        message: 'Daily free briefing limit reached (3/3). Upgrade to VAYU Pro for unlimited corridor briefings.',
         queriesUsed: userStats.count,
         maxFreeBriefs: MAX_FREE_DAILY_QUERIES,
       },
     };
   }
 
-  // Increment query count for FREE user
   userStats.count += 1;
   freeQueryTracker.set(trackerKey, userStats);
 

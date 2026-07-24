@@ -173,28 +173,10 @@ function formatShortUtc(d: Date): string {
 export function runDeterministicSafetyEngine(rawNotams: RawNotam[]): FlaggedNotam[] {
   return rawNotams.map((notam) => {
     const text = notam.rawText;
-    const isFir = notam.isFir || text.includes('FIR') || text.includes('Q) V') || text.includes('Q) Z');
-
     const matchedKeywords: string[] = [];
-
-    // Bucket matching
     let category: NotamBucket = 'GENERAL';
 
-    // 1. Check FIR_ENROUTE if explicitly marked FIR or keywords match
-    let isFirMatch = false;
-    for (const pat of FIR_ENROUTE_PATTERNS) {
-      const m = text.match(pat);
-      if (m) {
-        matchedKeywords.push(m[0]);
-        isFirMatch = true;
-      }
-    }
-
-    if (isFir || isFirMatch) {
-      category = 'FIR_ENROUTE';
-    }
-
-    // 2. Check RUNWAYS_TFRS
+    // 1. Check RUNWAYS & TFRs
     let isRwyMatch = false;
     for (const pat of RUNWAYS_TFRS_PATTERNS) {
       const m = text.match(pat);
@@ -203,12 +185,12 @@ export function runDeterministicSafetyEngine(rawNotams: RawNotam[]): FlaggedNota
         isRwyMatch = true;
       }
     }
-    if (isRwyMatch && !isFir) {
+    if (isRwyMatch) {
       category = 'RUNWAYS_TFRS';
     }
 
-    // 3. Check PROCEDURES_NAVAIDS
-    if (category === 'GENERAL' || category === 'FIR_ENROUTE') {
+    // 2. Check PROCEDURES & NAVAIDS
+    if (category === 'GENERAL') {
       let isProcMatch = false;
       for (const pat of PROCEDURES_NAVAIDS_PATTERNS) {
         const m = text.match(pat);
@@ -217,12 +199,12 @@ export function runDeterministicSafetyEngine(rawNotams: RawNotam[]): FlaggedNota
           isProcMatch = true;
         }
       }
-      if (isProcMatch && !isFir) {
+      if (isProcMatch) {
         category = 'PROCEDURES_NAVAIDS';
       }
     }
 
-    // 4. Check TAXIWAYS_APRON
+    // 3. Check TAXIWAYS & APRON
     if (category === 'GENERAL') {
       let isTwyMatch = false;
       for (const pat of TAXIWAYS_APRON_PATTERNS) {
@@ -237,7 +219,7 @@ export function runDeterministicSafetyEngine(rawNotams: RawNotam[]): FlaggedNota
       }
     }
 
-    // 5. Check OBSTACLES_LIGHTING
+    // 4. Check OBSTACLES & LIGHTING
     if (category === 'GENERAL') {
       let isObstMatch = false;
       for (const pat of OBSTACLES_LIGHTING_PATTERNS) {
@@ -252,13 +234,29 @@ export function runDeterministicSafetyEngine(rawNotams: RawNotam[]): FlaggedNota
       }
     }
 
+    // 5. Check FIR & EN-ROUTE AIRSPACE
+    let isFirMatch = false;
+    for (const pat of FIR_ENROUTE_PATTERNS) {
+      const m = text.match(pat);
+      if (m) {
+        matchedKeywords.push(m[0]);
+        isFirMatch = true;
+      }
+    }
+
+    const isFirNotam = notam.isFir || (notam.icao && notam.icao.endsWith('FIR')) || notam.icao === notam.firIcao;
+
+    if (category === 'GENERAL') {
+      if (isFirNotam || isFirMatch) {
+        category = 'FIR_ENROUTE';
+      }
+    }
+
     // Assign Severity
     let severity: SeverityLevel = 'INFO';
     if (category === 'RUNWAYS_TFRS' || category === 'FIR_ENROUTE') {
       severity = 'CRITICAL';
-    } else if (category === 'PROCEDURES_NAVAIDS' || category === 'TAXIWAYS_APRON') {
-      severity = 'WARNING';
-    } else if (category === 'OBSTACLES_LIGHTING') {
+    } else if (category === 'PROCEDURES_NAVAIDS' || category === 'TAXIWAYS_APRON' || category === 'OBSTACLES_LIGHTING') {
       severity = 'WARNING';
     }
 
@@ -274,7 +272,7 @@ export function runDeterministicSafetyEngine(rawNotams: RawNotam[]): FlaggedNota
       effectiveEnd: notam.effectiveEnd,
       effectiveWindow: tempInfo.windowText,
       effectiveStatus: tempInfo.status,
-      isFir,
+      isFir: isFirNotam,
       firIcao: notam.firIcao,
     };
   });
