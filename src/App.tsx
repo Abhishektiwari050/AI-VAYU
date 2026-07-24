@@ -17,6 +17,7 @@ import { generateClientFallbackBriefing, generateClientFallbackRoute } from './l
 import { supabase, getUserProfile, UserProfile, recordBriefingAudit } from './lib/supabaseClient';
 import { SaaSAppShell, SaaSTab } from './components/SaaSAppShell';
 import { NotFoundPage } from './components/NotFoundPage';
+import { FloatingCloudBackground } from './components/FloatingCloudBackground';
 import { AlertTriangle, ShieldCheck, Zap, WifiOff, Compass } from 'lucide-react';
 
 export default function App() {
@@ -345,10 +346,8 @@ export default function App() {
 
   return (
     <div className={getThemeWrapperClass()}>
-      {/* Ambient Soft Glow Background Accent */}
-      <div className={`fixed top-1/4 left-1/2 -translate-x-1/2 w-[800px] h-[400px] blur-[180px] pointer-events-none rounded-full z-0 transition-all duration-700 ${
-        theme === 'NIGHT_RED' ? 'bg-red-600/10' : theme === 'DAY_FLIGHT' ? 'bg-blue-500/10' : 'bg-blue-600/3'
-      }`} />
+      {/* Floating SVG Sky Clouds Background */}
+      <FloatingCloudBackground />
 
       {/* MASTER AVIATION WORKSTATION CONTAINER */}
       <div className={`relative max-w-5xl mx-auto rounded-3xl overflow-hidden z-10 transition-all duration-300 border ${getWorkstationFrameClass()}`}>

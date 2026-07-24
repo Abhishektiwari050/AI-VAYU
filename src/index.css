@@ -19,9 +19,22 @@
     font-family: "Inter", system-ui, -apple-system, sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    background: linear-gradient(180deg, #dbeafe 0%, #e0f2fe 40%, #f0f9ff 100%);
+    background: linear-gradient(180deg, #bae6fd 0%, #e0f2fe 35%, #f0f9ff 100%);
     color: var(--color-ink);
     min-h: 100vh;
+  }
+}
+
+/* FLOATING CLOUD DRIFT ANIMATION KEYFRAMES */
+@keyframes drift {
+  0% {
+    transform: translateX(0px);
+  }
+  50% {
+    transform: translateX(60px);
+  }
+  100% {
+    transform: translateX(0px);
   }
 }
 
