@@ -1,74 +1,92 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
-        xmlns:xsi="http://www.w3.org/2000/svg"
-        xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
-  
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9 http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd">
+  <!-- Homepage -->
   <url>
-    <loc>https://vayu.ai/</loc>
-    <lastmod>2026-07-23</lastmod>
+    <loc>https://vayu.aero/</loc>
+    <lastmod>2026-07-24</lastmod>
     <changefreq>hourly</changefreq>
     <priority>1.0</priority>
-    <image:image>
-      <image:loc>https://vayu.ai/vayu-logo.svg</image:loc>
-      <image:title>Project VAYU Aviation Intelligence Platform</image:title>
-    </image:image>
+  </url>
+  
+  <!-- Indian DGCA Primary Aerodromes -->
+  <url>
+    <loc>https://vayu.aero/#VIDP</loc>
+    <lastmod>2026-07-24</lastmod>
+    <changefreq>always</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://vayu.aero/#VABB</loc>
+    <lastmod>2026-07-24</lastmod>
+    <changefreq>always</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://vayu.aero/#VOBL</loc>
+    <lastmod>2026-07-24</lastmod>
+    <changefreq>always</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://vayu.aero/#VOMM</loc>
+    <lastmod>2026-07-24</lastmod>
+    <changefreq>always</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://vayu.aero/#VECC</loc>
+    <lastmod>2026-07-24</lastmod>
+    <changefreq>always</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://vayu.aero/#VOHS</loc>
+    <lastmod>2026-07-24</lastmod>
+    <changefreq>always</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://vayu.aero/#VOCI</loc>
+    <lastmod>2026-07-24</lastmod>
+    <changefreq>always</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://vayu.aero/#VAGO</loc>
+    <lastmod>2026-07-24</lastmod>
+    <changefreq>always</changefreq>
+    <priority>0.8</priority>
   </url>
 
-  <!-- Major Indian Airspace Hubs -->
+  <!-- Global FAA & ICAO Hubs -->
   <url>
-    <loc>https://vayu.ai/briefing/VIDP</loc>
-    <lastmod>2026-07-23</lastmod>
+    <loc>https://vayu.aero/#KJFK</loc>
+    <lastmod>2026-07-24</lastmod>
     <changefreq>always</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://vayu.ai/briefing/VABB</loc>
-    <lastmod>2026-07-23</lastmod>
+    <loc>https://vayu.aero/#KDFW</loc>
+    <lastmod>2026-07-24</lastmod>
     <changefreq>always</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://vayu.ai/briefing/VOBL</loc>
-    <lastmod>2026-07-23</lastmod>
+    <loc>https://vayu.aero/#KLAX</loc>
+    <lastmod>2026-07-24</lastmod>
+    <changefreq>always</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://vayu.aero/#EGLL</loc>
+    <lastmod>2026-07-24</lastmod>
     <changefreq>always</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://vayu.ai/briefing/VDGO</loc>
-    <lastmod>2026-07-23</lastmod>
+    <loc>https://vayu.aero/#OMDB</loc>
+    <lastmod>2026-07-24</lastmod>
     <changefreq>always</changefreq>
     <priority>0.9</priority>
-  </url>
-  <url>
-    <loc>https://vayu.ai/briefing/VOHS</loc>
-    <lastmod>2026-07-23</lastmod>
-    <changefreq>always</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://vayu.ai/briefing/VOMM</loc>
-    <lastmod>2026-07-23</lastmod>
-    <changefreq>always</changefreq>
-    <priority>0.8</priority>
-  </url>
-
-  <!-- Global Strategic Airspace Hubs -->
-  <url>
-    <loc>https://vayu.ai/briefing/KJFK</loc>
-    <lastmod>2026-07-23</lastmod>
-    <changefreq>always</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://vayu.ai/briefing/KLAX</loc>
-    <lastmod>2026-07-23</lastmod>
-    <changefreq>always</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://vayu.ai/briefing/EGLL</loc>
-    <lastmod>2026-07-23</lastmod>
-    <changefreq>always</changefreq>
-    <priority>0.8</priority>
   </url>
 </urlset>
