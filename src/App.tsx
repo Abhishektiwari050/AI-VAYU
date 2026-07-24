@@ -335,27 +335,11 @@ export default function App() {
 
   // Theme Wrapper & Workstation Frame Styles
   const getThemeWrapperClass = () => {
-    switch (theme) {
-      case 'NIGHT_RED':
-        return 'bg-[#0a0202] text-[#ff4444] min-h-screen selection:bg-red-900 selection:text-white py-6 sm:py-10 px-4 sm:px-6 relative font-sans';
-      case 'DAY_FLIGHT':
-        return 'bg-[#f4f4f7] text-slate-900 min-h-screen selection:bg-blue-200 selection:text-black py-6 sm:py-10 px-4 sm:px-6 relative font-sans';
-      case 'DARK_COCKPIT':
-      default:
-        return 'bg-[#000000] text-[#f1f5f9] min-h-screen selection:bg-zinc-800 selection:text-white py-6 sm:py-10 px-4 sm:px-6 relative font-sans';
-    }
+    return 'cirrus-sky-bg text-[#0e1116] min-h-screen selection:bg-[#2e7def]/20 selection:text-[#0e1116] py-6 sm:py-10 px-4 sm:px-6 relative font-sans';
   };
 
   const getWorkstationFrameClass = () => {
-    switch (theme) {
-      case 'NIGHT_RED':
-        return 'bg-[#100404] border-red-950 text-red-100 shadow-2xl';
-      case 'DAY_FLIGHT':
-        return 'bg-white border-slate-200 text-slate-900 shadow-sm';
-      case 'DARK_COCKPIT':
-      default:
-        return 'bg-[#05070a] border-white/[0.08] text-white shadow-2xl';
-    }
+    return 'cirrus-card text-[#0e1116]';
   };
 
   return (

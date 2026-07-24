@@ -178,36 +178,36 @@ ADVISORY ONLY: Informational pre-flight awareness utility under DGCA and FAA reg
         </div>
       </div>
 
-      {/* HERO AIRPORT TITLE & WEATHER HUD */}
-      <div className="text-center my-8">
-        <h1 className={`text-6xl sm:text-7xl font-mono font-semibold tracking-tight mb-1.5 ${
-          isNight ? 'text-red-400' : isDay ? 'text-slate-900' : 'text-white'
-        }`}>
+      {/* HERO AIRPORT TITLE & CIRRUS OPEN SKY HUD */}
+      <div className="text-center my-10 space-y-3">
+        <div className="text-4xl sm:text-5xl text-[#5b6472] cirrus-serif-pause">
+          Clear skies, decoded in real-time.
+        </div>
+
+        <h1 className="text-6xl sm:text-8xl font-bold tracking-tight text-[#0e1116] font-sans">
           {briefing.icao}
         </h1>
-        <p className={`text-sm font-sans mb-3 ${
-          isNight ? 'text-red-300/70' : isDay ? 'text-slate-600' : 'text-zinc-400'
-        }`}>
+        <p className="text-base font-normal text-[#5b6472]">
           {briefing.airportName}
         </p>
 
         {/* Time Info */}
-        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full badge-minimal text-xs font-mono mb-4">
-          <Clock className="w-3.5 h-3.5 opacity-60" />
+        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white border border-[#e3e8ee] shadow-sm text-xs font-mono text-[#5b6472]">
+          <Clock className="w-3.5 h-3.5 opacity-60 text-[#2e7def]" />
           <span>{timeInfo.combinedString}</span>
         </div>
 
-        <div className="flex flex-col items-center gap-2">
+        <div className="flex flex-col items-center gap-3 pt-2">
           {/* Weather Pill */}
-          <div className="inline-flex items-center gap-3 px-4 py-2 rounded-full border border-white/[0.08] bg-white/[0.03] text-xs font-mono">
-            <span className={`w-2 h-2 rounded-full ${
-              weatherConfig.label === 'VFR' ? 'led-quiet-green' : weatherConfig.label === 'MVFR' ? 'led-quiet-yellow' : 'led-quiet-red'
+          <div className="inline-flex items-center gap-3 px-5 py-2.5 rounded-full bg-white border border-[#e3e8ee] shadow-sm text-xs font-medium text-[#0e1116]">
+            <span className={`w-2.5 h-2.5 rounded-full ${
+              weatherConfig.label === 'VFR' ? 'bg-[#10b981]' : weatherConfig.label === 'MVFR' ? 'bg-[#ff7a00]' : 'bg-red-500'
             }`} />
-            <span className="font-semibold text-white">{weatherConfig.label}</span>
-            <span className="text-zinc-600">•</span>
-            <span className="text-zinc-300">Winds {briefing.weather.windInfo}</span>
-            <span className="text-zinc-600">•</span>
-            <span className="text-zinc-300">Vis {briefing.weather.visibilityInfo}</span>
+            <span className="font-bold text-[#0e1116]">{weatherConfig.label}</span>
+            <span className="text-[#e3e8ee]">•</span>
+            <span className="text-[#5b6472]">Winds {briefing.weather.windInfo}</span>
+            <span className="text-[#e3e8ee]">•</span>
+            <span className="text-[#5b6472]">Vis {briefing.weather.visibilityInfo}</span>
           </div>
 
           {/* TAF Accordion Trigger */}
