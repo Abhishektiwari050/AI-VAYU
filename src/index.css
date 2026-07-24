@@ -25,16 +25,43 @@
   }
 }
 
-/* FLOATING CLOUD DRIFT ANIMATION KEYFRAMES */
+/* FLOATING CLOUD DRIFT AND ORGANIC JIGGLE ANIMATIONS */
 @keyframes drift {
   0% {
     transform: translateX(0px);
   }
   50% {
-    transform: translateX(60px);
+    transform: translateX(50px);
   }
   100% {
     transform: translateX(0px);
+  }
+}
+
+@keyframes cloudFloatJiggle {
+  0%, 100% {
+    transform: translateY(0px) rotate(0deg) scale(1);
+  }
+  25% {
+    transform: translateY(-8px) rotate(0.6deg) scale(1.015);
+  }
+  50% {
+    transform: translateY(5px) rotate(-0.4deg) scale(0.99);
+  }
+  75% {
+    transform: translateY(-6px) rotate(0.3deg) scale(1.01);
+  }
+}
+
+@keyframes cloudFloatJiggleSlow {
+  0%, 100% {
+    transform: translateY(0px) rotate(0deg) scale(1);
+  }
+  33% {
+    transform: translateY(-12px) rotate(-0.7deg) scale(1.02);
+  }
+  66% {
+    transform: translateY(8px) rotate(0.5deg) scale(0.985);
   }
 }
 

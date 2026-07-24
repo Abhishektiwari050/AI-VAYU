@@ -1,54 +1,90 @@
 import React from 'react';
 
 /**
- * Animated Floating Cloud Background Layer for Cirrus Open Sky Theme
- * Renders prominent, highly visible white volumetric clouds drifting across the blue sky.
+ * Hyper-Realistic Animated Floating Clouds with Organic Jiggle & Sway
+ * Built with realistic SVG cloud gradients, layered atmospheric depth, and gentle jiggle floating animations.
  */
 export const FloatingCloudBackground: React.FC = () => {
   return (
     <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden select-none">
-      {/* Cloud 1 - Top Left Large Cirrus Cloud */}
-      <div className="absolute -top-6 left-[-50px] w-[500px] sm:w-[700px] opacity-85 animate-[drift_40s_ease-in-out_infinite]">
-        <svg viewBox="0 0 600 250" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path
-            d="M 100 180 C 60 180, 20 150, 40 100 C 60 50, 130 40, 180 75 C 230 30, 340 30, 390 75 C 440 45, 520 60, 550 110 C 580 110, 600 140, 580 180 Z"
-            fill="white"
-            filter="drop-shadow(0px 14px 28px rgba(56, 189, 248, 0.4))"
-          />
-        </svg>
+      {/* SVG Definitions for Realistic Atmospheric Cloud Lighting */}
+      <svg className="absolute w-0 h-0">
+        <defs>
+          <linearGradient id="cloudGrad1" x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%" stopColor="#ffffff" stopOpacity="0.95" />
+            <stop offset="70%" stopColor="#f8fafc" stopOpacity="0.85" />
+            <stop offset="100%" stopColor="#e2e8f0" stopOpacity="0.7" />
+          </linearGradient>
+          <linearGradient id="cloudGrad2" x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%" stopColor="#ffffff" stopOpacity="0.9" />
+            <stop offset="60%" stopColor="#f1f5f9" stopOpacity="0.8" />
+            <stop offset="100%" stopColor="#cbd5e1" stopOpacity="0.65" />
+          </linearGradient>
+          <filter id="cloudSoftShadow" x="-20%" y="-20%" width="140%" height="140%">
+            <feDropShadow dx="0" dy="12" stdDeviation="16" floodColor="#0284c7" floodOpacity="0.22" />
+          </filter>
+        </defs>
+      </svg>
+
+      {/* CLOUD 1: Top Left Cumulus Puff (Horizontal Drift + Organic Vertical Jiggle) */}
+      <div className="absolute top-2 left-[-40px] w-[500px] sm:w-[650px] animate-[drift_45s_ease-in-out_infinite]">
+        <div className="animate-[cloudFloatJiggle_8s_ease-in-out_infinite]">
+          <svg viewBox="0 0 500 220" fill="none" className="w-full h-auto filter-[url(#cloudSoftShadow)]">
+            <g fill="url(#cloudGrad1)">
+              <circle cx="120" cy="140" r="70" />
+              <circle cx="190" cy="110" r="85" />
+              <circle cx="280" cy="100" r="95" />
+              <circle cx="360" cy="130" r="75" />
+              <circle cx="410" cy="150" r="50" />
+              <rect x="100" y="140" width="310" height="70" rx="35" />
+            </g>
+          </svg>
+        </div>
       </div>
 
-      {/* Cloud 2 - Top Right Mid-Altitude Cloud */}
-      <div className="absolute top-20 right-[-100px] w-[450px] sm:w-[650px] opacity-90 animate-[drift_50s_ease-in-out_infinite_reverse]">
-        <svg viewBox="0 0 600 250" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path
-            d="M 90 170 C 50 170, 20 140, 40 95 C 60 50, 130 40, 170 70 C 220 25, 330 25, 380 70 C 430 40, 500 55, 530 100 C 560 100, 580 130, 560 170 Z"
-            fill="white"
-            filter="drop-shadow(0px 16px 32px rgba(14, 165, 233, 0.35))"
-          />
-        </svg>
+      {/* CLOUD 2: Top Right Volumetric Cloud Bank (Slow Reverse Drift + Gentle Sway Jiggle) */}
+      <div className="absolute top-24 right-[-80px] w-[450px] sm:w-[600px] animate-[drift_55s_ease-in-out_infinite_reverse]">
+        <div className="animate-[cloudFloatJiggleSlow_11s_ease-in-out_infinite]">
+          <svg viewBox="0 0 480 200" fill="none" className="w-full h-auto filter-[url(#cloudSoftShadow)]">
+            <g fill="url(#cloudGrad2)">
+              <circle cx="100" cy="130" r="60" />
+              <circle cx="170" cy="95" r="75" />
+              <circle cx="260" cy="85" r="85" />
+              <circle cx="340" cy="110" r="70" />
+              <rect x="80" y="120" width="280" height="60" rx="30" />
+            </g>
+          </svg>
+        </div>
       </div>
 
-      {/* Cloud 3 - Lower Middle Fluffy Cumulus */}
-      <div className="absolute top-[45%] left-[5%] w-[400px] sm:w-[600px] opacity-75 animate-[drift_65s_ease-in-out_infinite]">
-        <svg viewBox="0 0 500 200" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path
-            d="M 60 140 C 30 140, 10 120, 25 85 C 40 50, 95 40, 130 65 C 170 30, 250 30, 290 65 C 330 40, 390 50, 420 85 C 450 85, 470 110, 450 140 Z"
-            fill="white"
-            filter="drop-shadow(0px 12px 24px rgba(56, 189, 248, 0.3))"
-          />
-        </svg>
+      {/* CLOUD 3: Midground Left Floating Fluff */}
+      <div className="absolute top-[40%] left-[8%] w-[380px] sm:w-[520px] animate-[drift_60s_ease-in-out_infinite]">
+        <div className="animate-[cloudFloatJiggle_9s_ease-in-out_infinite_1s]">
+          <svg viewBox="0 0 450 190" fill="none" className="w-full h-auto opacity-90 filter-[url(#cloudSoftShadow)]">
+            <g fill="url(#cloudGrad1)">
+              <circle cx="90" cy="120" r="55" />
+              <circle cx="160" cy="90" r="70" />
+              <circle cx="240" cy="80" r="80" />
+              <circle cx="320" cy="105" r="60" />
+              <rect x="75" y="110" width="260" height="55" rx="25" />
+            </g>
+          </svg>
+        </div>
       </div>
 
-      {/* Cloud 4 - Bottom Right Horizon Cloud */}
-      <div className="absolute bottom-10 right-[5%] w-[480px] sm:w-[680px] opacity-80 animate-[drift_55s_ease-in-out_infinite_reverse]">
-        <svg viewBox="0 0 600 230" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path
-            d="M 80 160 C 45 160, 15 130, 30 90 C 45 50, 110 40, 150 65 C 190 25, 290 25, 340 65 C 390 35, 460 50, 490 90 C 520 90, 540 120, 520 160 Z"
-            fill="white"
-            filter="drop-shadow(0px 14px 28px rgba(14, 165, 233, 0.35))"
-          />
-        </svg>
+      {/* CLOUD 4: Lower Horizon Volumetric Clouds */}
+      <div className="absolute bottom-6 right-[4%] w-[460px] sm:w-[620px] animate-[drift_50s_ease-in-out_infinite_reverse]">
+        <div className="animate-[cloudFloatJiggleSlow_10s_ease-in-out_infinite_2s]">
+          <svg viewBox="0 0 520 210" fill="none" className="w-full h-auto filter-[url(#cloudSoftShadow)]">
+            <g fill="url(#cloudGrad2)">
+              <circle cx="110" cy="130" r="65" />
+              <circle cx="190" cy="95" r="80" />
+              <circle cx="290" cy="90" r="90" />
+              <circle cx="380" cy="120" r="70" />
+              <rect x="90" y="125" width="310" height="65" rx="30" />
+            </g>
+          </svg>
+        </div>
       </div>
     </div>
   );
