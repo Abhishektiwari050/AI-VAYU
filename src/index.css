@@ -5,13 +5,13 @@
     font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Inter", system-ui, sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    background-color: #07090e;
-    color: #f1f5f9;
+    background-color: #000000;
+    color: #ffffff;
   }
 }
 
 @layer utilities {
-  /* Scrollbar reset */
+  /* Scrollbar Reset */
   .no-scrollbar::-webkit-scrollbar {
     display: none;
   }
@@ -20,77 +20,52 @@
     scrollbar-width: none;
   }
 
-  /* Linear / Vercel Minimal Dark Surface Cards */
-  .surface-card {
-    background-color: rgba(13, 17, 24, 0.75);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    border: 1px solid rgba(255, 255, 255, 0.07);
-    border-radius: 20px;
-    transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+  /* Deep Pitch-Black Pitch Canvas */
+  .pitch-black-canvas {
+    background-color: #000000;
   }
 
-  .surface-card:hover {
-    border-color: rgba(255, 255, 255, 0.15);
-    box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.7);
-  }
-
-  /* Minimal Hairline Command Bar */
-  .command-bar {
-    background-color: rgba(10, 14, 21, 0.85);
-    backdrop-filter: blur(24px);
-    -webkit-backdrop-filter: blur(24px);
+  .pitch-black-surface {
+    background-color: #05070a;
     border: 1px solid rgba(255, 255, 255, 0.08);
-    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.5);
   }
 
-  /* Subtle Minimal Badges */
-  .badge-minimal {
-    background-color: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    color: #cbd5e1;
+  /* Editorial Editorial Text Typography */
+  .editorial-title {
+    font-weight: 600;
+    letter-spacing: -0.03em;
+    color: #ffffff;
   }
 
-  .badge-critical {
-    background-color: rgba(239, 68, 68, 0.1);
-    border: 1px solid rgba(239, 68, 68, 0.25);
-    color: #fca5a5;
+  .editorial-subtitle {
+    color: #888888;
+    letter-spacing: 0;
   }
 
-  .badge-advisory {
-    background-color: rgba(245, 158, 11, 0.1);
-    border: 1px solid rgba(245, 158, 11, 0.25);
-    color: #fde047;
+  /* Hairline Editorial Borders */
+  .editorial-border {
+    border-color: rgba(255, 255, 255, 0.08);
   }
 
-  .badge-success {
-    background-color: rgba(16, 185, 129, 0.1);
-    border: 1px solid rgba(16, 185, 129, 0.25);
-    color: #6ee7b7;
-  }
-
-  /* Minimal Quiet LED Glow */
-  .led-quiet-green {
+  /* Quiet Status Dots */
+  .dot-green {
     width: 6px;
     height: 6px;
     border-radius: 9999px;
     background-color: #10b981;
-    box-shadow: 0 0 8px rgba(16, 185, 129, 0.6);
   }
 
-  .led-quiet-red {
-    width: 6px;
-    height: 6px;
-    border-radius: 9999px;
-    background-color: #ef4444;
-    box-shadow: 0 0 8px rgba(239, 68, 68, 0.6);
-  }
-
-  .led-quiet-yellow {
+  .dot-amber {
     width: 6px;
     height: 6px;
     border-radius: 9999px;
     background-color: #f59e0b;
-    box-shadow: 0 0 8px rgba(245, 158, 11, 0.6);
+  }
+
+  .dot-red {
+    width: 6px;
+    height: 6px;
+    border-radius: 9999px;
+    background-color: #ef4444;
   }
 }

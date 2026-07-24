@@ -337,40 +337,29 @@ export default function App() {
   const getThemeWrapperClass = () => {
     switch (theme) {
       case 'NIGHT_RED':
-        return 'bg-[#0a0202] text-[#ff4444] min-h-screen selection:bg-red-900 selection:text-white py-2 sm:py-6 px-1.5 sm:px-4 md:px-6 relative overflow-x-hidden font-sans transition-colors duration-300';
+        return 'bg-[#0a0202] text-[#ff4444] min-h-screen selection:bg-red-900 selection:text-white py-6 sm:py-10 px-4 sm:px-6 relative font-sans';
       case 'DAY_FLIGHT':
-        return 'theme-day-flight bg-[#f4f4f7] text-slate-900 min-h-screen selection:bg-blue-200 selection:text-black py-2 sm:py-6 px-1.5 sm:px-4 md:px-6 relative overflow-x-hidden font-sans transition-colors duration-300';
+        return 'bg-[#f4f4f7] text-slate-900 min-h-screen selection:bg-blue-200 selection:text-black py-6 sm:py-10 px-4 sm:px-6 relative font-sans';
       case 'DARK_COCKPIT':
       default:
-        return 'bg-[#080b11] agency-bg-mesh text-zinc-100 min-h-screen selection:bg-zinc-800 selection:text-white py-2 sm:py-6 px-1.5 sm:px-4 md:px-6 relative overflow-x-hidden font-sans transition-colors duration-300';
+        return 'bg-[#000000] text-[#f1f5f9] min-h-screen selection:bg-zinc-800 selection:text-white py-6 sm:py-10 px-4 sm:px-6 relative font-sans';
     }
   };
 
   const getWorkstationFrameClass = () => {
     switch (theme) {
       case 'NIGHT_RED':
-        return 'glass-card-night border-hardware-night shadow-[0_20px_80px_rgba(153,27,27,0.35)] text-red-100';
+        return 'bg-[#100404] border-red-950 text-red-100 shadow-2xl';
       case 'DAY_FLIGHT':
-        return 'glass-card-day border-hardware-day shadow-[0_16px_60px_rgba(0,0,0,0.08)] text-slate-900';
+        return 'bg-white border-slate-200 text-slate-900 shadow-sm';
       case 'DARK_COCKPIT':
       default:
-        return 'glass-card-dark border-hardware-dark shadow-[0_20px_80px_rgba(0,0,0,0.95)] text-zinc-100';
+        return 'bg-[#05070a] border-white/[0.08] text-white shadow-2xl';
     }
   };
 
   return (
-    <SaaSAppShell
-      activeTab={saasTab}
-      setActiveTab={handleSaasTabChange}
-      userTier={userTier}
-      onOpenMonetization={() => setIsMonetizationModalOpen(true)}
-      onOpenAuth={() => setIsAuthModalOpen(true)}
-      onOpenDispatchModal={() => setIsDispatchModalOpen(true)}
-      userEmail={currentUser?.email}
-      theme={theme}
-      activeIcao={briefing?.icao}
-    >
-      <div className={getThemeWrapperClass()}>
+    <div className={getThemeWrapperClass()}>
       {/* Ambient Soft Glow Background Accent */}
       <div className={`fixed top-1/4 left-1/2 -translate-x-1/2 w-[800px] h-[400px] blur-[180px] pointer-events-none rounded-full z-0 transition-all duration-700 ${
         theme === 'NIGHT_RED' ? 'bg-red-600/10' : theme === 'DAY_FLIGHT' ? 'bg-blue-500/10' : 'bg-blue-600/3'
@@ -629,6 +618,5 @@ export default function App() {
         currentTier={userTier}
       />
     </div>
-    </SaaSAppShell>
   );
 }
