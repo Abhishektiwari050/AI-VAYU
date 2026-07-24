@@ -166,6 +166,13 @@ export default function App() {
     }
   }, [history]);
 
+  // Initial load: Automatically fetch default VIDP briefing on launch to prevent empty blue screen
+  useEffect(() => {
+    if (!briefing && !is404Route) {
+      fetchSingleBriefing('VIDP');
+    }
+  }, []);
+
   const fetchSingleBriefing = async (icao: string) => {
     setIsLoading(true);
     setError(null);
