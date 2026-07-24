@@ -120,21 +120,15 @@ ADVISORY ONLY: Informational pre-flight awareness utility under DGCA and FAA reg
 
   const cardGlassClass = isNight
     ? 'glass-card-night text-red-100'
-    : isDay
-    ? 'glass-card-day text-slate-900'
-    : 'glass-card-dark text-white';
+    : 'cirrus-card text-[#0e1116]';
 
   const criticalCardClass = isNight
     ? 'glass-card-critical-night text-red-100'
-    : isDay
-    ? 'glass-card-critical-day text-slate-900'
-    : 'glass-card-critical-dark text-white';
+    : 'cirrus-card bg-red-50/70 border-red-200 text-[#0e1116]';
 
   const advisoryCardClass = isNight
     ? 'glass-card-advisory-night text-red-100'
-    : isDay
-    ? 'glass-card-advisory-day text-slate-900'
-    : 'glass-card-advisory-dark text-white';
+    : 'cirrus-card bg-amber-50/70 border-amber-200 text-[#0e1116]';
 
   const allLedgerItems = briefing.allNotamsLedger || [];
   const filteredLedger = allLedgerItems.filter((item) => {

@@ -24,10 +24,16 @@ export default function App() {
   const [theme, setTheme] = useState<DisplayTheme>(() => {
     try {
       const saved = localStorage.getItem('vayu_theme');
-      if (saved === 'NIGHT_RED' || saved === 'DAY_FLIGHT' || saved === 'DARK_COCKPIT') return saved;
+      if (saved === 'DAY_FLIGHT' || saved === 'NIGHT_RED') return saved;
     } catch {}
-    return 'DARK_COCKPIT';
+    return 'DAY_FLIGHT';
   });
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('vayu_theme', 'DAY_FLIGHT');
+    } catch {}
+  }, []);
 
   const [fontSize, setFontSize] = useState<FontSizeSetting>('NORMAL');
   const [viewMode, setViewMode] = useState<'EXECUTIVE' | 'CLI' | 'ROUTE'>('EXECUTIVE');
