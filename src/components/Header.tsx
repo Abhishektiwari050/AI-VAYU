@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
   Terminal,
   Sun,
@@ -11,7 +11,6 @@ import {
   Search,
   Zap,
   Compass,
-  Plane,
   Crown,
   ShieldCheck,
   Command,
@@ -98,209 +97,167 @@ export const Header: React.FC<HeaderProps> = ({
   };
 
   const quickAirports = [
-    { code: 'VIDP', status: '🟢', type: 'GREEN', label: 'DELHI' },
-    { code: 'VABB', status: '🟡', type: 'YELLOW', label: 'MUMBAI' },
-    { code: 'VOBL', status: '🟢', type: 'GREEN', label: 'BLR' },
-    { code: 'VAID', status: '🟢', type: 'GREEN', label: 'INDORE' },
-    { code: 'VDGO', status: '🔴', type: 'RED', label: 'GOA' },
-    { code: 'VIJP', status: '🟢', type: 'GREEN', label: 'JAIPUR' },
-    { code: 'VILK', status: '🟢', type: 'GREEN', label: 'LUCKNOW' },
-    { code: 'KJFK', status: '🟢', type: 'GREEN', label: 'NYC' },
-    { code: 'EGLL', status: '🟢', type: 'GREEN', label: 'LHR' },
+    { code: 'VIDP', status: 'GREEN', label: 'Delhi' },
+    { code: 'VABB', status: 'YELLOW', label: 'Mumbai' },
+    { code: 'VOBL', status: 'GREEN', label: 'Bengaluru' },
+    { code: 'VAID', status: 'GREEN', label: 'Indore' },
+    { code: 'VDGO', status: 'RED', label: 'Goa' },
+    { code: 'VIJP', status: 'GREEN', label: 'Jaipur' },
+    { code: 'VILK', status: 'GREEN', label: 'Lucknow' },
+    { code: 'KJFK', status: 'GREEN', label: 'New York' },
+    { code: 'EGLL', status: 'GREEN', label: 'London' },
   ];
 
   const isNight = theme === 'NIGHT_RED';
   const isDay = theme === 'DAY_FLIGHT';
 
-  const headerGlassClass = isNight
-    ? 'glass-card-night text-red-100'
+  const containerClass = isNight
+    ? 'bg-[#140606] border-red-950 text-red-100'
     : isDay
-    ? 'glass-card-day text-slate-900'
-    : 'glass-card-dark text-white';
+    ? 'bg-white border-slate-200 text-slate-900 shadow-sm'
+    : 'bg-[#0b0e14]/90 border-white/[0.08] text-slate-100 shadow-2xl';
 
-  const ribbonGlassClass = isNight
-    ? 'glass-command-ribbon-night text-red-100'
+  const inputClass = isNight
+    ? 'bg-red-950/40 border-red-900/60 text-red-100 placeholder-red-400/40 focus:border-red-500'
     : isDay
-    ? 'glass-command-ribbon-day text-slate-900'
-    : 'glass-command-ribbon-dark text-white';
+    ? 'bg-slate-50 border-slate-300 text-slate-900 placeholder-slate-400 focus:border-slate-800'
+    : 'bg-zinc-900/60 border-white/[0.08] text-white placeholder-zinc-500 focus:border-white/20 focus:bg-zinc-900/90';
 
-  const inputBgClass = isNight
-    ? 'bg-red-950/50 border-red-900/60 text-red-100 placeholder-red-400/50 focus:border-red-500'
+  const btnSecondaryClass = isNight
+    ? 'border-red-900/60 bg-red-950/40 text-red-200 hover:bg-red-900/40'
     : isDay
-    ? 'bg-white/90 border-slate-300 text-slate-900 placeholder-slate-400 focus:border-blue-600'
-    : 'bg-black/80 border-white/10 text-white placeholder-zinc-500 focus:border-sky-400/60 focus:ring-1 focus:ring-sky-400/30';
+    ? 'border-slate-200 bg-slate-100 text-slate-700 hover:bg-slate-200'
+    : 'border-white/[0.08] bg-zinc-900/60 text-zinc-300 hover:bg-zinc-800 hover:text-white';
 
-  const actionBtnClass = isNight
-    ? 'border-red-900/60 bg-red-950/60 text-red-200 hover:bg-red-900/80'
+  const btnPrimaryClass = isNight
+    ? 'bg-red-600 hover:bg-red-500 text-white font-medium'
     : isDay
-    ? 'border-slate-300 bg-white text-slate-700 hover:bg-slate-100'
-    : 'border-white/10 bg-zinc-900/90 text-zinc-300 hover:bg-zinc-800 hover:text-white';
-
-  const activeTabClass = isNight
-    ? 'bg-red-600 text-white shadow-md font-bold'
-    : isDay
-    ? 'bg-slate-900 text-white shadow-md font-bold'
-    : 'bg-gradient-to-r from-sky-500 to-blue-600 text-white shadow-md font-bold';
-
-  const inactiveTabClass = isNight
-    ? 'text-red-300/70 hover:text-red-100'
-    : isDay
-    ? 'text-slate-600 hover:text-slate-900'
-    : 'text-zinc-400 hover:text-white';
-
-  const submitBtnClass = isNight
-    ? 'bg-red-600 hover:bg-red-500 text-white shadow-sm'
-    : isDay
-    ? 'bg-slate-900 hover:bg-slate-800 text-white shadow-sm'
-    : 'bg-gradient-to-r from-sky-500 via-cyan-400 to-emerald-500 hover:brightness-110 text-black font-extrabold shadow-[0_0_20px_rgba(56,189,248,0.3)]';
+    ? 'bg-slate-900 hover:bg-slate-800 text-white font-medium'
+    : 'bg-white hover:bg-zinc-100 text-zinc-950 font-semibold shadow-sm';
 
   return (
-    <header className={`w-full p-4 sm:p-6 rounded-t-[28px] shadow-2xl relative z-30 font-sans transition-all duration-300 ${headerGlassClass}`}>
-      <div className="flex flex-col gap-4">
+    <header className={`w-full p-4 sm:p-5 rounded-2xl border mb-6 transition-all font-sans ${containerClass}`}>
+      <div className="flex flex-col gap-4 max-w-7xl mx-auto">
         
-        {/* ROW 1: APPLE-GRADE HEADER BRANDING & COCKPIT STATUS */}
-        <div className={`flex flex-wrap items-center justify-between gap-3 text-xs font-mono uppercase tracking-wider pb-3 border-b ${
-          isNight ? 'border-red-900/40' : isDay ? 'border-slate-300/80' : 'border-white/10'
-        }`}>
-          {/* Brand Identity */}
-          <div className="flex items-center space-x-3.5">
-            <VayuLogo size="lg" showText={true} />
-
-            {/* Glowing Datastream Status Pill */}
-            <div className={`hidden md:flex items-center space-x-2 px-3 py-1 rounded-full text-[10px] font-bold border transition-all ${
-              isNight
-                ? 'border-red-900/60 bg-red-950/40 text-red-300'
-                : isDay
-                ? 'border-slate-300 bg-slate-100 text-slate-800'
-                : 'border-emerald-500/30 bg-emerald-950/40 text-emerald-300 shadow-[0_0_12px_rgba(16,185,129,0.2)]'
-            }`}>
-              <span className={`w-2 h-2 rounded-full inline-block ${isNight ? 'led-glow-red' : isDay ? 'bg-blue-600' : 'led-glow-green animate-pulse'}`} />
-              <span className="tracking-widest">LIVE DGCA & FAA DATASTREAM</span>
+        {/* ROW 1: MINIMAL BRAND HEADER & COCKPIT SESSION */}
+        <div className="flex flex-wrap items-center justify-between gap-3 text-xs pb-3 border-b border-white/[0.06]">
+          {/* Brand */}
+          <div className="flex items-center space-x-3">
+            <VayuLogo size="md" showText={true} />
+            
+            <div className="hidden sm:flex items-center space-x-2 px-2.5 py-1 rounded-full badge-minimal text-[11px] font-mono">
+              <span className="led-quiet-green" />
+              <span className="opacity-80">FAA & DGCA Live</span>
             </div>
           </div>
 
-          {/* Right Controls */}
-          <div className="flex items-center space-x-2 sm:space-x-3 text-xs">
-            
-            {/* Auth Session */}
-            <button
-              onClick={onOpenAuth}
-              className={`flex items-center space-x-1.5 border px-3 py-1.5 rounded-xl text-[10px] font-bold font-mono transition cursor-pointer ${
-                userEmail ? 'border-emerald-500/60 bg-emerald-950/40 text-emerald-300' : actionBtnClass
-              }`}
-            >
-              <ShieldCheck className="h-3.5 w-3.5 text-emerald-400" />
-              <span className="hidden sm:inline">{userEmail ? userEmail.split('@')[0].toUpperCase() : 'AUTH'}</span>
-            </button>
-
-            {/* Tier Badge */}
-            <button
-              onClick={onOpenMonetization}
-              className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-xl text-[10px] font-bold font-mono transition cursor-pointer border ${
-                userTier === 'PRO'
-                  ? 'border-emerald-500 bg-emerald-500/20 text-emerald-300 hover:bg-emerald-500/30'
-                  : userTier === 'FLEET'
-                  ? 'border-purple-500 bg-purple-500/20 text-purple-300 hover:bg-purple-500/30'
-                  : 'border-amber-500/50 bg-amber-500/10 text-amber-300 hover:bg-amber-500/20'
-              }`}
-            >
-              <Crown className="h-3.5 w-3.5 text-amber-400" />
-              <span>{userTier} PILOT</span>
-            </button>
-
+          {/* Controls */}
+          <div className="flex items-center space-x-2 text-xs font-mono">
             {/* Zulu Clock */}
-            <div className={`hidden sm:inline-flex items-center gap-1.5 px-3 py-1 rounded-xl border text-[11px] font-mono font-bold ${
-              isNight ? 'bg-red-950/40 border-red-900/60 text-red-300' : isDay ? 'bg-slate-100 border-slate-300 text-slate-800' : 'bg-black/60 border-white/10 text-zinc-200'
-            }`}>
-              <span className="opacity-60">ZULU:</span>
-              <span className="text-sky-400">{currentZulu}Z</span>
+            <div className="hidden md:flex items-center space-x-1.5 px-2.5 py-1 rounded-lg badge-minimal text-[11px]">
+              <span className="opacity-50">UTC</span>
+              <span className="font-semibold text-white">{currentZulu}Z</span>
             </div>
 
+            {/* Auth */}
+            <button
+              onClick={onOpenAuth}
+              className={`px-2.5 py-1.5 rounded-lg border text-[11px] transition cursor-pointer ${btnSecondaryClass}`}
+            >
+              <span className="hidden sm:inline">{userEmail ? userEmail.split('@')[0] : 'Sign In'}</span>
+            </button>
+
+            {/* Tier */}
+            <button
+              onClick={onOpenMonetization}
+              className="px-2.5 py-1.5 rounded-lg border border-amber-500/30 bg-amber-500/10 text-amber-300 text-[11px] font-medium transition cursor-pointer flex items-center gap-1"
+            >
+              <Crown className="w-3 h-3" />
+              <span>{userTier}</span>
+            </button>
+
+            {/* Dispatch */}
             <button
               onClick={onOpenDispatchModal}
-              className={`flex items-center space-x-1 border px-3 py-1.5 rounded-xl text-[11px] font-bold transition cursor-pointer ${actionBtnClass}`}
+              className={`px-2.5 py-1.5 rounded-lg border text-[11px] transition cursor-pointer hidden sm:flex items-center gap-1 ${btnSecondaryClass}`}
             >
-              <FileText className="h-3.5 w-3.5 opacity-70" />
-              <span className="hidden sm:inline">Dispatch</span>
+              <FileText className="w-3 h-3 opacity-70" />
+              <span>Dispatch</span>
             </button>
 
+            {/* Audit */}
             <button
               onClick={onOpenHistory}
-              className={`flex items-center space-x-1 border px-3 py-1.5 rounded-xl text-[11px] font-bold transition cursor-pointer ${actionBtnClass}`}
+              className={`px-2.5 py-1.5 rounded-lg border text-[11px] transition cursor-pointer hidden sm:flex items-center gap-1 ${btnSecondaryClass}`}
             >
-              <History className="h-3.5 w-3.5 opacity-70" />
-              <span className="hidden sm:inline">Audit</span>
+              <History className="w-3 h-3 opacity-70" />
+              <span>History</span>
             </button>
 
+            {/* Audio */}
             <button
               onClick={toggleAudioBriefing}
-              className={`flex items-center space-x-1 border px-3 py-1.5 rounded-xl text-[11px] font-bold transition cursor-pointer ${
-                isAudioPlaying ? 'border-emerald-500 bg-emerald-500 text-black animate-pulse font-black' : actionBtnClass
+              className={`px-2.5 py-1.5 rounded-lg border text-[11px] transition cursor-pointer flex items-center gap-1 ${
+                isAudioPlaying ? 'bg-emerald-500 text-black font-semibold' : btnSecondaryClass
               }`}
             >
-              {isAudioPlaying ? <Volume2 className="h-3.5 w-3.5" /> : <VolumeX className="h-3.5 w-3.5" />}
+              {isAudioPlaying ? <Volume2 className="w-3 h-3" /> : <VolumeX className="w-3 h-3" />}
               <span className="hidden sm:inline">{isAudioPlaying ? 'Stop' : 'Audio'}</span>
             </button>
 
-            {/* Apple Cockpit Theme Selector */}
-            <div className={`flex items-center border p-1 rounded-xl transition-colors ${
-              isNight ? 'border-red-900/60 bg-red-950/80' : isDay ? 'border-slate-300 bg-slate-200' : 'border-white/10 bg-black/60'
-            }`}>
+            {/* Theme switcher */}
+            <div className="flex items-center border border-white/[0.08] p-0.5 rounded-lg bg-black/40">
               <button
                 type="button"
                 onClick={() => setTheme('DARK_COCKPIT')}
-                className={`p-1.5 rounded-lg cursor-pointer transition ${
-                  theme === 'DARK_COCKPIT' ? 'bg-sky-500 text-black font-bold shadow-sm' : isDay ? 'text-slate-600 hover:text-slate-900' : 'text-zinc-400 hover:text-white'
+                className={`p-1 rounded cursor-pointer transition ${
+                  theme === 'DARK_COCKPIT' ? 'bg-zinc-800 text-white' : 'text-zinc-500 hover:text-zinc-300'
                 }`}
-                title="Dark Cockpit Mode"
+                title="Dark Cockpit"
               >
-                <Moon className="h-3.5 w-3.5" />
+                <Moon className="w-3.5 h-3.5" />
               </button>
-
               <button
                 type="button"
                 onClick={() => setTheme('NIGHT_RED')}
-                className={`p-1.5 rounded-lg cursor-pointer transition ${
-                  theme === 'NIGHT_RED' ? 'bg-red-600 text-white font-bold shadow-sm' : isDay ? 'text-slate-600 hover:text-slate-900' : 'text-zinc-400 hover:text-white'
+                className={`p-1 rounded cursor-pointer transition ${
+                  theme === 'NIGHT_RED' ? 'bg-red-600 text-white' : 'text-zinc-500 hover:text-zinc-300'
                 }`}
-                title="Night-Vision Red Mode"
+                title="Night Red"
               >
-                <Eye className="h-3.5 w-3.5" />
+                <Eye className="w-3.5 h-3.5" />
               </button>
-
               <button
                 type="button"
                 onClick={() => setTheme('DAY_FLIGHT')}
-                className={`p-1.5 rounded-lg cursor-pointer transition ${
-                  theme === 'DAY_FLIGHT' ? 'bg-slate-900 text-white font-bold shadow-sm' : 'text-zinc-400 hover:text-white'
+                className={`p-1 rounded cursor-pointer transition ${
+                  theme === 'DAY_FLIGHT' ? 'bg-slate-200 text-slate-900' : 'text-zinc-500 hover:text-zinc-300'
                 }`}
-                title="Day Sunlight Mode"
+                title="Day Sunlight"
               >
-                <Sun className="h-3.5 w-3.5" />
+                <Sun className="w-3.5 h-3.5" />
               </button>
             </div>
-
           </div>
         </div>
 
-        {/* ROW 2: SEARCH INPUT COMMAND BAR & MODE SWITCH TABS */}
-        <div className={`p-3 rounded-2xl flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3 transition-all ${ribbonGlassClass}`}>
-          
+        {/* ROW 2: CLEAN MINIMAL COMMAND BAR */}
+        <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3">
           <div className="flex-1">
             {viewMode !== 'ROUTE' ? (
-              <form onSubmit={handleSingleSubmit} className="flex items-center gap-2.5">
+              <form onSubmit={handleSingleSubmit} className="flex items-center gap-2">
                 <div className="relative flex-1">
-                  <Search className={`absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 ${isNight ? 'text-red-400' : isDay ? 'text-slate-500' : 'text-sky-400'}`} />
+                  <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
                   <input
                     type="text"
                     value={singleIcao}
                     onChange={(e) => setSingleIcao(e.target.value.toUpperCase())}
-                    placeholder="ENTER ICAO AIRPORT CODE (e.g. VIDP, VABB, KJFK, EGLL)..."
+                    placeholder="Search ICAO airport (VIDP, VABB, KJFK)..."
                     maxLength={4}
-                    className={`w-full border rounded-2xl py-2.5 pl-11 pr-12 text-xs sm:text-sm font-mono font-bold uppercase tracking-widest focus:outline-none transition-all ${inputBgClass}`}
+                    className={`w-full border rounded-xl py-2.5 pl-10 pr-12 text-xs sm:text-sm font-mono font-medium focus:outline-none transition ${inputClass}`}
                   />
-                  <div className="absolute right-3 top-1/2 -translate-y-1/2 hidden sm:flex items-center gap-1 px-2 py-0.5 rounded-md bg-white/5 border border-white/10 text-[10px] font-mono text-zinc-400">
-                    <Command className="w-3 h-3" />
+                  <div className="absolute right-3 top-1/2 -translate-y-1/2 hidden sm:flex items-center gap-0.5 px-1.5 py-0.5 rounded bg-white/[0.05] border border-white/[0.08] text-[10px] font-mono text-zinc-400">
+                    <Command className="w-2.5 h-2.5" />
                     <span>K</span>
                   </div>
                 </div>
@@ -308,29 +265,29 @@ export const Header: React.FC<HeaderProps> = ({
                 <button
                   type="submit"
                   disabled={isLoading}
-                  className={`font-mono text-xs px-5 sm:px-6 py-3 rounded-2xl transition flex items-center gap-2 shrink-0 cursor-pointer disabled:opacity-50 ${submitBtnClass}`}
+                  className={`px-4 py-2.5 rounded-xl text-xs transition flex items-center gap-1.5 shrink-0 cursor-pointer disabled:opacity-50 ${btnPrimaryClass}`}
                 >
-                  {isLoading ? <Zap className="w-4 h-4 animate-spin" /> : <Search className="w-4 h-4" />}
-                  <span className="tracking-wider">Brief</span>
+                  {isLoading ? <Zap className="w-3.5 h-3.5 animate-spin" /> : <Search className="w-3.5 h-3.5" />}
+                  <span>Brief</span>
                 </button>
               </form>
             ) : (
               <form onSubmit={handleRouteSubmit} className="flex flex-col sm:flex-row items-center gap-2">
-                <div className="grid grid-cols-3 gap-2 flex-1 w-full">
+                <div className="grid grid-cols-3 gap-2 flex-1 w-full font-mono">
                   <input
                     type="text"
                     value={origin}
                     onChange={(e) => setOrigin(e.target.value.toUpperCase())}
                     placeholder="ORIGIN"
                     maxLength={4}
-                    className={`border rounded-xl px-3 py-2 text-xs font-mono font-bold uppercase focus:outline-none ${inputBgClass}`}
+                    className={`border rounded-xl px-3 py-2 text-xs focus:outline-none ${inputClass}`}
                   />
                   <input
                     type="text"
                     value={waypointInput}
                     onChange={(e) => setWaypointInput(e.target.value.toUpperCase())}
                     placeholder="WAYPOINTS"
-                    className={`border rounded-xl px-3 py-2 text-xs font-mono font-bold uppercase focus:outline-none ${inputBgClass}`}
+                    className={`border rounded-xl px-3 py-2 text-xs focus:outline-none ${inputClass}`}
                   />
                   <input
                     type="text"
@@ -338,88 +295,57 @@ export const Header: React.FC<HeaderProps> = ({
                     onChange={(e) => setDestination(e.target.value.toUpperCase())}
                     placeholder="DEST"
                     maxLength={4}
-                    className={`border rounded-xl px-3 py-2 text-xs font-mono font-bold uppercase focus:outline-none ${inputBgClass}`}
+                    className={`border rounded-xl px-3 py-2 text-xs focus:outline-none ${inputClass}`}
                   />
                 </div>
 
                 <button
                   type="submit"
                   disabled={isLoading}
-                  className={`w-full sm:w-auto font-mono text-xs px-5 py-2.5 rounded-xl transition flex items-center justify-center gap-1.5 shrink-0 cursor-pointer disabled:opacity-50 ${submitBtnClass}`}
+                  className={`w-full sm:w-auto px-4 py-2 text-xs rounded-xl transition flex items-center justify-center gap-1.5 shrink-0 cursor-pointer disabled:opacity-50 ${btnPrimaryClass}`}
                 >
-                  {isLoading ? <Zap className="w-4 h-4 animate-spin" /> : <Compass className="w-4 h-4" />}
-                  <span className="tracking-wider">Route</span>
+                  {isLoading ? <Zap className="w-3.5 h-3.5 animate-spin" /> : <Compass className="w-3.5 h-3.5" />}
+                  <span>Route</span>
                 </button>
               </form>
             )}
           </div>
 
-          {/* MODE TABS */}
-          <div className={`flex items-center justify-around w-full md:w-auto border p-1 rounded-2xl text-[11px] font-mono uppercase shrink-0 ${
-            isNight ? 'border-red-900/60 bg-red-950/70' : isDay ? 'border-slate-300 bg-slate-200' : 'border-white/10 bg-black/60'
-          }`}>
+          {/* VIEW SWITCHER PILLS */}
+          <div className="flex items-center border border-white/[0.08] p-1 rounded-xl bg-black/40 text-xs font-mono shrink-0">
             <button
               onClick={() => setViewMode('EXECUTIVE')}
-              className={`flex-1 md:flex-none justify-center flex items-center space-x-1.5 px-4 py-2 font-bold rounded-xl transition cursor-pointer min-h-[38px] ${
-                viewMode === 'EXECUTIVE' ? activeTabClass : inactiveTabClass
+              className={`px-3 py-1.5 rounded-lg transition cursor-pointer ${
+                viewMode === 'EXECUTIVE' ? 'bg-zinc-800 text-white font-medium' : 'text-zinc-400 hover:text-white'
               }`}
             >
-              <FileText className="h-3.5 w-3.5" />
-              <span>Card</span>
+              Briefing
             </button>
             <button
               onClick={() => setViewMode('ROUTE')}
-              className={`flex-1 md:flex-none justify-center flex items-center space-x-1.5 px-4 py-2 font-bold rounded-xl transition cursor-pointer min-h-[38px] ${
-                viewMode === 'ROUTE' ? activeTabClass : inactiveTabClass
+              className={`px-3 py-1.5 rounded-lg transition cursor-pointer ${
+                viewMode === 'ROUTE' ? 'bg-zinc-800 text-white font-medium' : 'text-zinc-400 hover:text-white'
               }`}
             >
-              <Compass className="h-3.5 w-3.5" />
-              <span>Route</span>
+              Corridor Leg
             </button>
             <button
               onClick={() => setViewMode('CLI')}
-              className={`flex-1 md:flex-none justify-center flex items-center space-x-1.5 px-4 py-2 font-bold rounded-xl transition cursor-pointer min-h-[38px] ${
-                viewMode === 'CLI' ? activeTabClass : inactiveTabClass
+              className={`px-3 py-1.5 rounded-lg transition cursor-pointer ${
+                viewMode === 'CLI' ? 'bg-zinc-800 text-white font-medium' : 'text-zinc-400 hover:text-white'
               }`}
             >
-              <Terminal className="h-3.5 w-3.5" />
-              <span>CLI</span>
+              Terminal CLI
             </button>
           </div>
         </div>
 
-        {/* ROW 3: QUICK AIRFIELDS STRIP */}
-        <div className="flex items-center gap-2.5 overflow-x-auto no-scrollbar text-xs font-mono pt-1">
-          <span className={`text-[10px] font-bold uppercase tracking-wider mr-1 shrink-0 ${isDay ? 'text-slate-600' : 'text-zinc-400'}`}>
-            HUB PRESETS:
-          </span>
+        {/* ROW 3: REFINED QUICK AIRPORT CHIPS */}
+        <div className="flex items-center gap-2 overflow-x-auto no-scrollbar text-xs font-mono pt-1">
+          <span className="text-[10px] text-zinc-500 uppercase tracking-wider mr-1 shrink-0">Popular:</span>
           {viewMode !== 'ROUTE' ? (
             quickAirports.map((ap) => {
-              const pillClass = isDay
-                ? ap.type === 'RED'
-                  ? 'bg-red-100 border border-red-400 text-red-950 font-black shadow-sm'
-                  : ap.type === 'YELLOW'
-                  ? 'bg-amber-100 border border-amber-400 text-amber-950 font-black shadow-sm'
-                  : 'bg-emerald-100 border border-emerald-400 text-emerald-950 font-black shadow-sm'
-                : isNight
-                ? ap.type === 'RED'
-                  ? 'glass-pill-red text-red-200 font-bold'
-                  : ap.type === 'YELLOW'
-                  ? 'glass-pill-yellow text-amber-200 font-bold'
-                  : 'bg-red-950/40 border border-red-900/60 text-red-200 font-bold'
-                : ap.type === 'RED'
-                ? 'glass-pill-red text-red-200 font-bold'
-                : ap.type === 'YELLOW'
-                ? 'glass-pill-yellow text-amber-200 font-bold'
-                : 'glass-pill-green text-emerald-200 font-bold';
-
-              const ledGlowClass =
-                ap.type === 'RED'
-                  ? 'led-glow-red'
-                  : ap.type === 'YELLOW'
-                  ? 'led-glow-yellow'
-                  : 'led-glow-green';
-
+              const ledClass = ap.status === 'RED' ? 'led-quiet-red' : ap.status === 'YELLOW' ? 'led-quiet-yellow' : 'led-quiet-green';
               return (
                 <button
                   key={ap.code}
@@ -427,11 +353,11 @@ export const Header: React.FC<HeaderProps> = ({
                     setSingleIcao(ap.code);
                     onSearchSingle(ap.code);
                   }}
-                  className={`px-3.5 py-1.5 rounded-xl text-[11px] font-mono font-bold transition-all duration-200 flex items-center gap-2 shrink-0 cursor-pointer shadow-sm hover:scale-105 active:scale-95 ${pillClass}`}
+                  className="px-2.5 py-1 rounded-lg border border-white/[0.06] bg-white/[0.02] hover:bg-white/[0.06] text-zinc-300 text-[11px] transition flex items-center gap-1.5 shrink-0 cursor-pointer"
                 >
-                  <span className={`w-2 h-2 rounded-full inline-block ${ledGlowClass}`} />
-                  <span className="tracking-wider">{ap.code}</span>
-                  <span className="text-[9px] uppercase tracking-tighter opacity-90 font-black">{ap.label}</span>
+                  <span className={ledClass} />
+                  <span className="font-semibold text-white">{ap.code}</span>
+                  <span className="text-zinc-500 text-[10px]">{ap.label}</span>
                 </button>
               );
             })
@@ -445,16 +371,10 @@ export const Header: React.FC<HeaderProps> = ({
                   setWaypointInput(route.waypoints.join(', '));
                   onSearchRoute(route.origin, route.destination, route.waypoints);
                 }}
-                className={`px-3 py-1 rounded-xl text-[11px] border transition flex items-center gap-1.5 shrink-0 cursor-pointer ${
-                  isNight
-                    ? 'bg-red-950/50 border-red-900/60 text-red-200 hover:text-white'
-                    : isDay
-                    ? 'bg-white border-slate-300 text-slate-800 hover:bg-slate-100'
-                    : 'bg-zinc-900/80 border-white/10 text-zinc-300 hover:text-white'
-                }`}
+                className="px-2.5 py-1 rounded-lg border border-white/[0.06] bg-white/[0.02] hover:bg-white/[0.06] text-zinc-300 text-[11px] transition flex items-center gap-1.5 shrink-0 cursor-pointer"
               >
                 <span>{route.name}</span>
-                <span className="opacity-60 text-[9px]">({route.origin}→{route.destination})</span>
+                <span className="text-zinc-500 text-[10px]">({route.origin}→{route.destination})</span>
               </button>
             ))
           )}

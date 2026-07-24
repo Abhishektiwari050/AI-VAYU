@@ -5,13 +5,13 @@
     font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Inter", system-ui, sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    background-color: #080b11;
-    color: #f8fafc;
+    background-color: #07090e;
+    color: #f1f5f9;
   }
 }
 
 @layer utilities {
-  /* Hide scrollbar for Chrome, Safari and Opera */
+  /* Scrollbar reset */
   .no-scrollbar::-webkit-scrollbar {
     display: none;
   }
@@ -20,116 +20,77 @@
     scrollbar-width: none;
   }
 
-  /* Apple Developer Grade Glowing Text Gradients */
-  .agency-gradient-text {
-    background: linear-gradient(135deg, #ffffff 0%, #cbd5e1 40%, #38bdf8 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
+  /* Linear / Vercel Minimal Dark Surface Cards */
+  .surface-card {
+    background-color: rgba(13, 17, 24, 0.75);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.07);
+    border-radius: 20px;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
   }
 
-  .agency-gradient-gold {
-    background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 50%, #d97706 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
+  .surface-card:hover {
+    border-color: rgba(255, 255, 255, 0.15);
+    box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.7);
   }
 
-  /* Apple-Grade Background Mesh Glow */
-  .agency-bg-mesh {
-    background-image: 
-      radial-gradient(circle at 50% 0%, rgba(56, 189, 248, 0.12) 0%, transparent 60%),
-      radial-gradient(circle at 85% 30%, rgba(16, 185, 129, 0.08) 0%, transparent 50%),
-      radial-gradient(circle at 15% 70%, rgba(139, 92, 246, 0.08) 0%, transparent 50%);
-  }
-
-  /* Apple-Grade Hardware Interface Glassmorphism Command Ribbon */
-  .glass-command-ribbon-dark {
-    background: rgba(12, 16, 24, 0.82);
-    backdrop-filter: blur(24px) saturate(180%);
-    -webkit-backdrop-filter: blur(24px) saturate(180%);
+  /* Minimal Hairline Command Bar */
+  .command-bar {
+    background-color: rgba(10, 14, 21, 0.85);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
     border: 1px solid rgba(255, 255, 255, 0.08);
-    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6), inset 0 1px 0 0 rgba(255, 255, 255, 0.12);
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.5);
   }
 
-  .glass-command-ribbon-night {
-    background: rgba(38, 8, 8, 0.88);
-    backdrop-filter: blur(24px) saturate(200%);
-    -webkit-backdrop-filter: blur(24px) saturate(200%);
-    border: 1px solid rgba(239, 68, 68, 0.35);
-    box-shadow: 0 20px 50px rgba(153, 27, 27, 0.3), inset 0 1px 0 0 rgba(255, 200, 200, 0.2);
-  }
-
-  .glass-command-ribbon-day {
-    background: rgba(255, 255, 255, 0.92);
-    backdrop-filter: blur(24px) saturate(160%);
-    -webkit-backdrop-filter: blur(24px) saturate(160%);
-    border: 1px solid rgba(203, 213, 225, 0.8);
-    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.06), inset 0 1px 0 0 rgba(255, 255, 255, 1);
-  }
-
-  /* Hardware Glass Card Panels & Bento Grid Aesthetics */
-  .glass-card-dark {
-    background: linear-gradient(145deg, rgba(17, 24, 39, 0.7) 0%, rgba(10, 14, 22, 0.85) 100%);
-    backdrop-filter: blur(32px) saturate(210%);
-    -webkit-backdrop-filter: blur(32px) saturate(210%);
+  /* Subtle Minimal Badges */
+  .badge-minimal {
+    background-color: rgba(255, 255, 255, 0.05);
     border: 1px solid rgba(255, 255, 255, 0.08);
-    box-shadow: 0 20px 50px -10px rgba(0, 0, 0, 0.7), inset 0 1px 0 0 rgba(255, 255, 255, 0.12);
-    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    color: #cbd5e1;
   }
 
-  .glass-card-dark:hover {
-    border-color: rgba(56, 189, 248, 0.3);
-    box-shadow: 0 24px 60px -10px rgba(0, 0, 0, 0.8), 0 0 30px rgba(56, 189, 248, 0.15), inset 0 1px 0 0 rgba(255, 255, 255, 0.2);
+  .badge-critical {
+    background-color: rgba(239, 68, 68, 0.1);
+    border: 1px solid rgba(239, 68, 68, 0.25);
+    color: #fca5a5;
   }
 
-  .glass-card-night {
-    background: linear-gradient(145deg, rgba(50, 12, 12, 0.78) 0%, rgba(22, 6, 6, 0.9) 100%);
-    backdrop-filter: blur(32px) saturate(220%);
-    -webkit-backdrop-filter: blur(32px) saturate(220%);
-    border: 1px solid rgba(239, 68, 68, 0.38);
-    box-shadow: 0 20px 50px -10px rgba(153, 27, 27, 0.45), inset 0 1px 0 0 rgba(254, 202, 202, 0.25);
+  .badge-advisory {
+    background-color: rgba(245, 158, 11, 0.1);
+    border: 1px solid rgba(245, 158, 11, 0.25);
+    color: #fde047;
   }
 
-  .glass-card-day {
-    background: linear-gradient(145deg, rgba(255, 255, 255, 0.92) 0%, rgba(241, 245, 249, 0.85) 100%);
-    backdrop-filter: blur(32px) saturate(180%);
-    -webkit-backdrop-filter: blur(32px) saturate(180%);
-    border: 1px solid rgba(226, 232, 240, 0.9);
-    box-shadow: 0 16px 40px -8px rgba(0, 0, 0, 0.06), inset 0 1px 0 0 rgba(255, 255, 255, 1);
+  .badge-success {
+    background-color: rgba(16, 185, 129, 0.1);
+    border: 1px solid rgba(16, 185, 129, 0.25);
+    color: #6ee7b7;
   }
 
-  /* Critical Attention Red Glass Card */
-  .glass-card-critical-dark,
-  .critical-card-dark {
-    background: linear-gradient(145deg, rgba(58, 16, 16, 0.8) 0%, rgba(18, 10, 14, 0.95) 100%);
-    backdrop-filter: blur(32px) saturate(210%);
-    -webkit-backdrop-filter: blur(32px) saturate(210%);
-    border: 1px solid rgba(239, 68, 68, 0.45);
-    box-shadow: 0 20px 50px -10px rgba(239, 68, 68, 0.25), inset 0 1px 0 0 rgba(254, 202, 202, 0.25);
-  }
-
-  /* Advisory Yellow Glass Card */
-  .glass-card-advisory-dark,
-  .advisory-card-dark {
-    background: linear-gradient(145deg, rgba(58, 42, 16, 0.8) 0%, rgba(18, 12, 10, 0.95) 100%);
-    backdrop-filter: blur(32px) saturate(210%);
-    -webkit-backdrop-filter: blur(32px) saturate(210%);
-    border: 1px solid rgba(245, 158, 11, 0.45);
-    box-shadow: 0 20px 50px -10px rgba(245, 158, 11, 0.25), inset 0 1px 0 0 rgba(253, 230, 138, 0.25);
-  }
-
-  /* Hardware LED Indicators */
-  .led-glow-red {
-    background-color: #ef4444;
-    box-shadow: 0 0 6px #ef4444, 0 0 14px #ef4444, 0 0 22px rgba(239, 68, 68, 0.9);
-  }
-
-  .led-glow-yellow {
-    background-color: #f59e0b;
-    box-shadow: 0 0 6px #f59e0b, 0 0 14px #f59e0b, 0 0 22px rgba(245, 158, 11, 0.9);
-  }
-
-  .led-glow-green {
+  /* Minimal Quiet LED Glow */
+  .led-quiet-green {
+    width: 6px;
+    height: 6px;
+    border-radius: 9999px;
     background-color: #10b981;
-    box-shadow: 0 0 6px #10b981, 0 0 14px #10b981, 0 0 22px rgba(16, 185, 129, 0.9);
+    box-shadow: 0 0 8px rgba(16, 185, 129, 0.6);
+  }
+
+  .led-quiet-red {
+    width: 6px;
+    height: 6px;
+    border-radius: 9999px;
+    background-color: #ef4444;
+    box-shadow: 0 0 8px rgba(239, 68, 68, 0.6);
+  }
+
+  .led-quiet-yellow {
+    width: 6px;
+    height: 6px;
+    border-radius: 9999px;
+    background-color: #f59e0b;
+    box-shadow: 0 0 8px rgba(245, 158, 11, 0.6);
   }
 }

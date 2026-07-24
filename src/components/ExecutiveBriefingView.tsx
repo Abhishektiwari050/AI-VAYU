@@ -178,76 +178,74 @@ ADVISORY ONLY: Informational pre-flight awareness utility under DGCA and FAA reg
         </div>
       </div>
 
-      {/* HERO AIRPORT TITLE, LOCAL TIME & WEATHER PILL */}
-      <div className="text-center my-6">
-        <h1 className={`text-5xl sm:text-7xl font-mono font-medium tracking-wider mb-1 ${
+      {/* HERO AIRPORT TITLE & WEATHER HUD */}
+      <div className="text-center my-8">
+        <h1 className={`text-6xl sm:text-7xl font-mono font-semibold tracking-tight mb-1.5 ${
           isNight ? 'text-red-400' : isDay ? 'text-slate-900' : 'text-white'
         }`}>
           {briefing.icao}
         </h1>
-        <p className={`text-xs sm:text-sm font-normal mb-2 ${
+        <p className={`text-sm font-sans mb-3 ${
           isNight ? 'text-red-300/70' : isDay ? 'text-slate-600' : 'text-zinc-400'
         }`}>
           {briefing.airportName}
         </p>
 
-        {/* Both Zulu Time & Local Airport Time Normalization */}
-        <div className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-mono font-bold mb-4 border ${
-          isNight ? 'bg-red-950/40 border-red-900/60 text-red-300' : isDay ? 'bg-slate-100 border-slate-300 text-slate-800' : 'bg-black/80 border-zinc-800 text-zinc-200'
-        }`}>
-          <Clock className="w-3.5 h-3.5 opacity-80" />
+        {/* Time Info */}
+        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full badge-minimal text-xs font-mono mb-4">
+          <Clock className="w-3.5 h-3.5 opacity-60" />
           <span>{timeInfo.combinedString}</span>
         </div>
 
-        <div className="flex flex-col items-center gap-2 px-2">
-          {/* Centered Weather Pill */}
-          <div className={`inline-flex items-center justify-center gap-2 px-3.5 sm:px-5 py-2 rounded-full border text-xs font-mono font-medium shadow-inner flex-wrap max-w-full ${weatherConfig.colorClass}`}>
-            <span className={`w-2.5 h-2.5 rounded-full inline-block shrink-0 ${
-              isNight ? 'led-glow-red' : weatherConfig.label === 'VFR' ? 'led-glow-green' : weatherConfig.label === 'MVFR' ? 'led-glow-yellow' : 'led-glow-red'
+        <div className="flex flex-col items-center gap-2">
+          {/* Weather Pill */}
+          <div className="inline-flex items-center gap-3 px-4 py-2 rounded-full border border-white/[0.08] bg-white/[0.03] text-xs font-mono">
+            <span className={`w-2 h-2 rounded-full ${
+              weatherConfig.label === 'VFR' ? 'led-quiet-green' : weatherConfig.label === 'MVFR' ? 'led-quiet-yellow' : 'led-quiet-red'
             }`} />
-            <span className="font-bold">{weatherConfig.label}</span>
-            <span className="opacity-40 hidden sm:inline">•</span>
-            <span>Winds {briefing.weather.windInfo}</span>
-            <span className="opacity-40 hidden sm:inline">•</span>
-            <span>Vis {briefing.weather.visibilityInfo}</span>
+            <span className="font-semibold text-white">{weatherConfig.label}</span>
+            <span className="text-zinc-600">•</span>
+            <span className="text-zinc-300">Winds {briefing.weather.windInfo}</span>
+            <span className="text-zinc-600">•</span>
+            <span className="text-zinc-300">Vis {briefing.weather.visibilityInfo}</span>
           </div>
 
-          {/* TAF Forecast Accordion Trigger Button */}
+          {/* TAF Accordion Trigger */}
           {briefing.weather.rawTaf && (
             <div className="w-full max-w-xl mt-2">
               <button
                 onClick={() => setShowTafAccordion(!showTafAccordion)}
-                className={`w-full px-4 py-2 rounded-xl border text-xs font-mono font-bold flex items-center justify-between transition cursor-pointer ${
+                className={`w-full px-4 py-2 rounded-xl border text-xs font-mono font-medium flex items-center justify-between transition cursor-pointer ${
                   isNight
-                    ? 'bg-red-950/60 border-red-800 text-red-200 hover:bg-red-900/60'
+                    ? 'bg-red-950/40 border-red-900/60 text-red-200'
                     : isDay
-                    ? 'bg-slate-100 border-slate-300 text-slate-800 hover:bg-slate-200'
-                    : 'bg-zinc-900 border-zinc-800 text-zinc-200 hover:bg-zinc-800'
+                    ? 'bg-slate-100 border-slate-200 text-slate-800'
+                    : 'bg-zinc-900/60 border-white/[0.08] text-zinc-300 hover:text-white hover:bg-zinc-800/80'
                 }`}
               >
                 <div className="flex items-center gap-2">
                   <CloudRain className="w-4 h-4 text-sky-400" />
-                  <span>TAF TERMINAL AERODROME FORECAST (NOAA)</span>
+                  <span>TAF Terminal Aerodrome Forecast (NOAA)</span>
                 </div>
                 <ChevronDown className={`w-4 h-4 transition-transform ${showTafAccordion ? 'rotate-180' : ''}`} />
               </button>
 
               {showTafAccordion && (
                 <div className={`mt-2 p-4 rounded-xl border text-left text-xs font-mono space-y-3 ${
-                  isNight ? 'bg-black/80 border-red-900 text-red-200' : isDay ? 'bg-white border-slate-300 text-slate-800' : 'bg-black/90 border-zinc-800 text-zinc-200'
+                  isNight ? 'bg-black border-red-900 text-red-200' : isDay ? 'bg-white border-slate-200 text-slate-800' : 'bg-zinc-950 border-white/[0.08] text-zinc-200'
                 }`}>
                   <div>
                     <span className="text-[10px] uppercase font-bold text-sky-400 tracking-wider block mb-1">
-                      RAW NOAA TAF PAYLOAD:
+                      RAW NOAA TAF:
                     </span>
-                    <pre className="p-2 rounded bg-zinc-950 border border-zinc-800 text-[11px] text-amber-300 font-mono whitespace-pre-wrap break-all leading-tight">
+                    <pre className="p-2.5 rounded bg-black/80 border border-white/[0.08] text-[11px] text-amber-300/90 font-mono whitespace-pre-wrap break-all leading-relaxed">
                       {briefing.weather.rawTaf}
                     </pre>
                   </div>
                   {briefing.weather.tafDecodedSummary && (
                     <div>
                       <span className="text-[10px] uppercase font-bold text-emerald-400 tracking-wider block mb-1">
-                        DECODED FORECAST TRENDS:
+                        FORECAST TRENDS:
                       </span>
                       <p className="text-xs leading-relaxed text-zinc-300 font-sans whitespace-pre-line">
                         {briefing.weather.tafDecodedSummary}
