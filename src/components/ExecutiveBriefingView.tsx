@@ -22,6 +22,8 @@ import {
 import { DisplayTheme, FontSizeSetting } from './Header';
 import { formatZuluAndLocalTime, evaluateNotamStatusWindow } from '../lib/timezoneUtils';
 import { AerodromeRadarMap } from './AerodromeRadarMap';
+import { CockpitAudioReadout } from './CockpitAudioReadout';
+import { InteractiveAirportDiagram } from './InteractiveAirportDiagram';
 
 interface ExecutiveBriefingViewProps {
   briefing: BriefingSummary;
@@ -254,6 +256,12 @@ ADVISORY ONLY: Informational pre-flight awareness utility under DGCA and FAA reg
           )}
         </div>
       </div>
+
+      {/* HANDS-FREE COCKPIT AUDIO READOUT MODE */}
+      <CockpitAudioReadout briefing={briefing} theme={theme} />
+
+      {/* INTERACTIVE VECTOR AIRPORT DIAGRAM OVERLAY */}
+      <InteractiveAirportDiagram briefing={briefing} theme={theme} />
 
       {/* 5-BUCKET OPERATIONAL DASHBOARD SUMMARY */}
       <div className={`p-4 rounded-2xl border mb-6 ${cardGlassClass}`}>

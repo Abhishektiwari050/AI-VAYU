@@ -11,6 +11,7 @@ import { checkBriefingUsageMiddleware } from './src/middleware.js';
 import { updateUserSubscriptionTier } from './src/lib/supabase.js';
 import { generateDispatchHtml } from './app/api/export/pdf/route.js';
 import { executeHazardMonitoringScan } from './app/api/cron/monitor/route.js';
+import { processMessagingBotRequest } from './app/api/bot/webhook/route.js';
 import { BriefingSummary, RawNotam, MetarData } from './src/types.js';
 
 const app = express();
@@ -336,6 +337,22 @@ app.get('/api/cron/monitor', async (req, res) => {
   } catch (err: any) {
     console.error('Hazard Monitoring Error:', err);
     return res.status(500).json({ error: 'Hazard monitoring scan failed.' });
+  }
+});
+
+// WhatsApp / Telegram Automated Briefing Bot Webhook Endpoint
+app.post('/api/bot/webhook', async (req, res) => {
+  try {
+    const { from, sender, text, message, body, channel } = req.body;
+    const result = await processMessagingBotRequest({
+      fromNumberOrId: from || sender || 'unknown_pilot',
+      messageText: text || message || body || '',
+      channel: channel || 'WHATSAPP',
+    });
+    return res.json(result);
+  } catch (err: any) {
+    console.error('Bot Webhook Error:', err);
+    return res.status(500).json({ error: 'Failed to process bot briefing request.' });
   }
 });
 

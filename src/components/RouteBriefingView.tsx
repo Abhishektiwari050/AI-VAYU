@@ -4,6 +4,7 @@ import { Compass, ArrowRight, AlertTriangle, ShieldCheck, CheckCircle2 } from 'l
 import { ExecutiveBriefingView } from './ExecutiveBriefingView';
 import { DisplayTheme, FontSizeSetting } from './Header';
 import { RouteFileDropzone } from './RouteFileDropzone';
+import { RouteCorridorProfile } from './RouteCorridorProfile';
 
 interface RouteBriefingViewProps {
   routeData: RouteLegBriefing;
@@ -115,6 +116,9 @@ export const RouteBriefingView: React.FC<RouteBriefingViewProps> = ({
           {routeData.routeSummaryText}
         </p>
       </div>
+
+      {/* GRAPHICAL CORRIDOR VERTICAL CROSS-SECTION PROFILE */}
+      <RouteCorridorProfile routeData={routeData} theme={theme} />
 
       {/* Flight Plan File Dropzone Importer */}
       {onSearchRoute && (
