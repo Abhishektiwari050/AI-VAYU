@@ -267,59 +267,79 @@ ADVISORY ONLY: Informational pre-flight awareness utility under DGCA and FAA reg
       {/* INTERACTIVE VECTOR AIRPORT DIAGRAM OVERLAY */}
       <InteractiveAirportDiagram briefing={briefing} theme={theme} />
 
-      {/* 5-BUCKET OPERATIONAL DASHBOARD SUMMARY */}
-      <div className={`p-4 rounded-2xl border mb-6 ${cardGlassClass}`}>
-        <div className="flex flex-wrap items-center justify-between gap-3 mb-3 pb-3 border-b border-zinc-800/80">
-          <div className="flex items-center gap-2 font-mono">
-            <ListFilter className="w-4 h-4 text-emerald-400" />
-            <span className="text-xs font-bold uppercase tracking-wider">
-              DETERMINISTIC 5-BUCKET OPERATIONAL NOTAM MATRIX
-            </span>
+      {/* APPLE-GRADE BENTO GRID 5-BUCKET OPERATIONAL NOTAM MATRIX */}
+      <div className={`p-5 rounded-3xl border mb-6 transition-all ${cardGlassClass}`}>
+        <div className="flex flex-wrap items-center justify-between gap-3 mb-4 pb-3 border-b border-white/10">
+          <div className="flex items-center gap-2.5 font-mono">
+            <div className="p-1.5 rounded-lg bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
+              <ListFilter className="w-4 h-4" />
+            </div>
+            <div>
+              <span className="text-xs font-bold uppercase tracking-widest block agency-gradient-text">
+                DETERMINISTIC 5-BUCKET OPERATIONAL NOTAM MATRIX
+              </span>
+              <span className="text-[10px] text-zinc-400 font-sans">100% Raw FAA & DGCA Aerodrome Data Stream</span>
+            </div>
           </div>
           <button
             onClick={() => setShowFullLedger(!showFullLedger)}
-            className="px-3 py-1 rounded-lg border text-xs font-mono font-bold bg-emerald-600 hover:bg-emerald-500 text-white border-emerald-400 transition cursor-pointer flex items-center gap-1.5 shadow-sm"
+            className="px-3.5 py-1.5 rounded-xl border text-xs font-mono font-bold bg-gradient-to-r from-emerald-600 to-teal-600 hover:brightness-110 text-white border-emerald-400/50 transition cursor-pointer flex items-center gap-2 shadow-lg"
           >
             <Zap className="w-3.5 h-3.5" />
             <span>{showFullLedger ? 'Hide Unfiltered Ledger' : `View Full NOTAM Ledger (${allLedgerItems.length || briefing.totalNotamsIngested})`}</span>
           </button>
         </div>
 
-        {/* 5 Bucket Badges Grid */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2 text-xs font-mono">
-          <div className={`p-2.5 rounded-xl border flex flex-col justify-between ${
-            counts.RUNWAYS_TFRS > 0 ? 'bg-red-950/40 border-red-800 text-red-200' : 'bg-zinc-900/40 border-zinc-800 text-zinc-400'
+        {/* 5-Bucket Bento Grid */}
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 text-xs font-mono">
+          <div className={`p-4 rounded-2xl border flex flex-col justify-between transition-all duration-300 ${
+            counts.RUNWAYS_TFRS > 0 ? 'bg-gradient-to-b from-red-950/60 to-black/80 border-red-500/60 text-red-200 shadow-[0_0_20px_rgba(239,68,68,0.2)]' : 'bg-black/40 border-white/10 text-zinc-400'
           }`}>
-            <span className="text-[10px] opacity-80 uppercase font-bold">1. 🔴 Runways & TFRs</span>
-            <span className="text-xl font-bold font-mono mt-1">{counts.RUNWAYS_TFRS}</span>
+            <div className="flex items-center justify-between">
+              <span className="text-[10px] opacity-80 uppercase font-bold tracking-wider">1. RUNWAYS & TFRs</span>
+              <span className={`w-2 h-2 rounded-full ${counts.RUNWAYS_TFRS > 0 ? 'led-glow-red animate-ping' : 'bg-zinc-700'}`} />
+            </div>
+            <span className="text-3xl font-black font-mono mt-2 text-red-400">{counts.RUNWAYS_TFRS}</span>
           </div>
 
-          <div className={`p-2.5 rounded-xl border flex flex-col justify-between ${
-            counts.PROCEDURES_NAVAIDS > 0 ? 'bg-sky-950/40 border-sky-800 text-sky-200' : 'bg-zinc-900/40 border-zinc-800 text-zinc-400'
+          <div className={`p-4 rounded-2xl border flex flex-col justify-between transition-all duration-300 ${
+            counts.PROCEDURES_NAVAIDS > 0 ? 'bg-gradient-to-b from-sky-950/60 to-black/80 border-sky-500/60 text-sky-200 shadow-[0_0_20px_rgba(56,189,248,0.2)]' : 'bg-black/40 border-white/10 text-zinc-400'
           }`}>
-            <span className="text-[10px] opacity-80 uppercase font-bold">2. 🔵 Procedures & NavAids</span>
-            <span className="text-xl font-bold font-mono mt-1">{counts.PROCEDURES_NAVAIDS}</span>
+            <div className="flex items-center justify-between">
+              <span className="text-[10px] opacity-80 uppercase font-bold tracking-wider">2. PROCEDURES</span>
+              <span className={`w-2 h-2 rounded-full ${counts.PROCEDURES_NAVAIDS > 0 ? 'bg-sky-400 led-glow-green' : 'bg-zinc-700'}`} />
+            </div>
+            <span className="text-3xl font-black font-mono mt-2 text-sky-300">{counts.PROCEDURES_NAVAIDS}</span>
           </div>
 
-          <div className={`p-2.5 rounded-xl border flex flex-col justify-between ${
-            counts.TAXIWAYS_APRON > 0 ? 'bg-amber-950/40 border-amber-800 text-amber-200' : 'bg-zinc-900/40 border-zinc-800 text-zinc-400'
+          <div className={`p-4 rounded-2xl border flex flex-col justify-between transition-all duration-300 ${
+            counts.TAXIWAYS_APRON > 0 ? 'bg-gradient-to-b from-amber-950/60 to-black/80 border-amber-500/60 text-amber-200 shadow-[0_0_20px_rgba(245,158,11,0.2)]' : 'bg-black/40 border-white/10 text-zinc-400'
           }`}>
-            <span className="text-[10px] opacity-80 uppercase font-bold">3. 🟡 Taxiways & Apron</span>
-            <span className="text-xl font-bold font-mono mt-1">{counts.TAXIWAYS_APRON}</span>
+            <div className="flex items-center justify-between">
+              <span className="text-[10px] opacity-80 uppercase font-bold tracking-wider">3. TAXIWAYS & APRON</span>
+              <span className={`w-2 h-2 rounded-full ${counts.TAXIWAYS_APRON > 0 ? 'led-glow-yellow' : 'bg-zinc-700'}`} />
+            </div>
+            <span className="text-3xl font-black font-mono mt-2 text-amber-300">{counts.TAXIWAYS_APRON}</span>
           </div>
 
-          <div className={`p-2.5 rounded-xl border flex flex-col justify-between ${
-            counts.OBSTACLES_LIGHTING > 0 ? 'bg-slate-800/40 border-slate-700 text-slate-200' : 'bg-zinc-900/40 border-zinc-800 text-zinc-400'
+          <div className={`p-4 rounded-2xl border flex flex-col justify-between transition-all duration-300 ${
+            counts.OBSTACLES_LIGHTING > 0 ? 'bg-gradient-to-b from-slate-900/60 to-black/80 border-slate-700 text-slate-200' : 'bg-black/40 border-white/10 text-zinc-400'
           }`}>
-            <span className="text-[10px] opacity-80 uppercase font-bold">4. ⚪ Obstacles & Lights</span>
-            <span className="text-xl font-bold font-mono mt-1">{counts.OBSTACLES_LIGHTING}</span>
+            <div className="flex items-center justify-between">
+              <span className="text-[10px] opacity-80 uppercase font-bold tracking-wider">4. OBSTACLES</span>
+              <span className={`w-2 h-2 rounded-full ${counts.OBSTACLES_LIGHTING > 0 ? 'bg-slate-400' : 'bg-zinc-700'}`} />
+            </div>
+            <span className="text-3xl font-black font-mono mt-2 text-slate-200">{counts.OBSTACLES_LIGHTING}</span>
           </div>
 
-          <div className={`p-2.5 rounded-xl border flex flex-col justify-between col-span-2 sm:col-span-1 ${
-            counts.FIR_ENROUTE > 0 ? 'bg-purple-950/40 border-purple-800 text-purple-200' : 'bg-zinc-900/40 border-zinc-800 text-zinc-400'
+          <div className={`p-4 rounded-2xl border flex flex-col justify-between transition-all duration-300 col-span-2 sm:col-span-1 ${
+            counts.FIR_ENROUTE > 0 ? 'bg-gradient-to-b from-purple-950/60 to-black/80 border-purple-500/60 text-purple-200 shadow-[0_0_20px_rgba(168,85,247,0.2)]' : 'bg-black/40 border-white/10 text-zinc-400'
           }`}>
-            <span className="text-[10px] opacity-80 uppercase font-bold">5. 🟣 FIR & En-Route</span>
-            <span className="text-xl font-bold font-mono mt-1">{counts.FIR_ENROUTE}</span>
+            <div className="flex items-center justify-between">
+              <span className="text-[10px] opacity-80 uppercase font-bold tracking-wider">5. FIR EN-ROUTE</span>
+              <span className={`w-2 h-2 rounded-full ${counts.FIR_ENROUTE > 0 ? 'bg-purple-400' : 'bg-zinc-700'}`} />
+            </div>
+            <span className="text-3xl font-black font-mono mt-2 text-purple-300">{counts.FIR_ENROUTE}</span>
           </div>
         </div>
       </div>

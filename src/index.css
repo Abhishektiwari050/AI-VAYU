@@ -2,9 +2,11 @@
 
 @layer base {
   body {
-    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Inter", system-ui, -apple-system, sans-serif;
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Inter", system-ui, sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    background-color: #080b11;
+    color: #f8fafc;
   }
 }
 
@@ -13,27 +15,47 @@
   .no-scrollbar::-webkit-scrollbar {
     display: none;
   }
-  /* Hide scrollbar for IE, Edge and Firefox */
   .no-scrollbar {
-    -ms-overflow-style: none;  /* IE and Edge */
-    scrollbar-width: none;  /* Firefox */
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  /* Apple Developer Grade Glowing Text Gradients */
+  .agency-gradient-text {
+    background: linear-gradient(135deg, #ffffff 0%, #cbd5e1 40%, #38bdf8 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .agency-gradient-gold {
+    background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 50%, #d97706 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  /* Apple-Grade Background Mesh Glow */
+  .agency-bg-mesh {
+    background-image: 
+      radial-gradient(circle at 50% 0%, rgba(56, 189, 248, 0.12) 0%, transparent 60%),
+      radial-gradient(circle at 85% 30%, rgba(16, 185, 129, 0.08) 0%, transparent 50%),
+      radial-gradient(circle at 15% 70%, rgba(139, 92, 246, 0.08) 0%, transparent 50%);
   }
 
   /* Apple-Grade Hardware Interface Glassmorphism Command Ribbon */
   .glass-command-ribbon-dark {
-    background: rgba(14, 14, 20, 0.92);
+    background: rgba(12, 16, 24, 0.82);
     backdrop-filter: blur(24px) saturate(180%);
     -webkit-backdrop-filter: blur(24px) saturate(180%);
-    border: 1px solid rgba(255, 255, 255, 0.12);
-    box-shadow: 0 8px 32px -4px rgba(0, 0, 0, 0.7), inset 0 1px 0 0 rgba(255, 255, 255, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6), inset 0 1px 0 0 rgba(255, 255, 255, 0.12);
   }
 
   .glass-command-ribbon-night {
-    background: rgba(42, 10, 10, 0.88);
+    background: rgba(38, 8, 8, 0.88);
     backdrop-filter: blur(24px) saturate(200%);
     -webkit-backdrop-filter: blur(24px) saturate(200%);
     border: 1px solid rgba(239, 68, 68, 0.35);
-    box-shadow: 0 8px 32px -4px rgba(153, 27, 27, 0.4), inset 0 1px 0 0 rgba(255, 200, 200, 0.2);
+    box-shadow: 0 20px 50px rgba(153, 27, 27, 0.3), inset 0 1px 0 0 rgba(255, 200, 200, 0.2);
   }
 
   .glass-command-ribbon-day {
@@ -41,178 +63,73 @@
     backdrop-filter: blur(24px) saturate(160%);
     -webkit-backdrop-filter: blur(24px) saturate(160%);
     border: 1px solid rgba(203, 213, 225, 0.8);
-    box-shadow: 0 8px 24px -4px rgba(0, 0, 0, 0.06), inset 0 1px 0 0 rgba(255, 255, 255, 1);
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.06), inset 0 1px 0 0 rgba(255, 255, 255, 1);
   }
 
-  /* Hardware Glass Card Panels & Translucent Liquid Glass Aesthetics */
+  /* Hardware Glass Card Panels & Bento Grid Aesthetics */
   .glass-card-dark {
-    background: linear-gradient(135deg, rgba(18, 18, 26, 0.78) 0%, rgba(8, 8, 14, 0.9) 100%);
-    backdrop-filter: blur(28px) saturate(210%);
-    -webkit-backdrop-filter: blur(28px) saturate(210%);
-    border: 1px solid rgba(255, 255, 255, 0.12);
-    box-shadow: 0 16px 40px -8px rgba(0, 0, 0, 0.85), inset 0 1px 0 0 rgba(255, 255, 255, 0.18), inset 0 0 12px 0 rgba(255, 255, 255, 0.03);
+    background: linear-gradient(145deg, rgba(17, 24, 39, 0.7) 0%, rgba(10, 14, 22, 0.85) 100%);
+    backdrop-filter: blur(32px) saturate(210%);
+    -webkit-backdrop-filter: blur(32px) saturate(210%);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: 0 20px 50px -10px rgba(0, 0, 0, 0.7), inset 0 1px 0 0 rgba(255, 255, 255, 0.12);
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .glass-card-dark:hover {
+    border-color: rgba(56, 189, 248, 0.3);
+    box-shadow: 0 24px 60px -10px rgba(0, 0, 0, 0.8), 0 0 30px rgba(56, 189, 248, 0.15), inset 0 1px 0 0 rgba(255, 255, 255, 0.2);
   }
 
   .glass-card-night {
-    background: linear-gradient(135deg, rgba(50, 12, 12, 0.78) 0%, rgba(22, 6, 6, 0.9) 100%);
-    backdrop-filter: blur(28px) saturate(220%);
-    -webkit-backdrop-filter: blur(28px) saturate(220%);
+    background: linear-gradient(145deg, rgba(50, 12, 12, 0.78) 0%, rgba(22, 6, 6, 0.9) 100%);
+    backdrop-filter: blur(32px) saturate(220%);
+    -webkit-backdrop-filter: blur(32px) saturate(220%);
     border: 1px solid rgba(239, 68, 68, 0.38);
-    box-shadow: 0 16px 40px -8px rgba(153, 27, 27, 0.45), inset 0 1px 0 0 rgba(254, 202, 202, 0.25), inset 0 0 12px 0 rgba(239, 68, 68, 0.08);
+    box-shadow: 0 20px 50px -10px rgba(153, 27, 27, 0.45), inset 0 1px 0 0 rgba(254, 202, 202, 0.25);
   }
 
   .glass-card-day {
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.88) 0%, rgba(243, 244, 246, 0.78) 100%);
-    backdrop-filter: blur(28px) saturate(180%);
-    -webkit-backdrop-filter: blur(28px) saturate(180%);
-    border: 1px solid rgba(255, 255, 255, 0.9);
-    box-shadow: 0 16px 40px -8px rgba(0, 0, 0, 0.08), inset 0 1px 0 0 rgba(255, 255, 255, 1), inset 0 -1px 0 0 rgba(0, 0, 0, 0.05);
+    background: linear-gradient(145deg, rgba(255, 255, 255, 0.92) 0%, rgba(241, 245, 249, 0.85) 100%);
+    backdrop-filter: blur(32px) saturate(180%);
+    -webkit-backdrop-filter: blur(32px) saturate(180%);
+    border: 1px solid rgba(226, 232, 240, 0.9);
+    box-shadow: 0 16px 40px -8px rgba(0, 0, 0, 0.06), inset 0 1px 0 0 rgba(255, 255, 255, 1);
   }
 
-  /* Dedicated Aviation Critical Attention Red Liquid Glass Card */
+  /* Critical Attention Red Glass Card */
   .glass-card-critical-dark,
   .critical-card-dark {
-    background: linear-gradient(135deg, rgba(58, 16, 16, 0.75) 0%, rgba(16, 10, 14, 0.92) 100%);
-    backdrop-filter: blur(28px) saturate(210%);
-    -webkit-backdrop-filter: blur(28px) saturate(210%);
+    background: linear-gradient(145deg, rgba(58, 16, 16, 0.8) 0%, rgba(18, 10, 14, 0.95) 100%);
+    backdrop-filter: blur(32px) saturate(210%);
+    -webkit-backdrop-filter: blur(32px) saturate(210%);
     border: 1px solid rgba(239, 68, 68, 0.45);
-    box-shadow: 0 12px 32px -6px rgba(239, 68, 68, 0.28), inset 0 1px 0 0 rgba(254, 202, 202, 0.25), inset 0 0 16px 0 rgba(239, 68, 68, 0.1);
+    box-shadow: 0 20px 50px -10px rgba(239, 68, 68, 0.25), inset 0 1px 0 0 rgba(254, 202, 202, 0.25);
   }
 
-  .glass-card-critical-night,
-  .critical-card-night {
-    background: linear-gradient(135deg, rgba(72, 12, 12, 0.85) 0%, rgba(28, 6, 6, 0.94) 100%);
-    backdrop-filter: blur(28px) saturate(230%);
-    -webkit-backdrop-filter: blur(28px) saturate(230%);
-    border: 1px solid rgba(239, 68, 68, 0.6);
-    box-shadow: 0 12px 32px -6px rgba(239, 68, 68, 0.4), inset 0 1px 0 0 rgba(254, 202, 202, 0.35);
-  }
-
-  .glass-card-critical-day,
-  .critical-card-day {
-    background: linear-gradient(135deg, rgba(254, 242, 242, 0.94) 0%, rgba(254, 226, 226, 0.85) 100%);
-    backdrop-filter: blur(28px) saturate(180%);
-    -webkit-backdrop-filter: blur(28px) saturate(180%);
-    border: 1px solid rgba(252, 165, 165, 0.85);
-    box-shadow: 0 12px 32px -6px rgba(239, 68, 68, 0.12), inset 0 1px 0 0 rgba(255, 255, 255, 1);
-  }
-
-  /* Dedicated Aviation Airport Advisory Yellow Liquid Glass Card */
+  /* Advisory Yellow Glass Card */
   .glass-card-advisory-dark,
   .advisory-card-dark {
-    background: linear-gradient(135deg, rgba(58, 42, 16, 0.75) 0%, rgba(16, 12, 10, 0.92) 100%);
-    backdrop-filter: blur(28px) saturate(210%);
-    -webkit-backdrop-filter: blur(28px) saturate(210%);
+    background: linear-gradient(145deg, rgba(58, 42, 16, 0.8) 0%, rgba(18, 12, 10, 0.95) 100%);
+    backdrop-filter: blur(32px) saturate(210%);
+    -webkit-backdrop-filter: blur(32px) saturate(210%);
     border: 1px solid rgba(245, 158, 11, 0.45);
-    box-shadow: 0 12px 32px -6px rgba(245, 158, 11, 0.28), inset 0 1px 0 0 rgba(253, 230, 138, 0.25), inset 0 0 16px 0 rgba(245, 158, 11, 0.1);
+    box-shadow: 0 20px 50px -10px rgba(245, 158, 11, 0.25), inset 0 1px 0 0 rgba(253, 230, 138, 0.25);
   }
 
-  .glass-card-advisory-night,
-  .advisory-card-night {
-    background: linear-gradient(135deg, rgba(62, 38, 12, 0.85) 0%, rgba(28, 12, 6, 0.94) 100%);
-    backdrop-filter: blur(28px) saturate(230%);
-    -webkit-backdrop-filter: blur(28px) saturate(230%);
-    border: 1px solid rgba(245, 158, 11, 0.6);
-    box-shadow: 0 12px 32px -6px rgba(245, 158, 11, 0.4), inset 0 1px 0 0 rgba(253, 230, 138, 0.35);
-  }
-
-  .glass-card-advisory-day,
-  .advisory-card-day {
-    background: linear-gradient(135deg, rgba(254, 243, 199, 0.94) 0%, rgba(253, 230, 138, 0.85) 100%);
-    backdrop-filter: blur(28px) saturate(180%);
-    -webkit-backdrop-filter: blur(28px) saturate(180%);
-    border: 1px solid rgba(252, 211, 77, 0.9);
-    box-shadow: 0 12px 32px -6px rgba(245, 158, 11, 0.12), inset 0 1px 0 0 rgba(255, 255, 255, 1);
-  }
-
-  /* Frosted Liquid Glass Status Pills (Red, Yellow, Green, Neutral) */
-  .glass-pill-red {
-    background: linear-gradient(135deg, rgba(239, 68, 68, 0.25) 0%, rgba(185, 28, 28, 0.15) 100%);
-    backdrop-filter: blur(16px) saturate(190%);
-    -webkit-backdrop-filter: blur(16px) saturate(190%);
-    border: 1px solid rgba(239, 68, 68, 0.45);
-    box-shadow: 0 4px 16px rgba(239, 68, 68, 0.25), inset 0 1px 0 0 rgba(254, 202, 202, 0.3);
-  }
-
-  .glass-pill-yellow {
-    background: linear-gradient(135deg, rgba(245, 158, 11, 0.25) 0%, rgba(180, 83, 9, 0.15) 100%);
-    backdrop-filter: blur(16px) saturate(190%);
-    -webkit-backdrop-filter: blur(16px) saturate(190%);
-    border: 1px solid rgba(245, 158, 11, 0.45);
-    box-shadow: 0 4px 16px rgba(245, 158, 11, 0.25), inset 0 1px 0 0 rgba(253, 230, 138, 0.3);
-  }
-
-  .glass-pill-green {
-    background: linear-gradient(135deg, rgba(16, 185, 129, 0.25) 0%, rgba(4, 120, 87, 0.15) 100%);
-    backdrop-filter: blur(16px) saturate(190%);
-    -webkit-backdrop-filter: blur(16px) saturate(190%);
-    border: 1px solid rgba(16, 185, 129, 0.45);
-    box-shadow: 0 4px 16px rgba(16, 185, 129, 0.25), inset 0 1px 0 0 rgba(167, 243, 208, 0.3);
-  }
-
-  .glass-pill-neutral {
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.14) 0%, rgba(255, 255, 255, 0.06) 100%);
-    backdrop-filter: blur(16px) saturate(180%);
-    -webkit-backdrop-filter: blur(16px) saturate(180%);
-    border: 1px solid rgba(255, 255, 255, 0.22);
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2), inset 0 1px 0 0 rgba(255, 255, 255, 0.28);
-  }
-
-  /* Day Flight High Contrast Override Rules */
-  .theme-day-flight .glass-pill-red {
-    background: rgba(254, 226, 226, 0.95);
-    border: 1px solid rgba(239, 68, 68, 0.6);
-    color: #450a0a !important;
-    font-weight: 800;
-  }
-
-  .theme-day-flight .glass-pill-yellow {
-    background: rgba(254, 243, 199, 0.95);
-    border: 1px solid rgba(245, 158, 11, 0.6);
-    color: #451a03 !important;
-    font-weight: 800;
-  }
-
-  .theme-day-flight .glass-pill-green {
-    background: rgba(209, 250, 229, 0.95);
-    border: 1px solid rgba(16, 185, 129, 0.6);
-    color: #022c22 !important;
-    font-weight: 800;
-  }
-
-  .theme-day-flight .glass-pill-neutral {
-    background: rgba(241, 245, 249, 0.95);
-    border: 1px solid rgba(203, 213, 225, 0.8);
-    color: #0f172a !important;
-    font-weight: 800;
-  }
-
-  /* Hardware LED Indicators with Radiant Glow */
+  /* Hardware LED Indicators */
   .led-glow-red {
     background-color: #ef4444;
-    box-shadow: 0 0 6px #ef4444, 0 0 12px #ef4444, 0 0 18px rgba(239, 68, 68, 0.85);
+    box-shadow: 0 0 6px #ef4444, 0 0 14px #ef4444, 0 0 22px rgba(239, 68, 68, 0.9);
   }
 
   .led-glow-yellow {
     background-color: #f59e0b;
-    box-shadow: 0 0 6px #f59e0b, 0 0 12px #f59e0b, 0 0 18px rgba(245, 158, 11, 0.85);
+    box-shadow: 0 0 6px #f59e0b, 0 0 14px #f59e0b, 0 0 22px rgba(245, 158, 11, 0.9);
   }
 
   .led-glow-green {
     background-color: #10b981;
-    box-shadow: 0 0 6px #10b981, 0 0 12px #10b981, 0 0 18px rgba(16, 185, 129, 0.85);
-  }
-
-  /* Refined hardware gradient borders */
-  .border-hardware-dark {
-    border-color: rgba(255, 255, 255, 0.1);
-  }
-  .border-hardware-night {
-    border-color: rgba(239, 68, 68, 0.3);
-  }
-  .border-hardware-day {
-    border-color: rgba(0, 0, 0, 0.12);
+    box-shadow: 0 0 6px #10b981, 0 0 14px #10b981, 0 0 22px rgba(16, 185, 129, 0.9);
   }
 }
-
-

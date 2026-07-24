@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Terminal,
   Sun,
@@ -14,6 +14,7 @@ import {
   Plane,
   Crown,
   ShieldCheck,
+  Command,
 } from 'lucide-react';
 import { PRESET_ROUTES, normalizeAirportCode } from '../lib/airportData';
 import { UserTier } from './MonetizationModal';
@@ -108,15 +109,8 @@ export const Header: React.FC<HeaderProps> = ({
     { code: 'EGLL', status: '🟢', type: 'GREEN', label: 'LHR' },
   ];
 
-  // Theme-driven styling variables
   const isNight = theme === 'NIGHT_RED';
   const isDay = theme === 'DAY_FLIGHT';
-
-  const borderHardwareClass = isNight
-    ? 'border-hardware-night'
-    : isDay
-    ? 'border-hardware-day'
-    : 'border-hardware-dark';
 
   const headerGlassClass = isNight
     ? 'glass-card-night text-red-100'
@@ -131,22 +125,22 @@ export const Header: React.FC<HeaderProps> = ({
     : 'glass-command-ribbon-dark text-white';
 
   const inputBgClass = isNight
-    ? 'bg-red-950/50 border-hardware-night text-red-100 placeholder-red-400/50 focus:border-red-500 focus:ring-1 focus:ring-red-500/50'
+    ? 'bg-red-950/50 border-red-900/60 text-red-100 placeholder-red-400/50 focus:border-red-500'
     : isDay
-    ? 'bg-white/90 border-hardware-day text-slate-900 placeholder-slate-400 focus:border-blue-600 focus:ring-1 focus:ring-blue-500/30'
-    : 'bg-black/80 border-hardware-dark text-white placeholder-zinc-500 focus:border-zinc-400 focus:ring-1 focus:ring-zinc-400/30';
+    ? 'bg-white/90 border-slate-300 text-slate-900 placeholder-slate-400 focus:border-blue-600'
+    : 'bg-black/80 border-white/10 text-white placeholder-zinc-500 focus:border-sky-400/60 focus:ring-1 focus:ring-sky-400/30';
 
   const actionBtnClass = isNight
-    ? 'border-hardware-night bg-red-950/60 text-red-200 hover:bg-red-900/80'
+    ? 'border-red-900/60 bg-red-950/60 text-red-200 hover:bg-red-900/80'
     : isDay
-    ? 'border-hardware-day bg-white text-slate-700 hover:bg-slate-100 hover:text-slate-900'
-    : 'border-hardware-dark bg-zinc-900/90 text-zinc-300 hover:bg-zinc-800 hover:text-white';
+    ? 'border-slate-300 bg-white text-slate-700 hover:bg-slate-100'
+    : 'border-white/10 bg-zinc-900/90 text-zinc-300 hover:bg-zinc-800 hover:text-white';
 
   const activeTabClass = isNight
     ? 'bg-red-600 text-white shadow-md font-bold'
     : isDay
     ? 'bg-slate-900 text-white shadow-md font-bold'
-    : 'bg-zinc-100 text-zinc-950 shadow-sm font-bold';
+    : 'bg-gradient-to-r from-sky-500 to-blue-600 text-white shadow-md font-bold';
 
   const inactiveTabClass = isNight
     ? 'text-red-300/70 hover:text-red-100'
@@ -158,54 +152,51 @@ export const Header: React.FC<HeaderProps> = ({
     ? 'bg-red-600 hover:bg-red-500 text-white shadow-sm'
     : isDay
     ? 'bg-slate-900 hover:bg-slate-800 text-white shadow-sm'
-    : 'bg-white hover:bg-zinc-200 text-black font-bold shadow-sm';
+    : 'bg-gradient-to-r from-sky-500 via-cyan-400 to-emerald-500 hover:brightness-110 text-black font-extrabold shadow-[0_0_20px_rgba(56,189,248,0.3)]';
 
   return (
-    <header className={`w-full p-3.5 sm:p-5 rounded-t-[26px] shadow-2xl relative z-30 font-sans transition-all duration-300 ${headerGlassClass}`}>
-      {/* UNIFIED GLASSMORPHIC COMMAND RIBBON */}
-      <div className="flex flex-col gap-3">
+    <header className={`w-full p-4 sm:p-6 rounded-t-[28px] shadow-2xl relative z-30 font-sans transition-all duration-300 ${headerGlassClass}`}>
+      <div className="flex flex-col gap-4">
         
-        {/* ROW 1: BRANDING, ZULU CLOCK & COCKPIT CONTROLS */}
-        <div className={`flex flex-wrap items-center justify-between gap-3 text-xs font-mono uppercase tracking-wider pb-2.5 border-b ${
-          isNight ? 'border-red-900/40' : isDay ? 'border-slate-300/80' : 'border-white/[0.12]'
+        {/* ROW 1: APPLE-GRADE HEADER BRANDING & COCKPIT STATUS */}
+        <div className={`flex flex-wrap items-center justify-between gap-3 text-xs font-mono uppercase tracking-wider pb-3 border-b ${
+          isNight ? 'border-red-900/40' : isDay ? 'border-slate-300/80' : 'border-white/10'
         }`}>
           {/* Brand Identity */}
-          <div className="flex items-center space-x-3">
-            <VayuLogo size="md" showText={true} />
-            <span className={`w-2.5 h-2.5 rounded-full animate-pulse inline-block ${isNight ? 'led-glow-red' : isDay ? 'bg-blue-600 shadow-[0_0_8px_rgba(37,99,235,0.8)]' : 'led-glow-green'}`} />
+          <div className="flex items-center space-x-3.5">
+            <VayuLogo size="lg" showText={true} />
 
-            {/* FAA SWIM Data Feed Status Badge */}
-            <div className={`hidden md:flex items-center space-x-1.5 px-2.5 py-0.5 rounded-md text-[10px] font-bold border ${
+            {/* Glowing Datastream Status Pill */}
+            <div className={`hidden md:flex items-center space-x-2 px-3 py-1 rounded-full text-[10px] font-bold border transition-all ${
               isNight
                 ? 'border-red-900/60 bg-red-950/40 text-red-300'
                 : isDay
-                ? 'border-slate-200 bg-slate-100 text-slate-700'
-                : 'border-zinc-800 bg-zinc-900/90 text-zinc-300'
+                ? 'border-slate-300 bg-slate-100 text-slate-800'
+                : 'border-emerald-500/30 bg-emerald-950/40 text-emerald-300 shadow-[0_0_12px_rgba(16,185,129,0.2)]'
             }`}>
-              <ShieldCheck className="h-3 w-3 text-zinc-400" />
-              <span>FAA SWIM CONNECTED</span>
+              <span className={`w-2 h-2 rounded-full inline-block ${isNight ? 'led-glow-red' : isDay ? 'bg-blue-600' : 'led-glow-green animate-pulse'}`} />
+              <span className="tracking-widest">LIVE DGCA & FAA DATASTREAM</span>
             </div>
           </div>
 
-          {/* Right: Tier Badge, Auth, Zulu Clock & Cockpit Theme Controls */}
-          <div className="flex items-center space-x-2 sm:space-x-2.5 text-xs">
+          {/* Right Controls */}
+          <div className="flex items-center space-x-2 sm:space-x-3 text-xs">
             
-            {/* Auth Button */}
+            {/* Auth Session */}
             <button
               onClick={onOpenAuth}
-              className={`flex items-center space-x-1 border px-2 py-1 rounded-lg text-[10px] font-bold font-mono transition cursor-pointer ${
+              className={`flex items-center space-x-1.5 border px-3 py-1.5 rounded-xl text-[10px] font-bold font-mono transition cursor-pointer ${
                 userEmail ? 'border-emerald-500/60 bg-emerald-950/40 text-emerald-300' : actionBtnClass
               }`}
-              title="Supabase Pilot Session"
             >
-              <ShieldCheck className="h-3 w-3 text-emerald-400" />
+              <ShieldCheck className="h-3.5 w-3.5 text-emerald-400" />
               <span className="hidden sm:inline">{userEmail ? userEmail.split('@')[0].toUpperCase() : 'AUTH'}</span>
             </button>
 
-            {/* Tier / Subscription Badge Button */}
+            {/* Tier Badge */}
             <button
               onClick={onOpenMonetization}
-              className={`flex items-center space-x-1 px-2.5 py-1 rounded-lg text-[10px] font-bold font-mono transition cursor-pointer border ${
+              className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-xl text-[10px] font-bold font-mono transition cursor-pointer border ${
                 userTier === 'PRO'
                   ? 'border-emerald-500 bg-emerald-500/20 text-emerald-300 hover:bg-emerald-500/30'
                   : userTier === 'FLEET'
@@ -213,18 +204,21 @@ export const Header: React.FC<HeaderProps> = ({
                   : 'border-amber-500/50 bg-amber-500/10 text-amber-300 hover:bg-amber-500/20'
               }`}
             >
-              <Crown className="h-3 w-3 text-amber-400" />
+              <Crown className="h-3.5 w-3.5 text-amber-400" />
               <span>{userTier} PILOT</span>
             </button>
 
-            <span className={`hidden sm:inline text-[11px] ${isDay ? 'text-slate-600' : 'text-zinc-400'}`}>
-              Zulu: <strong className={`font-bold ${isDay ? 'text-slate-900' : 'text-white'}`}>{currentZulu}Z</strong>
-            </span>
+            {/* Zulu Clock */}
+            <div className={`hidden sm:inline-flex items-center gap-1.5 px-3 py-1 rounded-xl border text-[11px] font-mono font-bold ${
+              isNight ? 'bg-red-950/40 border-red-900/60 text-red-300' : isDay ? 'bg-slate-100 border-slate-300 text-slate-800' : 'bg-black/60 border-white/10 text-zinc-200'
+            }`}>
+              <span className="opacity-60">ZULU:</span>
+              <span className="text-sky-400">{currentZulu}Z</span>
+            </div>
 
             <button
               onClick={onOpenDispatchModal}
-              className={`flex items-center space-x-1 border px-2.5 py-1.5 rounded-lg text-[11px] font-bold transition cursor-pointer ${actionBtnClass}`}
-              title="Dispatch Audit Log"
+              className={`flex items-center space-x-1 border px-3 py-1.5 rounded-xl text-[11px] font-bold transition cursor-pointer ${actionBtnClass}`}
             >
               <FileText className="h-3.5 w-3.5 opacity-70" />
               <span className="hidden sm:inline">Dispatch</span>
@@ -232,8 +226,7 @@ export const Header: React.FC<HeaderProps> = ({
 
             <button
               onClick={onOpenHistory}
-              className={`flex items-center space-x-1 border px-2.5 py-1.5 rounded-lg text-[11px] font-bold transition cursor-pointer ${actionBtnClass}`}
-              title="Audit Trail"
+              className={`flex items-center space-x-1 border px-3 py-1.5 rounded-xl text-[11px] font-bold transition cursor-pointer ${actionBtnClass}`}
             >
               <History className="h-3.5 w-3.5 opacity-70" />
               <span className="hidden sm:inline">Audit</span>
@@ -241,33 +234,23 @@ export const Header: React.FC<HeaderProps> = ({
 
             <button
               onClick={toggleAudioBriefing}
-              className={`flex items-center space-x-1 border px-2.5 py-1.5 rounded-lg text-[11px] font-bold transition cursor-pointer ${
-                isAudioPlaying
-                  ? 'border-emerald-500 bg-emerald-500 text-black animate-pulse font-black'
-                  : actionBtnClass
+              className={`flex items-center space-x-1 border px-3 py-1.5 rounded-xl text-[11px] font-bold transition cursor-pointer ${
+                isAudioPlaying ? 'border-emerald-500 bg-emerald-500 text-black animate-pulse font-black' : actionBtnClass
               }`}
             >
               {isAudioPlaying ? <Volume2 className="h-3.5 w-3.5" /> : <VolumeX className="h-3.5 w-3.5" />}
               <span className="hidden sm:inline">{isAudioPlaying ? 'Stop' : 'Audio'}</span>
             </button>
 
-            {/* Hardware Cockpit Theme Selector */}
-            <div className={`flex items-center border p-0.5 rounded-lg transition-colors ${
-              isNight
-                ? 'border-hardware-night bg-red-950/80'
-                : isDay
-                ? 'border-hardware-day bg-slate-200'
-                : 'border-hardware-dark bg-zinc-900/90'
+            {/* Apple Cockpit Theme Selector */}
+            <div className={`flex items-center border p-1 rounded-xl transition-colors ${
+              isNight ? 'border-red-900/60 bg-red-950/80' : isDay ? 'border-slate-300 bg-slate-200' : 'border-white/10 bg-black/60'
             }`}>
               <button
                 type="button"
                 onClick={() => setTheme('DARK_COCKPIT')}
-                className={`p-1.5 rounded cursor-pointer transition ${
-                  theme === 'DARK_COCKPIT'
-                    ? 'bg-emerald-500 text-black font-bold shadow-sm'
-                    : isDay
-                    ? 'text-slate-600 hover:text-slate-900'
-                    : 'text-zinc-400 hover:text-white'
+                className={`p-1.5 rounded-lg cursor-pointer transition ${
+                  theme === 'DARK_COCKPIT' ? 'bg-sky-500 text-black font-bold shadow-sm' : isDay ? 'text-slate-600 hover:text-slate-900' : 'text-zinc-400 hover:text-white'
                 }`}
                 title="Dark Cockpit Mode"
               >
@@ -277,12 +260,8 @@ export const Header: React.FC<HeaderProps> = ({
               <button
                 type="button"
                 onClick={() => setTheme('NIGHT_RED')}
-                className={`p-1.5 rounded cursor-pointer transition ${
-                  theme === 'NIGHT_RED'
-                    ? 'bg-red-600 text-white font-bold shadow-sm'
-                    : isDay
-                    ? 'text-slate-600 hover:text-slate-900'
-                    : 'text-zinc-400 hover:text-white'
+                className={`p-1.5 rounded-lg cursor-pointer transition ${
+                  theme === 'NIGHT_RED' ? 'bg-red-600 text-white font-bold shadow-sm' : isDay ? 'text-slate-600 hover:text-slate-900' : 'text-zinc-400 hover:text-white'
                 }`}
                 title="Night-Vision Red Mode"
               >
@@ -292,10 +271,8 @@ export const Header: React.FC<HeaderProps> = ({
               <button
                 type="button"
                 onClick={() => setTheme('DAY_FLIGHT')}
-                className={`p-1.5 rounded cursor-pointer transition ${
-                  theme === 'DAY_FLIGHT'
-                    ? 'bg-slate-900 text-white font-bold shadow-sm'
-                    : 'text-zinc-400 hover:text-white'
+                className={`p-1.5 rounded-lg cursor-pointer transition ${
+                  theme === 'DAY_FLIGHT' ? 'bg-slate-900 text-white font-bold shadow-sm' : 'text-zinc-400 hover:text-white'
                 }`}
                 title="Day Sunlight Mode"
               >
@@ -306,41 +283,40 @@ export const Header: React.FC<HeaderProps> = ({
           </div>
         </div>
 
-        {/* ROW 2: SINGLE INTEGRATED GLASS COMMAND RIBBON (SEARCH BAR + NAVIGATION SWITCHER TABS) */}
-        <div className={`p-2.5 rounded-2xl flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3 transition-all ${ribbonGlassClass}`}>
+        {/* ROW 2: SEARCH INPUT COMMAND BAR & MODE SWITCH TABS */}
+        <div className={`p-3 rounded-2xl flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3 transition-all ${ribbonGlassClass}`}>
           
-          {/* PRIMARY FOCUS: SEARCH INPUT FORM */}
           <div className="flex-1">
             {viewMode !== 'ROUTE' ? (
-              <form onSubmit={handleSingleSubmit} className="flex items-center gap-2">
+              <form onSubmit={handleSingleSubmit} className="flex items-center gap-2.5">
                 <div className="relative flex-1">
-                  <Search className={`absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 ${isNight ? 'text-red-400' : isDay ? 'text-slate-500' : 'text-emerald-400'}`} />
+                  <Search className={`absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 ${isNight ? 'text-red-400' : isDay ? 'text-slate-500' : 'text-sky-400'}`} />
                   <input
                     type="text"
                     value={singleIcao}
                     onChange={(e) => setSingleIcao(e.target.value.toUpperCase())}
-                    placeholder="ENTER ICAO / FAA AIRPORT CODE (e.g. VIDP, VABB, KJFK)..."
+                    placeholder="ENTER ICAO AIRPORT CODE (e.g. VIDP, VABB, KJFK, EGLL)..."
                     maxLength={4}
-                    className={`w-full border rounded-xl py-2 pl-10 pr-3 text-xs sm:text-sm font-mono font-bold uppercase tracking-widest focus:outline-none transition-all shadow-inner ${inputBgClass}`}
+                    className={`w-full border rounded-2xl py-2.5 pl-11 pr-12 text-xs sm:text-sm font-mono font-bold uppercase tracking-widest focus:outline-none transition-all ${inputBgClass}`}
                   />
+                  <div className="absolute right-3 top-1/2 -translate-y-1/2 hidden sm:flex items-center gap-1 px-2 py-0.5 rounded-md bg-white/5 border border-white/10 text-[10px] font-mono text-zinc-400">
+                    <Command className="w-3 h-3" />
+                    <span>K</span>
+                  </div>
                 </div>
 
                 <button
                   type="submit"
                   disabled={isLoading}
-                  className={`font-mono font-bold text-xs px-4 sm:px-5 py-2.5 rounded-xl transition flex items-center gap-1.5 shrink-0 cursor-pointer disabled:opacity-50 ${submitBtnClass}`}
+                  className={`font-mono text-xs px-5 sm:px-6 py-3 rounded-2xl transition flex items-center gap-2 shrink-0 cursor-pointer disabled:opacity-50 ${submitBtnClass}`}
                 >
-                  {isLoading ? (
-                    <Zap className="w-4 h-4 animate-spin" />
-                  ) : (
-                    <Search className="w-4 h-4" />
-                  )}
+                  {isLoading ? <Zap className="w-4 h-4 animate-spin" /> : <Search className="w-4 h-4" />}
                   <span className="tracking-wider">Brief</span>
                 </button>
               </form>
             ) : (
               <form onSubmit={handleRouteSubmit} className="flex flex-col sm:flex-row items-center gap-2">
-                <div className="grid grid-cols-3 gap-1.5 flex-1 w-full">
+                <div className="grid grid-cols-3 gap-2 flex-1 w-full">
                   <input
                     type="text"
                     value={origin}
@@ -369,7 +345,7 @@ export const Header: React.FC<HeaderProps> = ({
                 <button
                   type="submit"
                   disabled={isLoading}
-                  className={`w-full sm:w-auto font-mono font-bold text-xs px-4 sm:px-5 py-2.5 rounded-xl transition flex items-center justify-center gap-1.5 shrink-0 cursor-pointer disabled:opacity-50 ${submitBtnClass}`}
+                  className={`w-full sm:w-auto font-mono text-xs px-5 py-2.5 rounded-xl transition flex items-center justify-center gap-1.5 shrink-0 cursor-pointer disabled:opacity-50 ${submitBtnClass}`}
                 >
                   {isLoading ? <Zap className="w-4 h-4 animate-spin" /> : <Compass className="w-4 h-4" />}
                   <span className="tracking-wider">Route</span>
@@ -378,13 +354,13 @@ export const Header: React.FC<HeaderProps> = ({
             )}
           </div>
 
-          {/* SEAMLESS INTEGRATED NAVIGATION TABS */}
-          <div className={`flex items-center justify-around w-full md:w-auto border p-1 rounded-xl text-[11px] font-mono uppercase shrink-0 ${
-            isNight ? 'border-hardware-night bg-red-950/70' : isDay ? 'border-hardware-day bg-slate-200/80' : 'border-hardware-dark bg-zinc-900/80'
+          {/* MODE TABS */}
+          <div className={`flex items-center justify-around w-full md:w-auto border p-1 rounded-2xl text-[11px] font-mono uppercase shrink-0 ${
+            isNight ? 'border-red-900/60 bg-red-950/70' : isDay ? 'border-slate-300 bg-slate-200' : 'border-white/10 bg-black/60'
           }`}>
             <button
               onClick={() => setViewMode('EXECUTIVE')}
-              className={`flex-1 md:flex-none justify-center flex items-center space-x-1.5 px-3.5 py-2 font-bold rounded-lg transition cursor-pointer min-h-[38px] ${
+              className={`flex-1 md:flex-none justify-center flex items-center space-x-1.5 px-4 py-2 font-bold rounded-xl transition cursor-pointer min-h-[38px] ${
                 viewMode === 'EXECUTIVE' ? activeTabClass : inactiveTabClass
               }`}
             >
@@ -393,7 +369,7 @@ export const Header: React.FC<HeaderProps> = ({
             </button>
             <button
               onClick={() => setViewMode('ROUTE')}
-              className={`flex-1 md:flex-none justify-center flex items-center space-x-1.5 px-3.5 py-2 font-bold rounded-lg transition cursor-pointer min-h-[38px] ${
+              className={`flex-1 md:flex-none justify-center flex items-center space-x-1.5 px-4 py-2 font-bold rounded-xl transition cursor-pointer min-h-[38px] ${
                 viewMode === 'ROUTE' ? activeTabClass : inactiveTabClass
               }`}
             >
@@ -402,7 +378,7 @@ export const Header: React.FC<HeaderProps> = ({
             </button>
             <button
               onClick={() => setViewMode('CLI')}
-              className={`flex-1 md:flex-none justify-center flex items-center space-x-1.5 px-3.5 py-2 font-bold rounded-lg transition cursor-pointer min-h-[38px] ${
+              className={`flex-1 md:flex-none justify-center flex items-center space-x-1.5 px-4 py-2 font-bold rounded-xl transition cursor-pointer min-h-[38px] ${
                 viewMode === 'CLI' ? activeTabClass : inactiveTabClass
               }`}
             >
@@ -412,9 +388,11 @@ export const Header: React.FC<HeaderProps> = ({
           </div>
         </div>
 
-        {/* ROW 3: QUICK AIRFIELDS STRIP WITH FROSTED LIQUID GLASS PILLS */}
-        <div className="flex items-center gap-2 overflow-x-auto no-scrollbar text-xs font-mono pt-0.5">
-          <span className={`text-[10px] font-bold uppercase tracking-wider mr-0.5 shrink-0 ${isDay ? 'text-slate-600' : 'text-zinc-400'}`}>QUICK AIRFIELDS:</span>
+        {/* ROW 3: QUICK AIRFIELDS STRIP */}
+        <div className="flex items-center gap-2.5 overflow-x-auto no-scrollbar text-xs font-mono pt-1">
+          <span className={`text-[10px] font-bold uppercase tracking-wider mr-1 shrink-0 ${isDay ? 'text-slate-600' : 'text-zinc-400'}`}>
+            HUB PRESETS:
+          </span>
           {viewMode !== 'ROUTE' ? (
             quickAirports.map((ap) => {
               const pillClass = isDay
@@ -449,7 +427,7 @@ export const Header: React.FC<HeaderProps> = ({
                     setSingleIcao(ap.code);
                     onSearchSingle(ap.code);
                   }}
-                  className={`px-3 py-1 rounded-xl text-[11px] font-mono font-bold transition-all duration-200 flex items-center gap-2 shrink-0 cursor-pointer shadow-sm hover:scale-105 active:scale-95 ${pillClass}`}
+                  className={`px-3.5 py-1.5 rounded-xl text-[11px] font-mono font-bold transition-all duration-200 flex items-center gap-2 shrink-0 cursor-pointer shadow-sm hover:scale-105 active:scale-95 ${pillClass}`}
                 >
                   <span className={`w-2 h-2 rounded-full inline-block ${ledGlowClass}`} />
                   <span className="tracking-wider">{ap.code}</span>
@@ -467,12 +445,12 @@ export const Header: React.FC<HeaderProps> = ({
                   setWaypointInput(route.waypoints.join(', '));
                   onSearchRoute(route.origin, route.destination, route.waypoints);
                 }}
-                className={`px-2.5 py-0.5 rounded-lg text-[11px] border transition flex items-center gap-1 shrink-0 cursor-pointer ${
+                className={`px-3 py-1 rounded-xl text-[11px] border transition flex items-center gap-1.5 shrink-0 cursor-pointer ${
                   isNight
-                    ? 'bg-red-950/50 border-hardware-night text-red-200 hover:text-white'
+                    ? 'bg-red-950/50 border-red-900/60 text-red-200 hover:text-white'
                     : isDay
-                    ? 'bg-white border-hardware-day text-slate-800 hover:bg-slate-100'
-                    : 'bg-zinc-900/80 border-hardware-dark text-zinc-300 hover:text-white'
+                    ? 'bg-white border-slate-300 text-slate-800 hover:bg-slate-100'
+                    : 'bg-zinc-900/80 border-white/10 text-zinc-300 hover:text-white'
                 }`}
               >
                 <span>{route.name}</span>

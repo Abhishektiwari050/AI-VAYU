@@ -328,7 +328,7 @@ export default function App() {
         return 'theme-day-flight bg-[#f4f4f7] text-slate-900 min-h-screen selection:bg-blue-200 selection:text-black py-2 sm:py-6 px-1.5 sm:px-4 md:px-6 relative overflow-x-hidden font-sans transition-colors duration-300';
       case 'DARK_COCKPIT':
       default:
-        return 'bg-[#030305] text-zinc-100 min-h-screen selection:bg-zinc-800 selection:text-white py-2 sm:py-6 px-1.5 sm:px-4 md:px-6 relative overflow-x-hidden font-sans transition-colors duration-300';
+        return 'bg-[#080b11] agency-bg-mesh text-zinc-100 min-h-screen selection:bg-zinc-800 selection:text-white py-2 sm:py-6 px-1.5 sm:px-4 md:px-6 relative overflow-x-hidden font-sans transition-colors duration-300';
     }
   };
 
