@@ -46,9 +46,6 @@ export default function App() {
     if (tab === 'DISPATCH') setIsDispatchModalOpen(true);
     if (tab === 'BILLING') setIsMonetizationModalOpen(true);
     if (tab === 'FLEET') setIsMonetizationModalOpen(true);
-    if (tab === 'BOT') {
-      alert('📱 WhatsApp Briefing Bot active on +1 (800) VAYU-BOT. Text any ICAO code (e.g. "VIDP") for instant cards!');
-    }
   };
 
   const [currentUser, setCurrentUser] = useState<UserProfile | null>(null);
@@ -439,16 +436,16 @@ export default function App() {
 
           {/* Loading Indicator */}
           {isLoading && (
-            <div className="my-20 flex flex-col items-center justify-center space-y-4 font-mono text-xs text-zinc-400">
-              <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-zinc-700 bg-zinc-900 text-white animate-spin shadow-lg">
-                <Zap className="h-6 w-6 text-emerald-400" />
+            <div className="my-20 flex flex-col items-center justify-center space-y-4 font-mono text-xs">
+              <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-[#e3e8ee] bg-white text-[#0e1116] animate-spin shadow-md">
+                <Zap className="h-6 w-6 text-[#2e7def]" />
               </div>
               <div className="text-center">
-                <div className={`font-bold tracking-widest text-sm ${theme === 'DAY_FLIGHT' ? 'text-slate-900' : 'text-white'}`}>
+                <div className="font-bold tracking-widest text-sm text-[#0e1116]">
                   PROJECT VAYU PARSING METAR & NOTAM FEEDS...
                 </div>
-                <div className={`text-[11px] mt-1 ${theme === 'DAY_FLIGHT' ? 'text-slate-600' : 'text-zinc-500'}`}>
-                  Executing Regex Deterministic Safety Engine & Gemini 3.6 Flash Synthesis
+                <div className="text-[11px] mt-1 text-[#5b6472]">
+                  Executing Deterministic Safety Engine & AI Synthesis
                 </div>
               </div>
             </div>

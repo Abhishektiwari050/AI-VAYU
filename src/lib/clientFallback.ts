@@ -50,13 +50,22 @@ export function generateClientFallbackBriefing(icao: string): BriefingSummary {
       plainEnglish: `Standard aerodrome note: ${i.rawText}`,
       rawSnippet: i.rawText,
     })),
-    picTakeaway: criticals.length > 0 
+    picTakeaway: criticals.length > 0
       ? `ATTENTION PIC: ${criticals.length} critical alert(s) active at ${code}. Review runway closures and airspace limits before engine start.`
       : `Normal pre-flight operations at ${code}. Maintain standard vigilance.`,
     totalNotamsIngested: flagged.length,
     criticalCount: criticals.length,
     warningCount: warnings.length,
     deterministicRulesTriggered: criticals.length + warnings.length,
+    allNotamsLedger: flagged,
+    bucketCounts: {
+      RUNWAYS_TFRS: flagged.filter((n) => n.category === 'RUNWAYS_TFRS').length,
+      PROCEDURES_NAVAIDS: flagged.filter((n) => n.category === 'PROCEDURES_NAVAIDS').length,
+      TAXIWAYS_APRON: flagged.filter((n) => n.category === 'TAXIWAYS_APRON').length,
+      OBSTACLES_LIGHTING: flagged.filter((n) => n.category === 'OBSTACLES_LIGHTING').length,
+      FIR_ENROUTE: flagged.filter((n) => n.category === 'FIR_ENROUTE').length,
+      GENERAL: flagged.filter((n) => n.category === 'GENERAL').length,
+    },
   };
 }
 

@@ -24,7 +24,6 @@ import { formatZuluAndLocalTime, evaluateNotamStatusWindow } from '../lib/timezo
 import { AerodromeRadarMap } from './AerodromeRadarMap';
 import { CockpitAudioReadout } from './CockpitAudioReadout';
 import { InteractiveAirportDiagram } from './InteractiveAirportDiagram';
-import { WhatsAppBotSimulator } from './WhatsAppBotSimulator';
 import { PresentationShowcaseBar } from './PresentationShowcaseBar';
 import { ViralGrowthBanner } from './ViralGrowthBanner';
 
@@ -273,9 +272,6 @@ ADVISORY ONLY: Informational pre-flight awareness utility under DGCA and FAA reg
 
       {/* INTERACTIVE VECTOR AIRPORT DIAGRAM OVERLAY */}
       <InteractiveAirportDiagram briefing={briefing} theme={theme} />
-
-      {/* WHATSAPP & TELEGRAM AUTOMATED BOT SIMULATOR */}
-      <WhatsAppBotSimulator />
 
       {/* APPLE-GRADE BENTO GRID 5-BUCKET OPERATIONAL NOTAM MATRIX */}
       <div className={`p-5 rounded-3xl border mb-6 transition-all ${cardGlassClass}`}>
