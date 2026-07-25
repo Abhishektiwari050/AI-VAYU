@@ -24,7 +24,6 @@ import { formatZuluAndLocalTime, evaluateNotamStatusWindow } from '../lib/timezo
 import { AerodromeRadarMap } from './AerodromeRadarMap';
 import { CockpitAudioReadout } from './CockpitAudioReadout';
 import { InteractiveAirportDiagram } from './InteractiveAirportDiagram';
-import { PresentationShowcaseBar } from './PresentationShowcaseBar';
 import { ViralGrowthBanner } from './ViralGrowthBanner';
 
 interface ExecutiveBriefingViewProps {
@@ -50,7 +49,7 @@ export const ExecutiveBriefingView: React.FC<ExecutiveBriefingViewProps> = ({
   const [showFullLedger, setShowFullLedger] = useState<boolean>(false);
   const [activeLedgerBucket, setActiveLedgerBucket] = useState<NotamBucket | 'ALL'>('ALL');
   const [ledgerSearchTerm, setLedgerSearchTerm] = useState<string>('');
-  const [isPresentationMode, setIsPresentationMode] = useState<boolean>(false);
+
 
   const isNight = theme === 'NIGHT_RED';
   const isDay = theme === 'DAY_FLIGHT';
@@ -158,18 +157,8 @@ ADVISORY ONLY: Informational pre-flight awareness utility under DGCA and FAA reg
       isNight ? 'text-red-100' : isDay ? 'text-slate-900' : 'text-white'
     }`}>
       
-      {/* PRESENTABILITY SHOWCASE & GLOBAL HUB QUICK SELECTOR BAR */}
-      <PresentationShowcaseBar
-        activeIcao={briefing.icao}
-        onSelectIcao={(code) => {
-          if (onSearchSingle) onSearchSingle(code);
-        }}
-        onTogglePresentationMode={() => setIsPresentationMode(!isPresentationMode)}
-        isPresentationMode={isPresentationMode}
-      />
-
       {/* VIRAL GROWTH & FLIGHT CREW RECREATION SHARE BANNER */}
-      {!isPresentationMode && <ViralGrowthBanner theme={theme} currentIcao={briefing.icao} />}
+      <ViralGrowthBanner theme={theme} currentIcao={briefing.icao} />
 
       {/* MANDATORY LEGAL FAR PART 91.3 ADVISORY DISCLAIMER BANNER */}
       <div className={`p-3 rounded-2xl border text-[11px] font-mono mb-6 flex items-start gap-2.5 shadow-sm ${
