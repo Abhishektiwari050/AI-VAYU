@@ -157,54 +157,46 @@ ADVISORY ONLY: Informational pre-flight awareness utility under DGCA and FAA reg
       isNight ? 'text-red-100' : isDay ? 'text-slate-900' : 'text-white'
     }`}>
       
-      {/* VIRAL GROWTH & FLIGHT CREW RECREATION SHARE BANNER */}
-      <ViralGrowthBanner theme={theme} currentIcao={briefing.icao} />
-
-      {/* MANDATORY LEGAL FAR PART 91.3 ADVISORY DISCLAIMER BANNER */}
-      <div className={`p-3 rounded-2xl border text-[11px] font-mono mb-3 flex items-start gap-2.5 shadow-sm ${
+      {/* CONSOLIDATED PROVENANCE & FAR 91.3 LEGAL BARNER */}
+      <div className={`p-3.5 rounded-2xl border text-xs font-mono mb-6 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-3 ${
         isNight
-          ? 'bg-red-950/60 border-red-800/80 text-red-300'
+          ? 'bg-red-950/60 border-red-800 text-red-300'
           : isDay
-          ? 'bg-amber-100/90 border-amber-400 text-amber-950'
-          : 'bg-zinc-900/80 border-zinc-700/80 text-zinc-300'
+          ? 'bg-white border-[#e3e8ee] text-[#0e1116]'
+          : 'bg-zinc-900/80 border-zinc-700 text-zinc-300'
       }`}>
-        <AlertTriangle className={`w-4 h-4 shrink-0 mt-0.5 ${isDay ? 'text-amber-900' : 'text-amber-400'}`} />
-        <div className="leading-snug">
-          <strong className={`font-bold uppercase tracking-wider ${isDay ? 'text-amber-900 font-black' : 'text-amber-400'}`}>FAR PART 91.3 PIC RESPONSIBILITY DISCLAIMER:</strong>{' '}
-          Project VAYU is an informational pre-flight awareness utility. It does not replace official FAA briefings via 1800wxbrief.com or official flight service stations. The Pilot-in-Command retains sole operational authority.
+        <div className="flex items-center gap-2.5">
+          <AlertTriangle className={`w-4 h-4 shrink-0 ${isDay ? 'text-[#2e7def]' : 'text-amber-400'}`} />
+          <div className="leading-snug">
+            <strong className="font-bold uppercase tracking-wider">FAR PART 91.3 ADVISORY:</strong>{' '}
+            Informational pre-flight awareness utility. Pilots retain sole operational authority.
+          </div>
         </div>
+
+        {/* Provenance Badge */}
+        {(() => {
+          const ds = briefing.dataSource;
+          const allSynthetic = !ds;
+          const anySynthetic = !ds || ds.metar === 'SYNTHETIC' || ds.notams === 'SYNTHETIC';
+          return (
+            <div className={`shrink-0 px-3 py-1 rounded-full text-[11px] font-bold font-mono border flex items-center gap-2 ${
+              allSynthetic
+                ? 'bg-red-50 border-red-300 text-red-700'
+                : anySynthetic
+                ? 'bg-amber-50 border-amber-300 text-amber-900'
+                : 'bg-emerald-50 border-emerald-300 text-emerald-900'
+            }`}>
+              <span>{allSynthetic ? '⚠ DEMO DATA' : anySynthetic ? '⚠ PARTIAL LIVE DATA' : '✓ LIVE DATA'}</span>
+              <span className="opacity-40">|</span>
+              <span className="font-normal text-[10px]">METAR: {ds?.metar ?? 'SYNTHETIC'}</span>
+            </div>
+          );
+        })()}
       </div>
 
-      {/* DATA SOURCE PROVENANCE BANNER — always visible, always honest */}
-      {(() => {
-        const ds = briefing.dataSource;
-        const allSynthetic = !ds;
-        const anySynthetic = !ds || ds.metar === 'SYNTHETIC' || ds.notams === 'SYNTHETIC';
-        return (
-          <div className={`mb-6 p-3 rounded-2xl border text-[11px] font-mono flex flex-wrap items-center gap-x-4 gap-y-1.5 ${
-            allSynthetic
-              ? 'bg-red-50 border-red-300 text-red-800'
-              : anySynthetic
-              ? 'bg-amber-50 border-amber-300 text-amber-900'
-              : 'bg-emerald-50 border-emerald-300 text-emerald-900'
-          }`}>
-            <span className="font-black uppercase tracking-wider shrink-0">
-              {allSynthetic ? '⚠ DEMO DATA' : anySynthetic ? '⚠ PARTIAL LIVE DATA' : '✓ LIVE DATA'}
-            </span>
-            <span>METAR: <strong>{ds?.metar ?? 'SYNTHETIC'}</strong></span>
-            <span>TAF: <strong>{ds?.taf ?? 'SYNTHETIC'}</strong></span>
-            <span>NOTAMs: <strong>{ds?.notams ?? 'SYNTHETIC'}</strong></span>
-            <span>AI: <strong>{ds?.aiSummary ?? 'DETERMINISTIC ENGINE'}</strong></span>
-            {allSynthetic && (
-              <span className="ml-auto text-red-700 font-bold">Not for operational use — server offline</span>
-            )}
-          </div>
-        );
-      })()}
-
       {/* HERO AIRPORT TITLE & CIRRUS OPEN SKY HUD */}
-      <div className="text-center my-10 space-y-3">
-        <div className="text-4xl sm:text-5xl text-[#5b6472] cirrus-serif-pause">
+      <div className="text-center my-8 space-y-3">
+        <div className="text-3xl sm:text-5xl text-[#5b6472] cirrus-serif-pause">
           Clear skies, decoded in real-time.
         </div>
 
@@ -225,89 +217,121 @@ ADVISORY ONLY: Informational pre-flight awareness utility under DGCA and FAA reg
           {/* Weather Pill */}
           <div className="inline-flex items-center gap-3 px-5 py-2.5 rounded-full bg-white border border-[#e3e8ee] shadow-sm text-xs font-medium text-[#0e1116]">
             <span className={`w-2.5 h-2.5 rounded-full ${
-              weatherConfig.label === 'VFR' ? 'bg-[#10b981]' : weatherConfig.label === 'MVFR' ? 'bg-[#ff7a00]' : 'bg-red-500'
+              briefing.weather.flightCategory === 'VFR' ? 'bg-emerald-500' :
+              briefing.weather.flightCategory === 'MVFR' ? 'bg-amber-500' : 'bg-red-500'
             }`} />
-            <span className="font-bold text-[#0e1116]">{weatherConfig.label}</span>
-            <span className="text-[#e3e8ee]">•</span>
-            <span className="text-[#5b6472]">Winds {briefing.weather.windInfo}</span>
-            <span className="text-[#e3e8ee]">•</span>
-            <span className="text-[#5b6472]">Vis {briefing.weather.visibilityInfo}</span>
+            <span className="font-bold font-mono text-sm">{weatherConfig.label}</span>
+            <span className="text-[#5b6472]">Winds: {briefing.weather.windInfo}</span>
+            <span className="text-[#5b6472]">Vis: {briefing.weather.visibilityInfo}</span>
           </div>
 
-          {/* TAF Accordion Trigger */}
-          {briefing.weather.rawTaf && (
-            <div className="w-full max-w-xl mt-2">
-              <button
-                onClick={() => setShowTafAccordion(!showTafAccordion)}
-                className={`w-full px-4 py-2 rounded-xl border text-xs font-mono font-medium flex items-center justify-between transition cursor-pointer ${
-                  isNight
-                    ? 'bg-red-950/40 border-red-900/60 text-red-200'
-                    : isDay
-                    ? 'bg-slate-100 border-slate-200 text-slate-800'
-                    : 'bg-zinc-900/60 border-white/[0.08] text-zinc-300 hover:text-white hover:bg-zinc-800/80'
-                }`}
-              >
-                <div className="flex items-center gap-2">
-                  <CloudRain className="w-4 h-4 text-sky-400" />
-                  <span>TAF Terminal Aerodrome Forecast (NOAA)</span>
-                </div>
-                <ChevronDown className={`w-4 h-4 transition-transform ${showTafAccordion ? 'rotate-180' : ''}`} />
-              </button>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={handleCopySummary}
+              className="px-4 py-2 rounded-full bg-white hover:bg-slate-50 border border-[#e3e8ee] text-xs font-medium text-[#0e1116] transition cursor-pointer flex items-center gap-1.5 shadow-sm"
+            >
+              {copied ? <Check className="w-3.5 h-3.5 text-emerald-500" /> : <Copy className="w-3.5 h-3.5 text-[#5b6472]" />}
+              <span>{copied ? 'Copied Briefing' : 'Copy Briefing'}</span>
+            </button>
+            <button
+              onClick={onOpenKneeboard}
+              className="px-4 py-2 rounded-full bg-white hover:bg-slate-50 border border-[#e3e8ee] text-xs font-medium text-[#0e1116] transition cursor-pointer flex items-center gap-1.5 shadow-sm"
+            >
+              <Printer className="w-3.5 h-3.5 text-[#5b6472]" />
+              <span>Print Kneeboard</span>
+            </button>
+          </div>
+        </div>
+      </div>
 
-              {showTafAccordion && (
-                <div className={`mt-2 p-4 rounded-xl border text-left text-xs font-mono space-y-3 ${
-                  isNight ? 'bg-black border-red-900 text-red-200' : isDay ? 'bg-white border-slate-200 text-slate-800' : 'bg-zinc-950 border-white/[0.08] text-zinc-200'
-                }`}>
-                  <div>
-                    <span className="text-[10px] uppercase font-bold text-sky-400 tracking-wider block mb-1">
-                      RAW NOAA TAF:
-                    </span>
-                    <pre className="p-2.5 rounded bg-black/80 border border-white/[0.08] text-[11px] text-amber-300/90 font-mono whitespace-pre-wrap break-all leading-relaxed">
-                      {briefing.weather.rawTaf}
-                    </pre>
-                  </div>
-                  {briefing.weather.tafDecodedSummary && (
-                    <div>
-                      <span className="text-[10px] uppercase font-bold text-emerald-400 tracking-wider block mb-1">
-                        FORECAST TRENDS:
-                      </span>
-                      <p className="text-xs leading-relaxed text-zinc-300 font-sans whitespace-pre-line">
-                        {briefing.weather.tafDecodedSummary}
-                      </p>
-                    </div>
-                  )}
-                </div>
-              )}
+      {/* METAR & TAF WEATHER SUMMARY CONTAINER */}
+      <div className="mb-6">
+        <div className={`p-5 rounded-3xl border transition-all ${cardGlassClass}`}>
+          <div className="flex items-center justify-between gap-3 mb-4 pb-3 border-b border-white/10">
+            <div className="flex items-center gap-2 font-mono">
+              <CloudSun className="w-4 h-4 text-emerald-400" />
+              <span className="text-xs font-bold uppercase tracking-widest block text-[#0e1116] dark:text-white">
+                METEOROLOGICAL CONDITIONS & TAF FORECAST
+              </span>
             </div>
-          )}
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+            <div className="p-4 rounded-2xl bg-slate-50 dark:bg-black/30 border border-[#e3e8ee] dark:border-white/10">
+              <span className="text-[10px] uppercase font-mono font-bold text-[#5b6472] block mb-1">
+                PLAIN ENGLISH WEATHER SUMMARY:
+              </span>
+              <p className="text-sm font-sans font-medium text-[#0e1116] dark:text-zinc-200 leading-relaxed">
+                {briefing.weather.plainEnglishSummary}
+              </p>
+            </div>
+
+            <div className="p-4 rounded-2xl bg-slate-50 dark:bg-black/30 border border-[#e3e8ee] dark:border-white/10 font-mono">
+              <span className="text-[10px] uppercase font-bold text-[#5b6472] block mb-1">
+                RAW METAR STRING:
+              </span>
+              <div className="text-xs leading-relaxed text-[#0e1116] dark:text-zinc-300 break-words select-text">
+                {briefing.weather.rawMetar}
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
       {/* HANDS-FREE COCKPIT AUDIO READOUT MODE */}
       <CockpitAudioReadout briefing={briefing} theme={theme} />
 
-      {/* INTERACTIVE VECTOR AIRPORT DIAGRAM OVERLAY */}
-      <InteractiveAirportDiagram briefing={briefing} theme={theme} />
+      {/* WORKSTATION TABBED MEDIA SECTION (VECTOR DIAGRAM vs RADAR MAP) */}
+      <div className="mb-6">
+        <div className="flex items-center justify-between gap-3 mb-3">
+          <div className="flex items-center gap-2 p-1 rounded-2xl bg-white border border-[#e3e8ee] shadow-sm">
+            <button
+              onClick={() => setActiveMediaTab('DIAGRAM')}
+              className={`px-4 py-1.5 rounded-xl text-xs font-mono font-bold transition cursor-pointer flex items-center gap-2 ${
+                activeMediaTab === 'DIAGRAM' ? 'bg-[#0e1116] text-white shadow-sm' : 'text-[#5b6472] hover:text-[#0e1116]'
+              }`}
+            >
+              <Layers className="w-3.5 h-3.5" />
+              <span>AERODROME DIAGRAM OVERLAY</span>
+            </button>
+            <button
+              onClick={() => setActiveMediaTab('RADAR')}
+              className={`px-4 py-1.5 rounded-xl text-xs font-mono font-bold transition cursor-pointer flex items-center gap-2 ${
+                activeMediaTab === 'RADAR' ? 'bg-[#0e1116] text-white shadow-sm' : 'text-[#5b6472] hover:text-[#0e1116]'
+              }`}
+            >
+              <Radio className="w-3.5 h-3.5" />
+              <span>RADAR & SPATIAL RADIAL GRID</span>
+            </button>
+          </div>
+        </div>
+
+        {activeMediaTab === 'DIAGRAM' ? (
+          <InteractiveAirportDiagram briefing={briefing} theme={theme} />
+        ) : (
+          <AerodromeRadarMap briefing={briefing} theme={theme} />
+        )}
+      </div>
 
       {/* APPLE-GRADE BENTO GRID 5-BUCKET OPERATIONAL NOTAM MATRIX */}
       <div className={`p-5 rounded-3xl border mb-6 transition-all ${cardGlassClass}`}>
-        <div className="flex flex-wrap items-center justify-between gap-3 mb-4 pb-3 border-b border-white/10">
+        <div className="flex flex-wrap items-center justify-between gap-3 mb-4 pb-3 border-b border-[#e3e8ee]">
           <div className="flex items-center gap-2.5 font-mono">
-            <div className="p-1.5 rounded-lg bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
+            <div className="p-1.5 rounded-lg bg-[#2e7def]/10 text-[#2e7def] border border-[#2e7def]/20">
               <ListFilter className="w-4 h-4" />
             </div>
             <div>
-              <span className="text-xs font-bold uppercase tracking-widest block agency-gradient-text">
+              <span className="text-xs font-bold uppercase tracking-widest block text-[#0e1116]">
                 DETERMINISTIC 5-BUCKET OPERATIONAL NOTAM MATRIX
               </span>
-              <span className="text-[10px] text-zinc-400 font-sans">100% Raw FAA & DGCA Aerodrome Data Stream</span>
+              <span className="text-[10px] text-[#5b6472] font-sans">Raw FAA & DGCA Aerodrome Data Stream</span>
             </div>
           </div>
           <button
             onClick={() => setShowFullLedger(!showFullLedger)}
-            className="px-3.5 py-1.5 rounded-xl border text-xs font-mono font-bold bg-gradient-to-r from-emerald-600 to-teal-600 hover:brightness-110 text-white border-emerald-400/50 transition cursor-pointer flex items-center gap-2 shadow-lg"
+            className="px-3.5 py-1.5 rounded-xl border text-xs font-mono font-bold bg-[#0e1116] hover:bg-slate-800 text-white border-[#0e1116] transition cursor-pointer flex items-center gap-2 shadow-sm"
           >
-            <Zap className="w-3.5 h-3.5" />
+            <Zap className="w-3.5 h-3.5 text-amber-400" />
             <span>{showFullLedger ? 'Hide Unfiltered Ledger' : `View Full NOTAM Ledger (${allLedgerItems.length || briefing.totalNotamsIngested})`}</span>
           </button>
         </div>
@@ -315,53 +339,53 @@ ADVISORY ONLY: Informational pre-flight awareness utility under DGCA and FAA reg
         {/* 5-Bucket Bento Grid */}
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 text-xs font-mono">
           <div className={`p-4 rounded-2xl border flex flex-col justify-between transition-all duration-300 ${
-            counts.RUNWAYS_TFRS > 0 ? 'bg-gradient-to-b from-red-950/60 to-black/80 border-red-500/60 text-red-200 shadow-[0_0_20px_rgba(239,68,68,0.2)]' : 'bg-black/40 border-white/10 text-zinc-400'
+            counts.RUNWAYS_TFRS > 0 ? 'bg-red-50/80 border-red-300 text-red-950 shadow-sm' : 'bg-slate-50 border-slate-200 text-[#5b6472]'
           }`}>
             <div className="flex items-center justify-between">
               <span className="text-[10px] opacity-80 uppercase font-bold tracking-wider">1. RUNWAYS & TFRs</span>
-              <span className={`w-2 h-2 rounded-full ${counts.RUNWAYS_TFRS > 0 ? 'led-glow-red animate-ping' : 'bg-zinc-700'}`} />
+              <span className={`w-2 h-2 rounded-full ${counts.RUNWAYS_TFRS > 0 ? 'bg-red-500 animate-ping' : 'bg-slate-300'}`} />
             </div>
-            <span className="text-3xl font-black font-mono mt-2 text-red-400">{counts.RUNWAYS_TFRS}</span>
+            <span className="text-3xl font-black font-mono mt-2 text-red-600">{counts.RUNWAYS_TFRS}</span>
           </div>
 
           <div className={`p-4 rounded-2xl border flex flex-col justify-between transition-all duration-300 ${
-            counts.PROCEDURES_NAVAIDS > 0 ? 'bg-gradient-to-b from-sky-950/60 to-black/80 border-sky-500/60 text-sky-200 shadow-[0_0_20px_rgba(56,189,248,0.2)]' : 'bg-black/40 border-white/10 text-zinc-400'
+            counts.PROCEDURES_NAVAIDS > 0 ? 'bg-blue-50/80 border-blue-300 text-blue-950 shadow-sm' : 'bg-slate-50 border-slate-200 text-[#5b6472]'
           }`}>
             <div className="flex items-center justify-between">
               <span className="text-[10px] opacity-80 uppercase font-bold tracking-wider">2. PROCEDURES</span>
-              <span className={`w-2 h-2 rounded-full ${counts.PROCEDURES_NAVAIDS > 0 ? 'bg-sky-400 led-glow-green' : 'bg-zinc-700'}`} />
+              <span className={`w-2 h-2 rounded-full ${counts.PROCEDURES_NAVAIDS > 0 ? 'bg-blue-500' : 'bg-slate-300'}`} />
             </div>
-            <span className="text-3xl font-black font-mono mt-2 text-sky-300">{counts.PROCEDURES_NAVAIDS}</span>
+            <span className="text-3xl font-black font-mono mt-2 text-blue-600">{counts.PROCEDURES_NAVAIDS}</span>
           </div>
 
           <div className={`p-4 rounded-2xl border flex flex-col justify-between transition-all duration-300 ${
-            counts.TAXIWAYS_APRON > 0 ? 'bg-gradient-to-b from-amber-950/60 to-black/80 border-amber-500/60 text-amber-200 shadow-[0_0_20px_rgba(245,158,11,0.2)]' : 'bg-black/40 border-white/10 text-zinc-400'
+            counts.TAXIWAYS_APRON > 0 ? 'bg-amber-50/80 border-amber-300 text-amber-950 shadow-sm' : 'bg-slate-50 border-slate-200 text-[#5b6472]'
           }`}>
             <div className="flex items-center justify-between">
               <span className="text-[10px] opacity-80 uppercase font-bold tracking-wider">3. TAXIWAYS & APRON</span>
-              <span className={`w-2 h-2 rounded-full ${counts.TAXIWAYS_APRON > 0 ? 'led-glow-yellow' : 'bg-zinc-700'}`} />
+              <span className={`w-2 h-2 rounded-full ${counts.TAXIWAYS_APRON > 0 ? 'bg-amber-500' : 'bg-slate-300'}`} />
             </div>
-            <span className="text-3xl font-black font-mono mt-2 text-amber-300">{counts.TAXIWAYS_APRON}</span>
+            <span className="text-3xl font-black font-mono mt-2 text-amber-600">{counts.TAXIWAYS_APRON}</span>
           </div>
 
           <div className={`p-4 rounded-2xl border flex flex-col justify-between transition-all duration-300 ${
-            counts.OBSTACLES_LIGHTING > 0 ? 'bg-gradient-to-b from-slate-900/60 to-black/80 border-slate-700 text-slate-200' : 'bg-black/40 border-white/10 text-zinc-400'
+            counts.OBSTACLES_LIGHTING > 0 ? 'bg-emerald-50/80 border-emerald-300 text-emerald-950 shadow-sm' : 'bg-slate-50 border-slate-200 text-[#5b6472]'
           }`}>
             <div className="flex items-center justify-between">
               <span className="text-[10px] opacity-80 uppercase font-bold tracking-wider">4. OBSTACLES</span>
-              <span className={`w-2 h-2 rounded-full ${counts.OBSTACLES_LIGHTING > 0 ? 'bg-slate-400' : 'bg-zinc-700'}`} />
+              <span className={`w-2 h-2 rounded-full ${counts.OBSTACLES_LIGHTING > 0 ? 'bg-emerald-500' : 'bg-slate-300'}`} />
             </div>
-            <span className="text-3xl font-black font-mono mt-2 text-slate-200">{counts.OBSTACLES_LIGHTING}</span>
+            <span className="text-3xl font-black font-mono mt-2 text-emerald-600">{counts.OBSTACLES_LIGHTING}</span>
           </div>
 
-          <div className={`p-4 rounded-2xl border flex flex-col justify-between transition-all duration-300 col-span-2 sm:col-span-1 ${
-            counts.FIR_ENROUTE > 0 ? 'bg-gradient-to-b from-purple-950/60 to-black/80 border-purple-500/60 text-purple-200 shadow-[0_0_20px_rgba(168,85,247,0.2)]' : 'bg-black/40 border-white/10 text-zinc-400'
+          <div className={`p-4 rounded-2xl border flex flex-col justify-between transition-all duration-300 ${
+            counts.FIR_ENROUTE > 0 ? 'bg-purple-50/80 border-purple-300 text-purple-950 shadow-sm' : 'bg-slate-50 border-slate-200 text-[#5b6472]'
           }`}>
             <div className="flex items-center justify-between">
-              <span className="text-[10px] opacity-80 uppercase font-bold tracking-wider">5. FIR EN-ROUTE</span>
-              <span className={`w-2 h-2 rounded-full ${counts.FIR_ENROUTE > 0 ? 'bg-purple-400' : 'bg-zinc-700'}`} />
+              <span className="text-[10px] opacity-80 uppercase font-bold tracking-wider">5. FIR ENROUTE</span>
+              <span className={`w-2 h-2 rounded-full ${counts.FIR_ENROUTE > 0 ? 'bg-purple-500' : 'bg-slate-300'}`} />
             </div>
-            <span className="text-3xl font-black font-mono mt-2 text-purple-300">{counts.FIR_ENROUTE}</span>
+            <span className="text-3xl font-black font-mono mt-2 text-purple-600">{counts.FIR_ENROUTE}</span>
           </div>
         </div>
       </div>
@@ -468,37 +492,11 @@ ADVISORY ONLY: Informational pre-flight awareness utility under DGCA and FAA reg
         </div>
       )}
 
-      {/* AERODROME RADAR & SPATIAL GRID MAP OVERLAY CONTROL */}
+
+
+      {/* VIRAL GROWTH SHARE BANNER — bottom placement */}
       <div className="mb-6">
-        <div className={`flex items-center justify-between p-3 rounded-2xl border mb-3 transition ${
-          isNight ? 'bg-red-950/40 border-red-900/60' : isDay ? 'bg-slate-100 border-slate-300' : 'bg-zinc-900/80 border-zinc-800'
-        }`}>
-          <div className="flex items-center gap-2 font-mono">
-            <Radio className={`w-4 h-4 ${showRadarMap ? 'text-emerald-400 animate-pulse' : 'text-zinc-500'}`} />
-            <div className="text-left">
-              <span className="text-xs font-bold tracking-wider uppercase block">
-                {briefing.icao} SPATIAL RADAR OVERLAY
-              </span>
-              <span className="text-[10px] opacity-70 font-sans block">
-                {showRadarMap ? 'Geospatial Grid Canvas active on summary' : 'Radar overlay collapsed'}
-              </span>
-            </div>
-          </div>
-
-          <button
-            onClick={() => setShowRadarMap(!showRadarMap)}
-            className={`px-3.5 py-1.5 rounded-xl border text-xs font-mono font-bold transition flex items-center gap-2 cursor-pointer shadow-sm ${
-              showRadarMap
-                ? (isNight ? 'bg-red-900 text-red-100 border-red-700' : isDay ? 'bg-slate-800 text-white border-slate-700' : 'bg-emerald-600 text-white border-emerald-500')
-                : (isNight ? 'bg-black/80 text-red-300 border-red-900' : isDay ? 'bg-white text-slate-800 border-slate-300 hover:bg-slate-200' : 'bg-zinc-800 text-zinc-200 border-zinc-700 hover:bg-zinc-700')
-            }`}
-          >
-            {showRadarMap ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
-            <span>{showRadarMap ? 'COLLAPSE MAP' : 'OVERLAY MAP'}</span>
-          </button>
-        </div>
-
-        {showRadarMap && <AerodromeRadarMap briefing={briefing} theme={theme} />}
+        <ViralGrowthBanner theme={theme} currentIcao={briefing.icao} />
       </div>
 
       {/* CRITICAL ATTENTION SECTION */}
