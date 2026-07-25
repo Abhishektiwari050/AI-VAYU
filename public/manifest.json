@@ -1,0 +1,22 @@
+{
+  "short_name": "VAYU EFB",
+  "name": "Project VAYU — Aviation Intelligence EFB",
+  "icons": [
+    {
+      "src": "/pwa-192.png",
+      "type": "image/png",
+      "sizes": "192x192"
+    },
+    {
+      "src": "/pwa-512.png",
+      "type": "image/png",
+      "sizes": "512x512"
+    }
+  ],
+  "start_url": "/",
+  "background_color": "#f8fafc",
+  "theme_color": "#2e7def",
+  "display": "standalone",
+  "orientation": "any",
+  "scope": "/"
+}

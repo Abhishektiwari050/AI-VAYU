@@ -14,6 +14,8 @@ import {
   Crown,
   ShieldCheck,
   Command,
+  Clipboard,
+  FileCode,
 } from 'lucide-react';
 import { PRESET_ROUTES, normalizeAirportCode } from '../lib/airportData';
 import { UserTier } from './MonetizationModal';
@@ -37,7 +39,8 @@ interface HeaderProps {
   onOpenAuth: () => void;
   userTier: UserTier;
   onSearchSingle: (icao: string) => void;
-  onSearchRoute: (origin: string, destination: string, waypoints: string[]) => void;
+  onOpenSmartPaste?: () => void;
+  onOpenRawInspector?: () => void;
   isLoading: boolean;
   activeIcao?: string;
   userEmail?: string;
@@ -148,6 +151,28 @@ export const Header: React.FC<HeaderProps> = ({
               <Crown className="w-3.5 h-3.5 text-amber-600" />
               <span>{userTier}</span>
             </button>
+
+            {/* Smart Paste */}
+            {onOpenSmartPaste && (
+              <button
+                onClick={onOpenSmartPaste}
+                className="px-3.5 py-1.5 rounded-full bg-blue-50 border border-blue-200 text-blue-800 hover:bg-blue-100 font-mono text-[11px] font-bold transition cursor-pointer flex items-center gap-1.5 shadow-sm"
+              >
+                <Clipboard className="w-3.5 h-3.5 text-blue-600" />
+                <span>Smart Paste</span>
+              </button>
+            )}
+
+            {/* Raw Data Inspector */}
+            {onOpenRawInspector && (
+              <button
+                onClick={onOpenRawInspector}
+                className="px-3.5 py-1.5 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-900 hover:bg-emerald-100 font-mono text-[11px] font-bold transition cursor-pointer hidden md:flex items-center gap-1.5 shadow-sm"
+              >
+                <FileCode className="w-3.5 h-3.5 text-emerald-600" />
+                <span>Raw Data</span>
+              </button>
+            )}
 
             {/* Dispatch */}
             <button

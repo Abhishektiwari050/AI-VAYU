@@ -12,6 +12,8 @@ import { KneeboardPrintModal } from './components/KneeboardPrintModal';
 import { SavedBriefingsDrawer } from './components/SavedBriefingsDrawer';
 import { MonetizationModal, UserTier } from './components/MonetizationModal';
 import { AuthModal } from './components/AuthModal';
+import { SmartPasteModal } from './components/SmartPasteModal';
+import { RawDataInspectorModal } from './components/RawDataInspectorModal';
 import { BriefingSummary, RouteLegBriefing, AuditLogEntry } from './types';
 import { generateClientFallbackBriefing, generateClientFallbackRoute } from './lib/clientFallback';
 import { supabase, getUserProfile, UserProfile, recordBriefingAudit } from './lib/supabaseClient';
@@ -95,6 +97,8 @@ export default function App() {
   const [isHistoryDrawerOpen, setIsHistoryDrawerOpen] = useState<boolean>(false);
   const [isMonetizationModalOpen, setIsMonetizationModalOpen] = useState<boolean>(false);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState<boolean>(false);
+  const [isSmartPasteOpen, setIsSmartPasteOpen] = useState<boolean>(false);
+  const [isRawInspectorOpen, setIsRawInspectorOpen] = useState<boolean>(false);
 
   // Supabase Auth Listener
   useEffect(() => {
@@ -396,6 +400,8 @@ export default function App() {
           onOpenDispatchModal={() => setIsDispatchModalOpen(true)}
           onOpenMonetization={() => setIsMonetizationModalOpen(true)}
           onOpenAuth={() => setIsAuthModalOpen(true)}
+          onOpenSmartPaste={() => setIsSmartPasteOpen(true)}
+          onOpenRawInspector={() => setIsRawInspectorOpen(true)}
           userTier={userTier}
           userEmail={currentUser?.email}
           onSearchSingle={fetchSingleBriefing}
@@ -638,6 +644,29 @@ export default function App() {
         theme={theme}
         currentTier={userTier}
       />
+
+      <SmartPasteModal
+        isOpen={isSmartPasteOpen}
+        onClose={() => setIsSmartPasteOpen(false)}
+        theme={theme}
+        onProcessPaste={(pastedText) => {
+          // Process pasted text using fallback briefing logic
+          const codeMatch = pastedText.match(/\b([A-Z]{4})\b/);
+          const icao = codeMatch ? codeMatch[1] : 'VIDP';
+          const fallback = generateClientFallbackBriefing(icao);
+          setBriefing(fallback);
+          setViewMode('EXECUTIVE');
+        }}
+      />
+
+      {briefing && (
+        <RawDataInspectorModal
+          isOpen={isRawInspectorOpen}
+          onClose={() => setIsRawInspectorOpen(false)}
+          briefing={briefing}
+          theme={theme}
+        />
+      )}
     </div>
   );
 }

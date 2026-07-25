@@ -21,6 +21,19 @@
     <meta name="geo.position" content="28.5562;77.1000" />
     <meta name="ICBM" content="28.5562, 77.1000" />
 
+    <!-- PWA Web App Manifest & Service Worker -->
+    <link rel="manifest" href="/manifest.json" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="VAYU EFB" />
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('/sw.js').catch(() => {});
+        });
+      }
+    </script>
+
     <!-- Favicon & Tab Icon Compatibility -->
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="shortcut icon" href="/favicon.svg" type="image/svg+xml" />
