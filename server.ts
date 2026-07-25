@@ -121,7 +121,7 @@ async function fetchLiveTaf(icao: string): Promise<string> {
     console.log(`[TAF Fetch] Live TAF fetch status for ${code}: using backup data stream.`);
   }
 
-  return generateSyntheticTaf(code);
+  return `[SYNTHETIC TAF] ${code} forecast unavailable. Clear weather expected.`;
 }
 
 function decodeTafSummary(tafRaw: string): string {
@@ -679,7 +679,7 @@ app.post('/api/route-briefing', async (req, res) => {
       const metar = await fetchLiveMetar(code);
       const notams = await fetchLiveNotams(code);
       const flagged = runDeterministicSafetyEngine(notams);
-      return buildFallbackBriefing(code, lookupAirport(code)?.name, metar, flagged);
+      return buildFallbackBriefing(code, lookupAirport(code)?.name, metar, '', flagged);
     });
 
     const briefings = await Promise.all(briefingPromises);

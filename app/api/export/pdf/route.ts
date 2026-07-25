@@ -1,4 +1,4 @@
-import { crypto } from 'node:crypto';
+import { createHash } from 'crypto';
 import { BriefingSummary } from '../../../../src/types';
 
 export interface PdfExportRequestPayload {
@@ -10,7 +10,7 @@ export interface PdfExportRequestPayload {
 }
 
 export function generateSha256Digest(data: string): string {
-  return require('crypto').createHash('sha256').update(data).digest('hex');
+  return createHash('sha256').update(data).digest('hex');
 }
 
 /**
