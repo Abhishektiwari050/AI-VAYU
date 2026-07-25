@@ -3,13 +3,13 @@
   "name": "Project VAYU — Aviation Intelligence EFB",
   "icons": [
     {
-      "src": "/pwa-192.png",
-      "type": "image/png",
-      "sizes": "192x192"
+      "src": "/favicon.svg",
+      "type": "image/svg+xml",
+      "sizes": "any"
     },
     {
-      "src": "/pwa-512.png",
-      "type": "image/png",
+      "src": "/vayu-logo.svg",
+      "type": "image/svg+xml",
       "sizes": "512x512"
     }
   ],

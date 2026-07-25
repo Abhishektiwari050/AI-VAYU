@@ -1,11 +1,12 @@
 {
+  "cleanUrls": true,
   "rewrites": [
     {
       "source": "/api/(.*)",
       "destination": "/api/$1"
     },
     {
-      "source": "/(.*)",
+      "source": "/((?!assets/|sw.js|manifest.json|vayu-logo.svg|favicon.svg|favicon.ico|robots.txt|sitemap.xml).*)",
       "destination": "/index.html"
     }
   ]
