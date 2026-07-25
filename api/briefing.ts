@@ -31,12 +31,26 @@ const AIRPORTS: Record<string, string> = {
   EGLL: 'London Heathrow', OMDB: 'Dubai International', WSSS: 'Singapore Changi',
 };
 
+const IATA_TO_ICAO: Record<string, string> = {
+  JFK: 'KJFK', LAX: 'KLAX', ORD: 'KORD', DFW: 'KDFW', SFO: 'KSFO', DEN: 'KDEN', MIA: 'KMIA', SEA: 'KSEA', ATL: 'KATL', BOS: 'KBOS',
+  DEL: 'VIDP', BOM: 'VABB', BLR: 'VOBL', HYD: 'VOHS', MAA: 'VOMM', CCU: 'VECC', GOX: 'VDGO', GOI: 'VOGO', IDR: 'VAID', BHO: 'VABP',
+  LHR: 'EGLL', LGW: 'EGKK', CDG: 'LFPG', AMS: 'EHAM', DXB: 'OMDB', HKG: 'VHHH', SIN: 'WSSS', BKK: 'VTBS', SYD: 'YSSY',
+  DELHI: 'VIDP', MUMBAI: 'VABB', BENGALURU: 'VOBL', BANGALORE: 'VOBL', HYDERABAD: 'VOHS', CHENNAI: 'VOMM', KOLKATA: 'VECC', GOA: 'VDGO',
+  LONDON: 'EGLL', DUBAI: 'OMDB', CHICAGO: 'KORD', NEWYORK: 'KJFK', LOSANGELES: 'KLAX', DALLAS: 'KDFW', SANFRANCISCO: 'KSFO',
+};
+
 function lookupAirportName(icao: string): string {
   return AIRPORTS[icao.toUpperCase()] || `${icao.toUpperCase()} Airport`;
 }
 
 function normalizeIcao(raw: string): string | null {
   const s = raw.trim().toUpperCase().replace(/[^A-Z0-9]/g, '');
+  if (!s) return null;
+  if (IATA_TO_ICAO[s]) return IATA_TO_ICAO[s];
+  if (s.length === 3 && !s.startsWith('K') && !s.startsWith('V') && !s.startsWith('E')) {
+    // Standard US 3-letter FAA identifier conversion e.g. DFW -> KDFW
+    return `K${s}`;
+  }
   if (s.length < 3 || s.length > 5) return null;
   return s;
 }

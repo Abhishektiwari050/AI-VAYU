@@ -94,7 +94,7 @@ export const Header: React.FC<HeaderProps> = ({
       setOrigin(formattedOrigin);
       setDestination(formattedDest);
       const waypoints = waypointInput
-        .split(',')
+        .split(/[\s,/]+/)
         .map((w) => normalizeCode(w.trim()))
         .filter(Boolean);
       onSearchRoute(formattedOrigin, formattedDest, waypoints);
@@ -219,8 +219,7 @@ export const Header: React.FC<HeaderProps> = ({
                     type="text"
                     value={singleIcao}
                     onChange={(e) => setSingleIcao(e.target.value.toUpperCase())}
-                    placeholder="Search airport by ICAO code (VIDP, VABB, KJFK)..."
-                    maxLength={4}
+                    placeholder="Search airport code or city (VIDP, Delhi, KJFK, JFK, Chicago)..."
                     className="w-full bg-white border border-[#e3e8ee] rounded-full py-3 pl-11 pr-12 text-sm font-medium text-[#0e1116] placeholder-[#5b6472] focus:outline-none focus:border-[#2e7def] focus:ring-2 focus:ring-[#2e7def]/20 shadow-[0_1px_1px_rgba(14,17,22,0.04),0_20px_40px_-24px_rgba(14,17,22,0.18)] transition-all"
                   />
                   <div className="absolute right-3.5 top-1/2 -translate-y-1/2 hidden sm:flex items-center gap-0.5 px-2 py-0.5 rounded-full bg-slate-100 border border-[#e3e8ee] text-[10px] font-mono text-[#5b6472]">

@@ -23,6 +23,9 @@
     color: var(--color-ink);
     min-h: 100vh;
   }
+  button, input, select, svg, .cursor-pointer {
+    touch-action: manipulation;
+  }
 }
 
 /* FLOATING CLOUD DRIFT AND ORGANIC JIGGLE ANIMATIONS */
