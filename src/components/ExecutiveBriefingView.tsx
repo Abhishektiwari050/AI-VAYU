@@ -49,6 +49,7 @@ export const ExecutiveBriefingView: React.FC<ExecutiveBriefingViewProps> = ({
   const [showFullLedger, setShowFullLedger] = useState<boolean>(false);
   const [activeLedgerBucket, setActiveLedgerBucket] = useState<NotamBucket | 'ALL'>('ALL');
   const [ledgerSearchTerm, setLedgerSearchTerm] = useState<string>('');
+  const [activeMediaTab, setActiveMediaTab] = useState<'DIAGRAM' | 'RADAR'>('DIAGRAM');
 
 
   const isNight = theme === 'NIGHT_RED';
