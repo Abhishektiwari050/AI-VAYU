@@ -87,7 +87,6 @@ const AIRPORT_LAYOUTS: Record<string, AirportLayout> = {
   },
 
   // ─── KJFK — John F. Kennedy, New York ────────────────────────────────────
-  // Four runways in a rectangular arrangement: 04L/22R, 04R/22L, 13L/31R, 13R/31L
   KJFK: {
     name: 'John F. Kennedy International',
     viewBox: '0 0 900 440',
@@ -107,6 +106,76 @@ const AIRPORT_LAYOUTS: Record<string, AirportLayout> = {
       { id: 'T5', label: 'T5', x: 530, y: 280, w: 80, h: 50 },
     ],
     tower: { x: 490, y: 210 },
+  },
+
+  // ─── KLAX — Los Angeles International ────────────────────────────────────
+  KLAX: {
+    name: 'Los Angeles International',
+    viewBox: '0 0 900 440',
+    runways: [
+      { id: 'RWY-06L24R', label1: '06L', label2: '24R', x1: 60, y1: 120, x2: 840, y2: 120, width: 18 },
+      { id: 'RWY-06R24L', label1: '06R', label2: '24L', x1: 60, y1: 175, x2: 840, y2: 175, width: 18 },
+      { id: 'RWY-07L25R', label1: '07L', label2: '25R', x1: 60, y1: 265, x2: 840, y2: 265, width: 18 },
+      { id: 'RWY-07R25L', label1: '07R', label2: '25L', x1: 60, y1: 320, x2: 840, y2: 320, width: 18 },
+    ],
+    taxiways: [
+      { id: 'TWY-C', label: 'TWY C', x1: 60, y1: 148, x2: 840, y2: 148, width: 10 },
+      { id: 'TWY-E', label: 'TWY E', x1: 60, y1: 292, x2: 840, y2: 292, width: 10 },
+      { id: 'TWY-AA', label: 'TWY AA', x1: 280, y1: 100, x2: 280, y2: 340, width: 10 },
+    ],
+    terminals: [
+      { id: 'TBIT', label: 'Tom Bradley Intl', x: 200, y: 205, w: 140, h: 45 },
+      { id: 'T1-3', label: 'Terminals 1-3',    x: 370, y: 205, w: 160, h: 45 },
+      { id: 'T4-8', label: 'Terminals 4-8',    x: 560, y: 205, w: 160, h: 45 },
+    ],
+    tower: { x: 350, y: 228 },
+  },
+
+  // ─── KORD — Chicago O'Hare International ─────────────────────────────────
+  KORD: {
+    name: "Chicago O'Hare International",
+    viewBox: '0 0 900 440',
+    runways: [
+      { id: 'RWY-10L28R', label1: '10L', label2: '28R', x1: 60, y1: 110, x2: 840, y2: 110, width: 18 },
+      { id: 'RWY-10C28C', label1: '10C', label2: '28C', x1: 60, y1: 165, x2: 840, y2: 165, width: 18 },
+      { id: 'RWY-10R28L', label1: '10R', label2: '28L', x1: 60, y1: 280, x2: 840, y2: 280, width: 18 },
+      { id: 'RWY-04L22R', label1: '04L', label2: '22R', x1: 180, y1: 60, x2: 720, y2: 380, width: 18 },
+    ],
+    taxiways: [
+      { id: 'TWY-A', label: 'TWY A', x1: 60, y1: 138, x2: 840, y2: 138, width: 10 },
+      { id: 'TWY-B', label: 'TWY B', x1: 60, y1: 250, x2: 840, y2: 250, width: 10 },
+    ],
+    terminals: [
+      { id: 'T1', label: 'Terminal 1', x: 320, y: 200, w: 80, h: 40 },
+      { id: 'T2', label: 'Terminal 2', x: 420, y: 200, w: 80, h: 40 },
+      { id: 'T3', label: 'Terminal 3', x: 520, y: 200, w: 80, h: 40 },
+      { id: 'T5', label: 'Terminal 5 Intl', x: 640, y: 200, w: 110, h: 40 },
+    ],
+    tower: { x: 400, y: 220 },
+  },
+
+  // ─── KDFW — Dallas/Fort Worth International ──────────────────────────────
+  KDFW: {
+    name: 'Dallas/Fort Worth International',
+    viewBox: '0 0 900 440',
+    runways: [
+      { id: 'RWY-17L35R', label1: '17L', label2: '35R', x1: 150, y1: 60, x2: 150, y2: 380, width: 18 },
+      { id: 'RWY-17C35C', label1: '17C', label2: '35C', x1: 230, y1: 60, x2: 230, y2: 380, width: 18 },
+      { id: 'RWY-17R35L', label1: '17R', label2: '35L', x1: 310, y1: 60, x2: 310, y2: 380, width: 18 },
+      { id: 'RWY-18L36R', label1: '18L', label2: '36R', x1: 670, y1: 60, x2: 670, y2: 380, width: 18 },
+      { id: 'RWY-18R36L', label1: '18R', label2: '36L', x1: 750, y1: 60, x2: 750, y2: 380, width: 18 },
+    ],
+    taxiways: [
+      { id: 'TWY-A', label: 'TWY A', x1: 190, y1: 60, x2: 190, y2: 380, width: 10 },
+      { id: 'TWY-B', label: 'TWY B', x1: 710, y1: 60, x2: 710, y2: 380, width: 10 },
+      { id: 'TWY-E', label: 'TWY E', x1: 150, y1: 220, x2: 750, y2: 220, width: 10 },
+    ],
+    terminals: [
+      { id: 'T-A', label: 'Term A/B', x: 400, y: 110, w: 100, h: 50 },
+      { id: 'T-C', label: 'Term C/D', x: 400, y: 195, w: 100, h: 50 },
+      { id: 'T-E', label: 'Term E',   x: 400, y: 280, w: 100, h: 50 },
+    ],
+    tower: { x: 520, y: 220 },
   },
 
   // ─── EGLL — London Heathrow ───────────────────────────────────────────────

@@ -501,14 +501,14 @@ export default function App() {
 
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-left">
                     {[
+                      { code: 'KJFK', name: 'John F. Kennedy', city: 'New York, USA', cat: 'VFR' },
+                      { code: 'KLAX', name: 'Los Angeles Intl', city: 'Los Angeles, USA', cat: 'MVFR' },
+                      { code: 'KORD', name: "Chicago O'Hare", city: 'Chicago, USA', cat: 'IFR' },
+                      { code: 'KDFW', name: 'Dallas/Fort Worth', city: 'Dallas, USA', cat: 'VFR' },
                       { code: 'VIDP', name: 'Indira Gandhi Intl', city: 'Delhi, India', cat: 'VFR' },
                       { code: 'VABB', name: 'Chhatrapati Shivaji', city: 'Mumbai, India', cat: 'MVFR' },
                       { code: 'VOBL', name: 'Kempegowda Intl', city: 'Bengaluru, India', cat: 'VFR' },
-                      { code: 'VDGO', name: 'Manohar Intl', city: 'Goa Mopa, India', cat: 'IFR' },
-                      { code: 'VOHS', name: 'Rajiv Gandhi Intl', city: 'Hyderabad, India', cat: 'VFR' },
-                      { code: 'VOMM', name: 'Chennai Intl', city: 'Chennai, India', cat: 'VFR' },
-                      { code: 'KJFK', name: 'John F. Kennedy', city: 'New York, USA', cat: 'VFR' },
-                      { code: 'EGLL', name: 'London Heathrow', city: 'London, UK', cat: 'VFR' },
+                      { code: 'VDGO', name: 'Manohar Intl', city: 'Goa Mopa, India', cat: 'VFR' },
                     ].map((hub) => (
                       <button
                         key={hub.code}
