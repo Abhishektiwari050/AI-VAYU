@@ -53,6 +53,13 @@ export interface BriefingSummary {
   icao: string;
   airportName?: string;
   generatedAtUtc: string;
+  // Honest data provenance — set by the server, consumed by the frontend
+  dataSource?: {
+    metar: 'LIVE (NOAA)' | 'SYNTHETIC';
+    taf: 'LIVE (NOAA)' | 'SYNTHETIC';
+    notams: 'LIVE (FAA)' | 'SYNTHETIC';
+    aiSummary: 'GEMINI AI' | 'DETERMINISTIC ENGINE';
+  };
   weather: {
     rawMetar: string;
     rawTaf?: string;

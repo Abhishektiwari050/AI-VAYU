@@ -161,7 +161,7 @@ ADVISORY ONLY: Informational pre-flight awareness utility under DGCA and FAA reg
       <ViralGrowthBanner theme={theme} currentIcao={briefing.icao} />
 
       {/* MANDATORY LEGAL FAR PART 91.3 ADVISORY DISCLAIMER BANNER */}
-      <div className={`p-3 rounded-2xl border text-[11px] font-mono mb-6 flex items-start gap-2.5 shadow-sm ${
+      <div className={`p-3 rounded-2xl border text-[11px] font-mono mb-3 flex items-start gap-2.5 shadow-sm ${
         isNight
           ? 'bg-red-950/60 border-red-800/80 text-red-300'
           : isDay
@@ -174,6 +174,33 @@ ADVISORY ONLY: Informational pre-flight awareness utility under DGCA and FAA reg
           Project VAYU is an informational pre-flight awareness utility. It does not replace official FAA briefings via 1800wxbrief.com or official flight service stations. The Pilot-in-Command retains sole operational authority.
         </div>
       </div>
+
+      {/* DATA SOURCE PROVENANCE BANNER — always visible, always honest */}
+      {(() => {
+        const ds = briefing.dataSource;
+        const allSynthetic = !ds;
+        const anySynthetic = !ds || ds.metar === 'SYNTHETIC' || ds.notams === 'SYNTHETIC';
+        return (
+          <div className={`mb-6 p-3 rounded-2xl border text-[11px] font-mono flex flex-wrap items-center gap-x-4 gap-y-1.5 ${
+            allSynthetic
+              ? 'bg-red-50 border-red-300 text-red-800'
+              : anySynthetic
+              ? 'bg-amber-50 border-amber-300 text-amber-900'
+              : 'bg-emerald-50 border-emerald-300 text-emerald-900'
+          }`}>
+            <span className="font-black uppercase tracking-wider shrink-0">
+              {allSynthetic ? '⚠ DEMO DATA' : anySynthetic ? '⚠ PARTIAL LIVE DATA' : '✓ LIVE DATA'}
+            </span>
+            <span>METAR: <strong>{ds?.metar ?? 'SYNTHETIC'}</strong></span>
+            <span>TAF: <strong>{ds?.taf ?? 'SYNTHETIC'}</strong></span>
+            <span>NOTAMs: <strong>{ds?.notams ?? 'SYNTHETIC'}</strong></span>
+            <span>AI: <strong>{ds?.aiSummary ?? 'DETERMINISTIC ENGINE'}</strong></span>
+            {allSynthetic && (
+              <span className="ml-auto text-red-700 font-bold">Not for operational use — server offline</span>
+            )}
+          </div>
+        );
+      })()}
 
       {/* HERO AIRPORT TITLE & CIRRUS OPEN SKY HUD */}
       <div className="text-center my-10 space-y-3">
