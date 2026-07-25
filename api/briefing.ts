@@ -296,24 +296,30 @@ NOTAMs (${flagged.length} flagged): ${JSON.stringify(flagged.slice(0, 15), null,
 Return ONLY valid JSON with this exact schema:
 {"weather":{"plainEnglishSummary":"string","tafDecodedSummary":"string","flightCategory":"VFR|MVFR|IFR|LIFR|UNKNOWN","windInfo":"string","visibilityInfo":"string","cloudInfo":"string","tempDewInfo":"string"},"criticalAlerts":[{"id":"string","title":"string","plainEnglish":"string","rawSnippet":"string","category":"string","actionRequired":"string","effectiveWindow":"string"}],"warnings":[{"id":"string","title":"string","plainEnglish":"string","rawSnippet":"string","category":"string","effectiveWindow":"string"}],"infoItems":[{"id":"string","title":"string","plainEnglish":"string","rawSnippet":"string"}],"picTakeaway":"string"}`;
 
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 10000);
+    const models = ['gemini-3.6-flash', 'gemini-2.5-flash', 'gemini-2.0-flash'];
 
-    const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`, {
-      method: 'POST',
-      signal: controller.signal,
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        contents: [{ parts: [{ text: prompt }] }],
-        generationConfig: { temperature: 0.1, responseMimeType: 'application/json' },
-      }),
-    });
-    clearTimeout(timeout);
+    for (const model of models) {
+      try {
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), 8000);
 
-    if (res.ok) {
-      const data = await res.json();
-      const text = data?.candidates?.[0]?.content?.parts?.[0]?.text;
-      if (text) return JSON.parse(text.replace(/```json\n?|\n?```/g, '').trim());
+        const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`, {
+          method: 'POST',
+          signal: controller.signal,
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            contents: [{ parts: [{ text: prompt }] }],
+            generationConfig: { temperature: 0.1, responseMimeType: 'application/json' },
+          }),
+        });
+        clearTimeout(timeout);
+
+        if (res.ok) {
+          const data = await res.json();
+          const text = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+          if (text) return JSON.parse(text.replace(/```json\n?|\n?```/g, '').trim());
+        }
+      } catch {}
     }
   } catch {}
   return null;
