@@ -3,7 +3,7 @@
   "crons": [
     {
       "path": "/api/cron/aai-sync",
-      "schedule": "0 */4 * * *"
+      "schedule": "0 0 * * *"
     }
   ],
   "rewrites": [
