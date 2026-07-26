@@ -29,7 +29,7 @@ import { DisplayTheme, FontSizeSetting } from './Header';
 import { formatZuluAndLocalTime, evaluateNotamStatusWindow } from '../lib/timezoneUtils';
 import { AerodromeRadarMap } from './AerodromeRadarMap';
 import { CockpitAudioReadout } from './CockpitAudioReadout';
-import { InteractiveAirportDiagram } from './InteractiveAirportDiagram';
+import { DynamicRunwayMap } from './DynamicRunwayMap';
 import { ViralGrowthBanner } from './ViralGrowthBanner';
 
 interface ExecutiveBriefingViewProps {
@@ -314,7 +314,7 @@ ADVISORY ONLY: Informational pre-flight awareness utility under DGCA and FAA reg
         </div>
 
         {activeMediaTab === 'DIAGRAM' ? (
-          <InteractiveAirportDiagram briefing={briefing} theme={theme} />
+          <DynamicRunwayMap briefing={briefing} theme={theme} />
         ) : (
           <AerodromeRadarMap briefing={briefing} theme={theme} />
         )}
