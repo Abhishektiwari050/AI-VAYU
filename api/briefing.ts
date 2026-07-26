@@ -129,9 +129,21 @@ async function fetchLiveTaf(icao: string): Promise<{ taf: string; isLive: boolea
   return { taf: `[SYNTHETIC] TAF not available for ${icao} from free data sources.`, isLive: false };
 }
 
-// ── Free NOAA NOTAM fetch (best for US; partial international) ────────────────
+import { createClient } from '@supabase/supabase-js';
+
+const SUPABASE_URL = process.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL || 'https://kgbgjskpadonrlntzdqc.supabase.co';
+const SUPABASE_ANON_KEY = process.env.VITE_SUPABASE_ANON_KEY || process.env.VITE_SUPABASE_PUBLISHABLE_KEY || process.env.SUPABASE_ANON_KEY || 'sb_publishable_VGXp0PLbkjDpM_CYyEi9Fg_YsZYNxl-';
+
+let supabaseClient: any = null;
+try {
+  supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+} catch {}
+
+// ── Free NOAA NOTAM fetch (best for US; Supabase cache for Indian aerodromes) ──
 async function fetchLiveNotams(icao: string): Promise<{ notams: RawNotam[]; isLive: boolean }> {
   const code = icao.toUpperCase();
+
+  // Try NOAA live NOTAMs first
   try {
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), 5000);
@@ -158,7 +170,35 @@ async function fetchLiveNotams(icao: string): Promise<{ notams: RawNotam[]; isLi
       }
     }
   } catch {}
-  // Return clearly synthetic NOTAMs for non-US airports
+
+  // Check Supabase Indian NOTAM Cache for Indian ICAO codes (VI*, VA*, VO*, VE*)
+  if (supabaseClient && (code.startsWith('VI') || code.startsWith('VA') || code.startsWith('VO') || code.startsWith('VE'))) {
+    try {
+      const { data } = await supabaseClient
+        .from('indian_notam_cache')
+        .select('*')
+        .eq('icao', code)
+        .single();
+
+      if (data && (data.raw_notams_text || data.series_a_json)) {
+        const rawText = data.raw_notams_text || JSON.stringify(data.series_a_json);
+        return {
+          notams: [
+            {
+              id: `AAI-CACHE-${code}-1`,
+              icao: code,
+              rawText: `[AAI SERIES A/C/G CACHE] ${rawText}`,
+              type: 'GENERAL',
+              isFir: false,
+            },
+          ],
+          isLive: true,
+        };
+      }
+    } catch {}
+  }
+
+  // Return synthetic NOTAMs if all feeds are offline
   const synthNotams: RawNotam[] = [
     { id: `SYNTH-${code}-1`, icao: code, rawText: `[SYNTHETIC] A) ${code} B) SYNTHETIC NOTAM — Live NOTAM feed unavailable for this airport. Consult official sources.`, type: 'GENERAL' },
   ];
