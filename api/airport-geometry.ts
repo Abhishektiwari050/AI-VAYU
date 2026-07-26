@@ -22,25 +22,26 @@ export interface AirportGeometryResponse {
 }
 
 const PRECACHED_GEOMETRIES: Record<string, AirportGeometryResponse> = {
-  // VIDP — Delhi (Indira Gandhi Intl)
+  // VIDP — Delhi (Indira Gandhi Intl) — 4 Operational Runways
   VIDP: {
     icao: 'VIDP',
     name: 'Indira Gandhi International Airport (Delhi)',
     elevation_ft: 777,
     runways: [
-      { id: '11L/29R', le_ident: '11L', he_ident: '29R', length_ft: 14500, width_ft: 150, heading_deg: 110, surface: 'ASPHALT' },
-      { id: '10/28', le_ident: '10', he_ident: '28', length_ft: 12500, width_ft: 150, heading_deg: 100, surface: 'ASPHALT' },
-      { id: '11R/29L', le_ident: '11R', he_ident: '29L', length_ft: 14534, width_ft: 197, heading_deg: 110, surface: 'ASPHALT' },
+      { id: '11L/29R', le_ident: '11L', he_ident: '29R', length_ft: 14534, width_ft: 197, heading_deg: 105, surface: 'ASPHALT' },
+      { id: '10/28', le_ident: '10', he_ident: '28', length_ft: 12510, width_ft: 150, heading_deg: 98, surface: 'ASPHALT' },
+      { id: '09/27', le_ident: '09', he_ident: '27', length_ft: 9229, width_ft: 148, heading_deg: 92, surface: 'ASPHALT' },
+      { id: '11R/29L', le_ident: '11R', he_ident: '29L', length_ft: 14435, width_ft: 197, heading_deg: 105, surface: 'ASPHALT' },
     ],
   },
-  // VABB — Mumbai (Chhatrapati Shivaji)
+  // VABB — Mumbai (Chhatrapati Shivaji) — 2 Intersecting Runways at 45°
   VABB: {
     icao: 'VABB',
     name: 'Chhatrapati Shivaji Maharaj International (Mumbai)',
     elevation_ft: 37,
     runways: [
-      { id: '09/27', le_ident: '09', he_ident: '27', length_ft: 11319, width_ft: 148, heading_deg: 90, surface: 'ASPHALT' },
-      { id: '14/32', le_ident: '14', he_ident: '32', length_ft: 9744, width_ft: 148, heading_deg: 140, surface: 'ASPHALT' },
+      { id: '09/27', le_ident: '09', he_ident: '27', length_ft: 11312, width_ft: 148, heading_deg: 93, surface: 'ASPHALT' },
+      { id: '14/32', le_ident: '14', he_ident: '32', length_ft: 9810, width_ft: 148, heading_deg: 138, surface: 'ASPHALT' },
     ],
   },
   // VOBL — Bengaluru (Kempegowda)
@@ -53,28 +54,16 @@ const PRECACHED_GEOMETRIES: Record<string, AirportGeometryResponse> = {
       { id: '09R/27L', le_ident: '09R', he_ident: '27L', length_ft: 13123, width_ft: 148, heading_deg: 90, surface: 'ASPHALT' },
     ],
   },
-  // KJFK — New York (JFK)
+  // KJFK — New York (JFK) — 4 Runways in Perpendicular "#" Quadrangle
   KJFK: {
     icao: 'KJFK',
     name: 'John F. Kennedy International Airport (New York)',
     elevation_ft: 13,
     runways: [
-      { id: '04L/22R', le_ident: '04L', he_ident: '22R', length_ft: 12079, width_ft: 200, heading_deg: 40, surface: 'ASPHALT' },
-      { id: '04R/22L', le_ident: '04R', he_ident: '22L', length_ft: 8400, width_ft: 150, heading_deg: 40, surface: 'ASPHALT' },
-      { id: '13L/31R', le_ident: '13L', he_ident: '31R', length_ft: 10000, width_ft: 150, heading_deg: 130, surface: 'ASPHALT' },
-      { id: '13R/31L', le_ident: '13R', he_ident: '31L', length_ft: 14511, width_ft: 200, heading_deg: 130, surface: 'CONCRETE' },
-    ],
-  },
-  // KLAX — Los Angeles Intl
-  KLAX: {
-    icao: 'KLAX',
-    name: 'Los Angeles International Airport',
-    elevation_ft: 128,
-    runways: [
-      { id: '06L/24R', le_ident: '06L', he_ident: '24R', length_ft: 8926, width_ft: 150, heading_deg: 60, surface: 'CONCRETE' },
-      { id: '06R/24L', le_ident: '06R', he_ident: '24L', length_ft: 10285, width_ft: 150, heading_deg: 60, surface: 'CONCRETE' },
-      { id: '07L/25R', le_ident: '07L', he_ident: '25R', length_ft: 12091, width_ft: 150, heading_deg: 70, surface: 'CONCRETE' },
-      { id: '07R/25L', le_ident: '07R', he_ident: '25L', length_ft: 11095, width_ft: 200, heading_deg: 70, surface: 'CONCRETE' },
+      { id: '04L/22R', le_ident: '04L', he_ident: '22R', length_ft: 12079, width_ft: 200, heading_deg: 44, surface: 'ASPHALT' },
+      { id: '04R/22L', le_ident: '04R', he_ident: '22L', length_ft: 8400, width_ft: 150, heading_deg: 44, surface: 'ASPHALT' },
+      { id: '13L/31R', le_ident: '13L', he_ident: '31R', length_ft: 10000, width_ft: 150, heading_deg: 134, surface: 'ASPHALT' },
+      { id: '13R/31L', le_ident: '13R', he_ident: '31L', length_ft: 14511, width_ft: 200, heading_deg: 134, surface: 'CONCRETE' },
     ],
   },
 };
@@ -96,7 +85,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       return res.status(200).json(PRECACHED_GEOMETRIES[icao]);
     }
 
-    // Default fallback geometry for any unspecified ICAO
     return res.status(200).json({
       icao,
       name: `${icao} Aerodrome`,

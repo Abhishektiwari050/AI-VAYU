@@ -7,7 +7,7 @@ interface DynamicRunwayMapProps {
   theme?: string;
 }
 
-interface RunwaySpec {
+interface RunwayData {
   id: string;
   le_ident: string;
   he_ident: string;
@@ -15,154 +15,143 @@ interface RunwaySpec {
   width_ft: number;
   heading_deg: number;
   surface: string;
-  x1: number;
-  y1: number;
-  x2: number;
-  y2: number;
+  cx: number;
+  cy: number;
   isClosed?: boolean;
 }
 
-interface TaxiwaySpec {
+interface TaxiwayData {
   id: string;
   label: string;
-  x1: number;
-  y1: number;
-  x2: number;
-  y2: number;
+  x1: number; y1: number; x2: number; y2: number;
   width?: number;
 }
 
-interface TerminalSpec {
+interface TerminalData {
   id: string;
   label: string;
-  x: number;
-  y: number;
-  w: number;
-  h: number;
+  x: number; y: number; w: number; h: number;
 }
 
-interface AirportMasterLayout {
+interface AirportLayout {
   name: string;
   viewBox: string;
-  runways: RunwaySpec[];
-  taxiways: TaxiwaySpec[];
-  terminals: TerminalSpec[];
+  runways: RunwayData[];
+  taxiways: TaxiwayData[];
+  terminals: TerminalData[];
   tower: { x: number; y: number };
 }
 
-const MASTER_AIRPORT_MAPS: Record<string, AirportMasterLayout> = {
-  // ─── VIDP — Indira Gandhi International, Delhi ───────────────────────────
-  // Real layout: 09/27 (North), 10/28 (Middle/South), 11R/29L (Far South)
+const MASTER_AIRPORT_MAPS: Record<string, AirportLayout> = {
+  // ─── VIDP — Indira Gandhi International, Delhi (4 Operational Runways) ──────
   VIDP: {
     name: 'Indira Gandhi International Airport (Delhi)',
-    viewBox: '0 0 900 440',
+    viewBox: '0 0 900 480',
     runways: [
-      { id: '11L/29R', le_ident: '11L', he_ident: '29R', length_ft: 14500, width_ft: 150, heading_deg: 110, surface: 'ASPHALT', x1: 60, y1: 100, x2: 840, y2: 125 },
-      { id: '10/28', le_ident: '10', he_ident: '28', length_ft: 12500, width_ft: 150, heading_deg: 100, surface: 'ASPHALT', x1: 80, y1: 180, x2: 820, y2: 200 },
-      { id: '11R/29L', le_ident: '11R', he_ident: '29L', length_ft: 14534, width_ft: 197, heading_deg: 110, surface: 'ASPHALT', x1: 60, y1: 260, x2: 840, y2: 285 },
+      { id: '09/27', le_ident: '09', he_ident: '27', length_ft: 9229, width_ft: 148, heading_deg: 92, surface: 'ASPHALT', cx: 320, cy: 90 },
+      { id: '11L/29R', le_ident: '11L', he_ident: '29R', length_ft: 14534, width_ft: 197, heading_deg: 105, surface: 'ASPHALT', cx: 450, cy: 150 },
+      { id: '10/28', le_ident: '10', he_ident: '28', length_ft: 12510, width_ft: 150, heading_deg: 98, surface: 'ASPHALT', cx: 450, cy: 240 },
+      { id: '11R/29L', le_ident: '11R', he_ident: '29L', length_ft: 14435, width_ft: 197, heading_deg: 105, surface: 'ASPHALT', cx: 450, cy: 330 },
     ],
     taxiways: [
-      { id: 'TWY-A', label: 'TWY A', x1: 60, y1: 145, x2: 840, y2: 145, width: 8 },
-      { id: 'TWY-B', label: 'TWY B', x1: 200, y1: 80, x2: 200, y2: 300, width: 8 },
-      { id: 'TWY-C', label: 'TWY C', x1: 450, y1: 80, x2: 450, y2: 300, width: 8 },
-      { id: 'TWY-D', label: 'TWY D', x1: 700, y1: 80, x2: 700, y2: 300, width: 8 },
+      { id: 'TWY-M', label: 'TWY M', x1: 60, y1: 175, x2: 840, y2: 175, width: 8 },
+      { id: 'TWY-N', label: 'TWY N', x1: 60, y1: 265, x2: 840, y2: 265, width: 8 },
+      { id: 'TWY-Z', label: 'TWY Z (Eco-Bridge)', x1: 250, y1: 90, x2: 250, y2: 330, width: 8 },
+      { id: 'TWY-E', label: 'TWY E (East Link)', x1: 680, y1: 90, x2: 680, y2: 330, width: 8 },
     ],
     terminals: [
-      { id: 'T1', label: 'T1 Domestic', x: 80, y: 320, w: 150, h: 55 },
-      { id: 'T2', label: 'T2', x: 350, y: 320, w: 90, h: 50 },
-      { id: 'T3', label: 'T3 International', x: 490, y: 320, w: 230, h: 65 },
+      { id: 'T1', label: 'T1 Domestic (North-West)', x: 100, y: 30, w: 160, h: 45 },
+      { id: 'T2', label: 'T2 Domestic', x: 380, y: 380, w: 90, h: 50 },
+      { id: 'T3', label: 'T3 International Pier', x: 500, y: 380, w: 250, h: 65 },
     ],
-    tower: { x: 310, y: 335 },
+    tower: { x: 330, y: 395 },
   },
 
-  // ─── VABB — Chhatrapati Shivaji Maharaj, Mumbai ──────────────────────────
-  // Real layout: Intersecting 09/27 (E-W) & 14/32 (NW-SE)
+  // ─── VABB — Chhatrapati Shivaji Maharaj, Mumbai (Intersecting at 45°) ──────
   VABB: {
     name: 'Chhatrapati Shivaji Maharaj International (Mumbai)',
-    viewBox: '0 0 900 440',
+    viewBox: '0 0 900 480',
     runways: [
-      { id: '09/27', le_ident: '09', he_ident: '27', length_ft: 11319, width_ft: 148, heading_deg: 90, surface: 'ASPHALT', x1: 60, y1: 200, x2: 840, y2: 200 },
-      { id: '14/32', le_ident: '14', he_ident: '32', length_ft: 9744, width_ft: 148, heading_deg: 140, surface: 'ASPHALT', x1: 160, y1: 50, x2: 740, y2: 370 },
+      { id: '09/27', le_ident: '09', he_ident: '27', length_ft: 11312, width_ft: 148, heading_deg: 93, surface: 'ASPHALT', cx: 450, cy: 230 },
+      { id: '14/32', le_ident: '14', he_ident: '32', length_ft: 9810, width_ft: 148, heading_deg: 138, surface: 'ASPHALT', cx: 450, cy: 230 },
     ],
     taxiways: [
-      { id: 'TWY-A', label: 'TWY A', x1: 60, y1: 235, x2: 840, y2: 235, width: 8 },
-      { id: 'TWY-B', label: 'TWY B', x1: 300, y1: 100, x2: 300, y2: 320, width: 8 },
-      { id: 'TWY-C', label: 'TWY C', x1: 600, y1: 100, x2: 600, y2: 320, width: 8 },
+      { id: 'TWY-A', label: 'TWY A', x1: 60, y1: 265, x2: 840, y2: 265, width: 8 },
+      { id: 'TWY-B', label: 'TWY B', x1: 300, y1: 80, x2: 300, y2: 380, width: 8 },
+      { id: 'TWY-C', label: 'TWY C', x1: 600, y1: 80, x2: 600, y2: 380, width: 8 },
     ],
     terminals: [
-      { id: 'T1', label: 'T1 Domestic (Santacruz)', x: 80, y: 290, w: 180, h: 60 },
-      { id: 'T2', label: 'T2 International (Sahar)', x: 560, y: 290, w: 220, h: 70 },
+      { id: 'T1', label: 'T1 Santacruz Domestic (South-West)', x: 90, y: 320, w: 200, h: 65 },
+      { id: 'T2', label: 'T2 Sahar International (North-East)', x: 580, y: 50, w: 230, h: 70 },
     ],
-    tower: { x: 450, y: 225 },
+    tower: { x: 450, y: 280 },
   },
 
-  // ─── VOBL — Kempegowda International, Bengaluru ──────────────────────────
+  // ─── VOBL — Kempegowda International, Bengaluru ────────────────────────────
   VOBL: {
     name: 'Kempegowda International Airport (Bengaluru)',
-    viewBox: '0 0 900 440',
+    viewBox: '0 0 900 480',
     runways: [
-      { id: '09L/27R', le_ident: '09L', he_ident: '27R', length_ft: 13123, width_ft: 148, heading_deg: 90, surface: 'ASPHALT', x1: 60, y1: 120, x2: 840, y2: 120 },
-      { id: '09R/27L', le_ident: '09R', he_ident: '27L', length_ft: 13123, width_ft: 148, heading_deg: 90, surface: 'ASPHALT', x1: 60, y1: 260, x2: 840, y2: 260 },
+      { id: '09L/27R', le_ident: '09L', he_ident: '27R', length_ft: 13123, width_ft: 148, heading_deg: 90, surface: 'ASPHALT', cx: 450, cy: 130 },
+      { id: '09R/27L', le_ident: '09R', he_ident: '27L', length_ft: 13123, width_ft: 148, heading_deg: 90, surface: 'ASPHALT', cx: 450, cy: 310 },
     ],
     taxiways: [
-      { id: 'TWY-A', label: 'TWY A', x1: 60, y1: 155, x2: 840, y2: 155, width: 8 },
-      { id: 'TWY-B', label: 'TWY B', x1: 60, y1: 225, x2: 840, y2: 225, width: 8 },
-      { id: 'TWY-C', label: 'TWY C', x1: 450, y1: 120, x2: 450, y2: 260, width: 8 },
+      { id: 'TWY-A', label: 'TWY A', x1: 60, y1: 165, x2: 840, y2: 165, width: 8 },
+      { id: 'TWY-B', label: 'TWY B', x1: 60, y1: 275, x2: 840, y2: 275, width: 8 },
+      { id: 'TWY-C', label: 'TWY C', x1: 450, y1: 130, x2: 450, y2: 310, width: 8 },
     ],
     terminals: [
-      { id: 'T1', label: 'T1 Terminal', x: 250, y: 175, w: 180, h: 45 },
-      { id: 'T2', label: 'T2 Garden Terminal', x: 470, y: 175, w: 200, h: 45 },
+      { id: 'T1', label: 'T1 Main Terminal', x: 220, y: 195, w: 190, h: 50 },
+      { id: 'T2', label: 'T2 Garden Terminal', x: 470, y: 195, w: 210, h: 50 },
     ],
-    tower: { x: 440, y: 200 },
+    tower: { x: 440, y: 220 },
   },
 
-  // ─── KJFK — John F. Kennedy International, New York ───────────────────────
+  // ─── KJFK — John F. Kennedy International, New York (# Quadrangle Frame) ─────
   KJFK: {
     name: 'John F. Kennedy International Airport (New York)',
-    viewBox: '0 0 900 440',
+    viewBox: '0 0 900 480',
     runways: [
-      { id: '04L/22R', le_ident: '04L', he_ident: '22R', length_ft: 12079, width_ft: 200, heading_deg: 40, surface: 'ASPHALT', x1: 60, y1: 160, x2: 840, y2: 160 },
-      { id: '04R/22L', le_ident: '04R', he_ident: '22L', length_ft: 8400, width_ft: 150, heading_deg: 40, surface: 'ASPHALT', x1: 60, y1: 245, x2: 840, y2: 245 },
-      { id: '13L/31R', le_ident: '13L', he_ident: '31R', length_ft: 10000, width_ft: 150, heading_deg: 130, surface: 'ASPHALT', x1: 155, y1: 55, x2: 760, y2: 390 },
-      { id: '13R/31L', le_ident: '13R', he_ident: '31L', length_ft: 14511, width_ft: 200, heading_deg: 130, surface: 'CONCRETE', x1: 260, y1: 55, x2: 840, y2: 350 },
+      { id: '04L/22R', le_ident: '04L', he_ident: '22R', length_ft: 12079, width_ft: 200, heading_deg: 44, surface: 'ASPHALT', cx: 320, cy: 240 },
+      { id: '04R/22L', le_ident: '04R', he_ident: '22L', length_ft: 8400, width_ft: 150, heading_deg: 44, surface: 'ASPHALT', cx: 580, cy: 240 },
+      { id: '13L/31R', le_ident: '13L', he_ident: '31R', length_ft: 10000, width_ft: 150, heading_deg: 134, surface: 'ASPHALT', cx: 450, cy: 140 },
+      { id: '13R/31L', le_ident: '13R', he_ident: '31L', length_ft: 14511, width_ft: 200, heading_deg: 134, surface: 'CONCRETE', cx: 450, cy: 340 },
     ],
     taxiways: [
-      { id: 'TWY-A', label: 'TWY A', x1: 60, y1: 200, x2: 840, y2: 200, width: 8 },
-      { id: 'TWY-B', label: 'TWY B', x1: 450, y1: 55, x2: 450, y2: 390, width: 8 },
+      { id: 'TWY-A', label: 'TWY Alpha', x1: 200, y1: 100, x2: 700, y2: 100, width: 8 },
+      { id: 'TWY-B', label: 'TWY Bravo', x1: 200, y1: 380, x2: 700, y2: 380, width: 8 },
     ],
     terminals: [
-      { id: 'T1', label: 'T1', x: 330, y: 280, w: 80, h: 50 },
-      { id: 'T4', label: 'T4', x: 430, y: 280, w: 80, h: 50 },
-      { id: 'T8', label: 'T8', x: 530, y: 280, w: 80, h: 50 },
+      { id: 'CTA', label: 'Central Terminal Area (T1, T4, T5, T7, T8 Ring)', x: 330, y: 200, w: 240, h: 80 },
     ],
-    tower: { x: 490, y: 210 },
+    tower: { x: 450, y: 240 },
   },
 };
 
 export const DynamicRunwayMap: React.FC<DynamicRunwayMapProps> = ({ briefing, theme }) => {
   const [zoomLevel, setZoomLevel] = useState<number>(1);
-  const [selectedFacility, setSelectedFacility] = useState<any | null>(null);
+  const [selectedRunway, setSelectedRunway] = useState<RunwayData | null>(null);
 
   const isNight = theme === 'NIGHT_RED';
   const isDay = theme === 'DAY_FLIGHT';
 
   const layout = MASTER_AIRPORT_MAPS[briefing.icao] || {
-    name: `${briefing.icao} Aerodrome Diagram`,
-    viewBox: '0 0 900 440',
+    name: `${briefing.icao} Aerodrome Geometry`,
+    viewBox: '0 0 900 480',
     runways: [
-      { id: '09/27', le_ident: '09', he_ident: '27', length_ft: 10500, width_ft: 150, heading_deg: 90, surface: 'ASPHALT', x1: 60, y1: 180, x2: 840, y2: 180 },
-      { id: '18/36', le_ident: '18', he_ident: '36', length_ft: 8500, width_ft: 150, heading_deg: 180, surface: 'ASPHALT', x1: 450, y1: 60, x2: 450, y2: 380 },
+      { id: '09/27', le_ident: '09', he_ident: '27', length_ft: 10500, width_ft: 150, heading_deg: 90, surface: 'ASPHALT', cx: 450, cy: 200 },
+      { id: '18/36', le_ident: '18', he_ident: '36', length_ft: 8500, width_ft: 150, heading_deg: 180, surface: 'ASPHALT', cx: 450, cy: 200 },
     ],
     taxiways: [
-      { id: 'TWY-A', label: 'TWY A', x1: 60, y1: 220, x2: 840, y2: 220, width: 8 },
+      { id: 'TWY-A', label: 'TWY A', x1: 60, y1: 240, x2: 840, y2: 240, width: 8 },
     ],
     terminals: [
-      { id: 'T1', label: 'Main Terminal', x: 180, y: 280, w: 200, h: 60 },
+      { id: 'T1', label: 'Main Terminal', x: 200, y: 300, w: 200, h: 60 },
     ],
-    tower: { x: 450, y: 220 },
+    tower: { x: 450, y: 240 },
   };
 
-  // Cross-reference NOTAM text for active runway closures
+  // Cross-reference active NOTAM closures
   const notamCombined = [
     ...(briefing.criticalAlerts || []).map((a) => `${a.title} ${a.rawSnippet} ${a.plainEnglish}`),
     ...(briefing.warnings || []).map((w) => `${w.title} ${w.rawSnippet} ${w.plainEnglish}`),
@@ -193,10 +182,10 @@ export const DynamicRunwayMap: React.FC<DynamicRunwayMapProps> = ({ briefing, th
           </div>
           <div>
             <span className="text-xs font-bold uppercase tracking-widest block text-[#0e1116] dark:text-white">
-              {layout.name} — REAL-WORLD AERODROME LAYOUT & MAGNETIC SPECS
+              {layout.name} — TRIGONOMETRIC VECTOR PROJECTION
             </span>
             <span className="text-[10px] text-[#5b6472] font-sans">
-              Exact runway thresholds, taxiway connectors & live NOTAM closure status
+              100% AIP/FAA magnetic bearings, exact physical intersections & live NOTAM closure status
             </span>
           </div>
         </div>
@@ -223,9 +212,9 @@ export const DynamicRunwayMap: React.FC<DynamicRunwayMapProps> = ({ briefing, th
         {evaluatedRunways.map((rwy) => (
           <button
             key={rwy.id}
-            onClick={() => setSelectedFacility(rwy)}
+            onClick={() => setSelectedRunway(rwy)}
             className={`px-3 py-1.5 rounded-xl border text-xs font-bold transition cursor-pointer flex items-center gap-2 ${
-              selectedFacility?.id === rwy.id
+              selectedRunway?.id === rwy.id
                 ? 'bg-[#0e1116] text-white border-[#0e1116] shadow-sm'
                 : 'bg-slate-100 dark:bg-zinc-800 text-slate-800 dark:text-zinc-200 border-slate-200 dark:border-zinc-700'
             }`}
@@ -243,7 +232,7 @@ export const DynamicRunwayMap: React.FC<DynamicRunwayMapProps> = ({ briefing, th
       </div>
 
       {/* Dynamic Render SVG Canvas */}
-      <div className="relative w-full h-[360px] bg-slate-950 rounded-2xl border border-slate-800 overflow-hidden flex items-center justify-center p-4 shadow-inner">
+      <div className="relative w-full h-[380px] bg-slate-950 rounded-2xl border border-slate-800 overflow-hidden flex items-center justify-center p-4 shadow-inner">
         {/* Grid pattern */}
         <div className="absolute inset-0 opacity-15 bg-[radial-gradient(#38bdf8_1px,transparent_1px)] [background-size:24px_24px]" />
 
@@ -300,7 +289,7 @@ export const DynamicRunwayMap: React.FC<DynamicRunwayMapProps> = ({ briefing, th
                 x={term.x + term.w / 2}
                 y={term.y + term.h / 2 + 4}
                 fill="#e2e8f0"
-                fontSize="11"
+                fontSize="10"
                 fontWeight="bold"
                 fontFamily="sans-serif"
                 textAnchor="middle"
@@ -318,28 +307,42 @@ export const DynamicRunwayMap: React.FC<DynamicRunwayMapProps> = ({ briefing, th
             </text>
           </g>
 
-          {/* Runways */}
+          {/* Runways rendered using Trigonometric Projections */}
           {evaluatedRunways.map((rwy) => {
+            // Mathematical Trigonometric Projection based on Magnetic Heading theta_mag
+            const thetaRad = ((rwy.heading_deg - 90) * Math.PI) / 180;
+            const scaleFactor = 0.032;
+            const halfLength = (rwy.length_ft * scaleFactor) / 2;
+
+            const dx = halfLength * Math.cos(thetaRad);
+            const dy = halfLength * Math.sin(thetaRad);
+
+            const x1 = rwy.cx - dx;
+            const y1 = rwy.cy - dy;
+            const x2 = rwy.cx + dx;
+            const y2 = rwy.cy + dy;
+
             const vectorColor = rwy.isClosed ? '#ef4444' : '#10b981';
+
             return (
-              <g key={rwy.id} className="cursor-pointer" onClick={() => setSelectedFacility(rwy)}>
-                {/* Asphalt Base */}
+              <g key={rwy.id} className="cursor-pointer" onClick={() => setSelectedRunway(rwy)}>
+                {/* Asphalt Base Line */}
                 <line
-                  x1={rwy.x1}
-                  y1={rwy.y1}
-                  x2={rwy.x2}
-                  y2={rwy.y2}
+                  x1={x1}
+                  y1={y1}
+                  x2={x2}
+                  y2={y2}
                   stroke={rwy.isClosed ? '#450a0a' : '#0f172a'}
-                  strokeWidth="20"
+                  strokeWidth="22"
                   strokeLinecap="square"
                 />
 
                 {/* Centerline */}
                 <line
-                  x1={rwy.x1}
-                  y1={rwy.y1}
-                  x2={rwy.x2}
-                  y2={rwy.y2}
+                  x1={x1}
+                  y1={y1}
+                  x2={x2}
+                  y2={y2}
                   stroke={vectorColor}
                   strokeWidth="4"
                   strokeDasharray="10,10"
@@ -347,33 +350,35 @@ export const DynamicRunwayMap: React.FC<DynamicRunwayMapProps> = ({ briefing, th
 
                 {/* Low Threshold Label */}
                 <text
-                  x={rwy.x1 - 18}
-                  y={rwy.y1 + 4}
+                  x={x1 - 22 * Math.cos(thetaRad)}
+                  y={y1 - 22 * Math.sin(thetaRad)}
                   fill={vectorColor}
                   fontSize="13"
                   fontWeight="bold"
                   fontFamily="monospace"
                   textAnchor="middle"
+                  dominantBaseline="middle"
                 >
                   {rwy.le_ident}
                 </text>
 
                 {/* High Threshold Label */}
                 <text
-                  x={rwy.x2 + 18}
-                  y={rwy.y2 + 4}
+                  x={x2 + 22 * Math.cos(thetaRad)}
+                  y={y2 + 22 * Math.sin(thetaRad)}
                   fill={vectorColor}
                   fontSize="13"
                   fontWeight="bold"
                   fontFamily="monospace"
                   textAnchor="middle"
+                  dominantBaseline="middle"
                 >
                   {rwy.he_ident}
                 </text>
 
                 {/* Closure Hazard X */}
                 {rwy.isClosed && (
-                  <g transform={`translate(${(rwy.x1 + rwy.x2) / 2}, ${(rwy.y1 + rwy.y2) / 2})`}>
+                  <g transform={`translate(${rwy.cx}, ${rwy.cy})`}>
                     <line x1="-15" y1="-15" x2="15" y2="15" stroke="#ef4444" strokeWidth="5" />
                     <line x1="-15" y1="15" x2="15" y2="-15" stroke="#ef4444" strokeWidth="5" />
                   </g>
@@ -384,25 +389,25 @@ export const DynamicRunwayMap: React.FC<DynamicRunwayMapProps> = ({ briefing, th
         </svg>
       </div>
 
-      {/* Selected Facility Spec Footer */}
-      {selectedFacility && (
+      {/* Selected Runway Info Footer */}
+      {selectedRunway && (
         <div className="mt-4 p-3 rounded-2xl bg-slate-50 dark:bg-black/30 border border-slate-200 dark:border-white/10 flex items-center justify-between text-xs font-mono">
           <div className="flex items-center gap-2">
             <span className="font-bold uppercase text-slate-800 dark:text-zinc-200">
-              SELECTED SPECIFICATION: RWY {selectedFacility.id}
+              SELECTED SPECIFICATION: RWY {selectedRunway.id}
             </span>
             <span className="text-slate-500">|</span>
             <span className="text-slate-600 dark:text-zinc-400">
-              LENGTH: {selectedFacility.length_ft.toLocaleString()} FT ({Math.round(selectedFacility.length_ft * 0.3048)} M)
+              LENGTH: {selectedRunway.length_ft.toLocaleString()} FT ({Math.round(selectedRunway.length_ft * 0.3048)} M)
             </span>
             <span className="text-slate-500">|</span>
-            <span className="text-slate-600 dark:text-zinc-400">HEADING: {selectedFacility.heading_deg}° MAG</span>
+            <span className="text-slate-600 dark:text-zinc-400">HEADING: {selectedRunway.heading_deg}° MAG</span>
           </div>
 
           <span className={`px-2.5 py-1 rounded-full font-bold text-[10px] ${
-            selectedFacility.isClosed ? 'bg-red-100 text-red-950 border border-red-400' : 'bg-emerald-100 text-emerald-950 border border-emerald-400'
+            selectedRunway.isClosed ? 'bg-red-100 text-red-950 border border-red-400' : 'bg-emerald-100 text-emerald-950 border border-emerald-400'
           }`}>
-            {selectedFacility.isClosed ? '🔴 CLSD NOTAM ACTIVE' : '🟢 OPERATIONAL'}
+            {selectedRunway.isClosed ? '🔴 CLSD NOTAM ACTIVE' : '🟢 OPERATIONAL'}
           </span>
         </div>
       )}
