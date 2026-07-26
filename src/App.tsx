@@ -14,6 +14,7 @@ import { MonetizationModal, UserTier } from './components/MonetizationModal';
 import { AuthModal } from './components/AuthModal';
 import { SmartPasteModal } from './components/SmartPasteModal';
 import { RawDataInspectorModal } from './components/RawDataInspectorModal';
+import { CfiApprovalHub } from './components/CfiApprovalHub';
 import { BriefingSummary, RouteLegBriefing, AuditLogEntry } from './types';
 import { generateClientFallbackBriefing, generateClientFallbackRoute } from './lib/clientFallback';
 import { supabase, getUserProfile, UserProfile, recordBriefingAudit } from './lib/supabaseClient';
@@ -99,6 +100,7 @@ export default function App() {
   const [isAuthModalOpen, setIsAuthModalOpen] = useState<boolean>(false);
   const [isSmartPasteOpen, setIsSmartPasteOpen] = useState<boolean>(false);
   const [isRawInspectorOpen, setIsRawInspectorOpen] = useState<boolean>(false);
+  const [isCfiHubOpen, setIsCfiHubOpen] = useState<boolean>(false);
 
   // Supabase Auth Listener
   useEffect(() => {
@@ -402,6 +404,7 @@ export default function App() {
           onOpenAuth={() => setIsAuthModalOpen(true)}
           onOpenSmartPaste={() => setIsSmartPasteOpen(true)}
           onOpenRawInspector={() => setIsRawInspectorOpen(true)}
+          onOpenCfiHub={() => setIsCfiHubOpen(true)}
           userTier={userTier}
           userEmail={currentUser?.email}
           onSearchSingle={fetchSingleBriefing}
@@ -667,6 +670,13 @@ export default function App() {
           theme={theme}
         />
       )}
+
+      <CfiApprovalHub
+        isOpen={isCfiHubOpen}
+        onClose={() => setIsCfiHubOpen(false)}
+        currentBriefing={briefing}
+        theme={theme}
+      />
     </div>
   );
 }

@@ -16,6 +16,7 @@ import {
   Command,
   Clipboard,
   FileCode,
+  Award,
 } from 'lucide-react';
 import { PRESET_ROUTES, normalizeAirportCode } from '../lib/airportData';
 import { UserTier } from './MonetizationModal';
@@ -39,8 +40,10 @@ interface HeaderProps {
   onOpenAuth: () => void;
   userTier: UserTier;
   onSearchSingle: (icao: string) => void;
+  onSearchRoute: (origin: string, destination: string, waypoints?: string[]) => void;
   onOpenSmartPaste?: () => void;
   onOpenRawInspector?: () => void;
+  onOpenCfiHub?: () => void;
   isLoading: boolean;
   activeIcao?: string;
   userEmail?: string;
@@ -66,6 +69,7 @@ export const Header: React.FC<HeaderProps> = ({
   onSearchRoute,
   onOpenSmartPaste,
   onOpenRawInspector,
+  onOpenCfiHub,
   isLoading = false,
   activeIcao = 'VIDP',
   userEmail,
@@ -173,6 +177,17 @@ export const Header: React.FC<HeaderProps> = ({
               >
                 <FileCode className="w-3.5 h-3.5 text-emerald-600" />
                 <span>Raw Data</span>
+              </button>
+            )}
+
+            {/* CFI Approval Hub */}
+            {onOpenCfiHub && (
+              <button
+                onClick={onOpenCfiHub}
+                className="px-3.5 py-1.5 rounded-full bg-emerald-600 hover:bg-emerald-500 text-white font-mono text-[11px] font-bold transition cursor-pointer flex items-center gap-1.5 shadow-sm border border-emerald-400"
+              >
+                <Award className="w-3.5 h-3.5 text-white" />
+                <span>CFI Hub</span>
               </button>
             )}
 

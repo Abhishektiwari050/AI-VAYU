@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { BriefingSummary, FlightCategory, NotamBucket } from '../types';
+import { openInForeFlight, openInSkyDemon } from '../lib/efbLinker';
 import {
   ChevronDown,
   Share2,
@@ -21,6 +22,8 @@ import {
   ListFilter,
   Shield,
   Zap,
+  Plane,
+  Compass,
 } from 'lucide-react';
 import { DisplayTheme, FontSizeSetting } from './Header';
 import { formatZuluAndLocalTime, evaluateNotamStatusWindow } from '../lib/timezoneUtils';
@@ -690,6 +693,22 @@ ADVISORY ONLY: Informational pre-flight awareness utility under DGCA and FAA reg
         >
           <Printer className="w-3.5 h-3.5 opacity-80" />
           <span>Export Dispatch PDF</span>
+        </button>
+
+        <button
+          onClick={() => openInForeFlight({ origin: briefing.icao })}
+          className="text-xs font-medium px-4 py-2.5 rounded-xl flex items-center gap-2 shadow-sm transition cursor-pointer border bg-[#2e7def] hover:brightness-110 text-white border-blue-400 font-mono font-bold"
+        >
+          <Plane className="w-3.5 h-3.5" />
+          <span>Open in ForeFlight</span>
+        </button>
+
+        <button
+          onClick={() => openInSkyDemon({ origin: briefing.icao })}
+          className="text-xs font-medium px-4 py-2.5 rounded-xl flex items-center gap-2 shadow-sm transition cursor-pointer border bg-indigo-600 hover:bg-indigo-500 text-white border-indigo-400 font-mono font-bold"
+        >
+          <Compass className="w-3.5 h-3.5" />
+          <span>Open in SkyDemon</span>
         </button>
 
         <button
