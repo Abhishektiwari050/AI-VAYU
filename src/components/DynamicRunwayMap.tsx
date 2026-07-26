@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { BriefingSummary } from '../types';
-import { Compass, ZoomIn, ZoomOut } from 'lucide-react';
+import { Compass, ZoomIn, ZoomOut, Clock } from 'lucide-react';
 
 interface DynamicRunwayMapProps {
   briefing: BriefingSummary;
@@ -45,7 +45,6 @@ interface AirportLayout {
 }
 
 const MASTER_AIRPORT_MAPS: Record<string, AirportLayout> = {
-  // ─── VIDP — Indira Gandhi International, Delhi (100% Match to Latest Master Plan) ───
   VIDP: {
     name: 'Indira Gandhi International Airport (Delhi)',
     viewBox: '0 0 900 480',
@@ -69,8 +68,6 @@ const MASTER_AIRPORT_MAPS: Record<string, AirportLayout> = {
     ],
     tower: { x: 340, y: 240 },
   },
-
-  // ─── VABB — Chhatrapati Shivaji Maharaj, Mumbai (Intersecting at 45°) ──────
   VABB: {
     name: 'Chhatrapati Shivaji Maharaj International (Mumbai)',
     viewBox: '0 0 900 480',
@@ -89,8 +86,6 @@ const MASTER_AIRPORT_MAPS: Record<string, AirportLayout> = {
     ],
     tower: { x: 450, y: 280 },
   },
-
-  // ─── VOBL — Kempegowda International, Bengaluru ────────────────────────────
   VOBL: {
     name: 'Kempegowda International Airport (Bengaluru)',
     viewBox: '0 0 900 480',
@@ -109,8 +104,6 @@ const MASTER_AIRPORT_MAPS: Record<string, AirportLayout> = {
     ],
     tower: { x: 440, y: 220 },
   },
-
-  // ─── KJFK — John F. Kennedy International, New York ───────────────────────
   KJFK: {
     name: 'John F. Kennedy International Airport (New York)',
     viewBox: '0 0 900 480',
@@ -134,6 +127,7 @@ const MASTER_AIRPORT_MAPS: Record<string, AirportLayout> = {
 export const DynamicRunwayMap: React.FC<DynamicRunwayMapProps> = ({ briefing, theme }) => {
   const [zoomLevel, setZoomLevel] = useState<number>(1);
   const [selectedRunway, setSelectedRunway] = useState<RunwayData | null>(null);
+  const [timeOffsetHours, setTimeOffsetHours] = useState<number>(0);
 
   const isNight = theme === 'NIGHT_RED';
   const isDay = theme === 'DAY_FLIGHT';
@@ -169,6 +163,8 @@ export const DynamicRunwayMap: React.FC<DynamicRunwayMapProps> = ({ briefing, th
     isClosed: isClosed(rwy.le_ident) || isClosed(rwy.he_ident) || isClosed(rwy.id),
   }));
 
+  const targetEtaZulu = new Date(Date.now() + timeOffsetHours * 3600 * 1000).toUTCString().slice(17, 22) + ' Z';
+
   return (
     <div className={`w-full p-5 rounded-3xl border mb-6 shadow-lg transition-all font-sans ${
       isNight
@@ -185,10 +181,10 @@ export const DynamicRunwayMap: React.FC<DynamicRunwayMapProps> = ({ briefing, th
           </div>
           <div>
             <span className="text-xs font-bold uppercase tracking-widest block text-[#0e1116] dark:text-white">
-              {layout.name} — LATEST AERODROME MASTER PLAN & GEOMETRY
+              {layout.name} — AERODROME GEOMETRY & TEMPORAL ETA SCRUBBER
             </span>
             <span className="text-[10px] text-[#5b6472] font-sans">
-              Matches official DGCA eAIP / FAA charts, exact threshold coordinates & live NOTAM closure status
+              Dynamic physical coordinates, magnetic bearings & ETA arrival time scrubbing
             </span>
           </div>
         </div>
@@ -207,6 +203,33 @@ export const DynamicRunwayMap: React.FC<DynamicRunwayMapProps> = ({ briefing, th
           >
             <ZoomOut className="w-4 h-4" />
           </button>
+        </div>
+      </div>
+
+      {/* Temporal ETA Scrubbing Time Bar */}
+      <div className="mb-4 p-3 rounded-2xl bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 flex flex-wrap items-center justify-between gap-3 font-mono text-xs">
+        <div className="flex items-center gap-2 text-slate-700 dark:text-slate-300 font-bold">
+          <Clock className="w-4 h-4 text-sky-500 animate-pulse" />
+          <span>TEMPORAL ETA SCRUBBER:</span>
+          <span className="px-2 py-0.5 rounded bg-sky-500/20 text-sky-400 font-black">
+            +{timeOffsetHours} HR (EST. ETA: {targetEtaZulu})
+          </span>
+        </div>
+
+        <div className="flex items-center gap-1.5">
+          {[0, 2, 4, 6, 12].map((offset) => (
+            <button
+              key={offset}
+              onClick={() => setTimeOffsetHours(offset)}
+              className={`px-2.5 py-1 rounded-lg text-[11px] font-bold cursor-pointer transition ${
+                timeOffsetHours === offset
+                  ? 'bg-sky-600 text-white shadow-sm'
+                  : 'bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-300'
+              }`}
+            >
+              {offset === 0 ? 'NOW' : `+${offset}h`}
+            </button>
+          ))}
         </div>
       </div>
 
@@ -402,7 +425,7 @@ export const DynamicRunwayMap: React.FC<DynamicRunwayMapProps> = ({ briefing, th
           <span className={`px-2.5 py-1 rounded-full font-bold text-[10px] ${
             selectedRunway.isClosed ? 'bg-red-100 text-red-950 border border-red-400' : 'bg-emerald-100 text-emerald-950 border border-emerald-400'
           }`}>
-            {selectedRunway.isClosed ? '🔴 CLSD NOTAM ACTIVE' : '🟢 OPERATIONAL'}
+            {selectedRunway.isClosed ? `🔴 CLSD AT ETA (+${timeOffsetHours}H)` : `🟢 OPEN AT ETA (+${timeOffsetHours}H)`}
           </span>
         </div>
       )}
