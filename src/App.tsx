@@ -9,6 +9,7 @@ import { TerminalCLIView } from './components/TerminalCLIView';
 import { RouteBriefingView } from './components/RouteBriefingView';
 import { DispatchLogModal } from './components/DispatchLogModal';
 import { KneeboardPrintModal } from './components/KneeboardPrintModal';
+import { PreFlightClearancePdfModal } from './components/PreFlightClearancePdfModal';
 import { SavedBriefingsDrawer } from './components/SavedBriefingsDrawer';
 import { MonetizationModal, UserTier } from './components/MonetizationModal';
 import { AuthModal } from './components/AuthModal';
@@ -95,6 +96,14 @@ export default function App() {
   // Modals
   const [isDispatchModalOpen, setIsDispatchModalOpen] = useState<boolean>(false);
   const [isKneeboardModalOpen, setIsKneeboardModalOpen] = useState<boolean>(false);
+  const [isClearancePdfOpen, setIsClearancePdfOpen] = useState<boolean>(false);
+  const [cfiSignedInfo, setCfiSignedInfo] = useState<{
+    cfiName: string;
+    studentName: string;
+    tailNumber: string;
+    dispatchNotes: string;
+    signedAt: string;
+  } | null>(null);
   const [isHistoryDrawerOpen, setIsHistoryDrawerOpen] = useState<boolean>(false);
   const [isMonetizationModalOpen, setIsMonetizationModalOpen] = useState<boolean>(false);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState<boolean>(false);
@@ -405,6 +414,7 @@ export default function App() {
           onOpenSmartPaste={() => setIsSmartPasteOpen(true)}
           onOpenRawInspector={() => setIsRawInspectorOpen(true)}
           onOpenCfiHub={() => setIsCfiHubOpen(true)}
+          onExportClearancePdf={() => setIsClearancePdfOpen(true)}
           userTier={userTier}
           userEmail={currentUser?.email}
           onSearchSingle={fetchSingleBriefing}
@@ -489,6 +499,7 @@ export default function App() {
                   onOpenKneeboard={() => setIsKneeboardModalOpen(true)}
                   onOpenDispatchModal={() => setIsDispatchModalOpen(true)}
                   onSearchSingle={fetchSingleBriefing}
+                  onExportClearancePdf={() => setIsClearancePdfOpen(true)}
                 />
               ) : (
                 /* LANDING SEARCH PORTAL (NO DEFAULT BRIEFING LOADED) */
@@ -676,6 +687,20 @@ export default function App() {
         onClose={() => setIsCfiHubOpen(false)}
         currentBriefing={briefing}
         theme={theme}
+        onExportSignedClearancePdf={(signedInfo) => {
+          setCfiSignedInfo(signedInfo);
+          setIsClearancePdfOpen(true);
+        }}
+      />
+
+      <PreFlightClearancePdfModal
+        isOpen={isClearancePdfOpen}
+        onClose={() => {
+          setIsClearancePdfOpen(false);
+          setCfiSignedInfo(null);
+        }}
+        briefing={briefing}
+        cfiSignedInfo={cfiSignedInfo}
       />
     </div>
   );

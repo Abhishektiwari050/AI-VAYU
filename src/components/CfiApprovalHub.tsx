@@ -8,6 +8,13 @@ interface CfiApprovalHubProps {
   onClose: () => void;
   currentBriefing?: BriefingSummary | null;
   theme: DisplayTheme;
+  onExportSignedClearancePdf?: (signedInfo: {
+    cfiName: string;
+    studentName: string;
+    tailNumber: string;
+    dispatchNotes: string;
+    signedAt: string;
+  }) => void;
 }
 
 interface StudentSubmission {
@@ -26,6 +33,7 @@ export const CfiApprovalHub: React.FC<CfiApprovalHubProps> = ({
   onClose,
   currentBriefing,
   theme,
+  onExportSignedClearancePdf,
 }) => {
   const [cfiName, setCfiName] = useState('Captain R. Sharma (CFI #48921)');
   const [studentName, setStudentName] = useState('Cadet Pilot A. Verma');
@@ -186,7 +194,7 @@ export const CfiApprovalHub: React.FC<CfiApprovalHubProps> = ({
                   <span>HAZARDS: <strong>{sub.criticalCount}</strong></span>
                 </div>
 
-                {sub.status === 'PENDING' && (
+                {sub.status === 'PENDING' ? (
                   <button
                     onClick={() => handleApprove(sub.id)}
                     className="w-full mt-2 py-2 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:brightness-110 text-white font-bold text-xs transition cursor-pointer flex items-center justify-center gap-2 shadow-lg"
@@ -194,6 +202,24 @@ export const CfiApprovalHub: React.FC<CfiApprovalHubProps> = ({
                     <Award className="w-4 h-4" />
                     <span>Approve & Sign Dispatch Release</span>
                   </button>
+                ) : (
+                  onExportSignedClearancePdf && (
+                    <button
+                      onClick={() =>
+                        onExportSignedClearancePdf({
+                          cfiName,
+                          studentName: sub.studentName,
+                          tailNumber,
+                          dispatchNotes,
+                          signedAt: new Date().toUTCString(),
+                        })
+                      }
+                      className="w-full mt-2 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs transition cursor-pointer flex items-center justify-center gap-2 shadow-md border border-blue-400 font-mono"
+                    >
+                      <FileText className="w-4 h-4" />
+                      <span>Export Signed Clearance PDF</span>
+                    </button>
+                  )
                 )}
               </div>
             ))}

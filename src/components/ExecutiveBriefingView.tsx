@@ -24,6 +24,7 @@ import {
   Zap,
   Plane,
   Compass,
+  FileText,
 } from 'lucide-react';
 import { DisplayTheme, FontSizeSetting } from './Header';
 import { formatZuluAndLocalTime, evaluateNotamStatusWindow } from '../lib/timezoneUtils';
@@ -39,6 +40,7 @@ interface ExecutiveBriefingViewProps {
   onOpenKneeboard: () => void;
   onOpenDispatchModal: () => void;
   onSearchSingle?: (icao: string) => void;
+  onExportClearancePdf?: () => void;
 }
 
 export const ExecutiveBriefingView: React.FC<ExecutiveBriefingViewProps> = ({
@@ -47,6 +49,7 @@ export const ExecutiveBriefingView: React.FC<ExecutiveBriefingViewProps> = ({
   onOpenKneeboard,
   onOpenDispatchModal,
   onSearchSingle,
+  onExportClearancePdf,
 }) => {
   const [expandedNotam, setExpandedNotam] = useState<number | null>(null);
   const [copied, setCopied] = useState(false);
@@ -233,6 +236,15 @@ ADVISORY ONLY: Informational pre-flight awareness utility under DGCA and FAA reg
           </div>
 
           <div className="flex items-center gap-2">
+            {onExportClearancePdf && (
+              <button
+                onClick={onExportClearancePdf}
+                className="px-4 py-2 rounded-full bg-blue-600 hover:bg-blue-500 text-white border border-blue-400 text-xs font-bold font-mono transition cursor-pointer flex items-center gap-1.5 shadow-md"
+              >
+                <FileText className="w-3.5 h-3.5 text-white" />
+                <span>Clearance PDF</span>
+              </button>
+            )}
             <button
               onClick={handleCopySummary}
               className="px-4 py-2 rounded-full bg-white hover:bg-slate-50 border border-[#e3e8ee] text-xs font-medium text-[#0e1116] transition cursor-pointer flex items-center gap-1.5 shadow-sm"
@@ -682,7 +694,7 @@ ADVISORY ONLY: Informational pre-flight awareness utility under DGCA and FAA reg
         </button>
 
         <button
-          onClick={onOpenKneeboard}
+          onClick={onExportClearancePdf || onOpenKneeboard}
           className={`text-xs font-medium px-4 py-2.5 rounded-xl flex items-center gap-2 shadow-sm transition cursor-pointer border ${
             isNight
               ? 'bg-red-900/60 border-red-800 text-red-100 hover:bg-red-800'
@@ -692,7 +704,7 @@ ADVISORY ONLY: Informational pre-flight awareness utility under DGCA and FAA reg
           }`}
         >
           <Printer className="w-3.5 h-3.5 opacity-80" />
-          <span>Export Dispatch PDF</span>
+          <span>Export Clearance PDF</span>
         </button>
 
         <button

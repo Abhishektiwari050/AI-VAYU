@@ -44,6 +44,7 @@ interface HeaderProps {
   onOpenSmartPaste?: () => void;
   onOpenRawInspector?: () => void;
   onOpenCfiHub?: () => void;
+  onExportClearancePdf?: () => void;
   isLoading: boolean;
   activeIcao?: string;
   userEmail?: string;
@@ -70,6 +71,7 @@ export const Header: React.FC<HeaderProps> = ({
   onOpenSmartPaste,
   onOpenRawInspector,
   onOpenCfiHub,
+  onExportClearancePdf,
   isLoading = false,
   activeIcao = 'VIDP',
   userEmail,
@@ -188,6 +190,17 @@ export const Header: React.FC<HeaderProps> = ({
               >
                 <Award className="w-3.5 h-3.5 text-white" />
                 <span>CFI Hub</span>
+              </button>
+            )}
+
+            {/* Clearance PDF */}
+            {onExportClearancePdf && (
+              <button
+                onClick={onExportClearancePdf}
+                className="px-3.5 py-1.5 rounded-full bg-blue-600 hover:bg-blue-500 text-white font-mono text-[11px] font-bold transition cursor-pointer flex items-center gap-1.5 shadow-sm border border-blue-400"
+              >
+                <FileText className="w-3.5 h-3.5 text-white" />
+                <span>Clearance PDF</span>
               </button>
             )}
 

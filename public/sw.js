@@ -1,5 +1,5 @@
-// Project VAYU Offline Cockpit Service Worker - v2
-const CACHE_NAME = 'vayu-efb-cache-v2';
+// Project VAYU Offline Cockpit Service Worker - v3 (Cache Invalidating & Network First)
+const CACHE_NAME = 'vayu-efb-cache-v3';
 
 self.addEventListener('install', (event) => {
   self.skipWaiting();
@@ -9,7 +9,12 @@ self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys().then((keys) =>
       Promise.all(
-        keys.map((key) => caches.delete(key))
+        keys.map((key) => {
+          if (key !== CACHE_NAME) {
+            return caches.delete(key);
+          }
+          return Promise.resolve();
+        })
       )
     ).then(() => self.clients.claim())
   );
@@ -20,17 +25,33 @@ self.addEventListener('fetch', (event) => {
   
   const url = new URL(event.request.url);
 
-  // Never return index.html for JS/CSS assets or API calls
-  if (url.pathname.startsWith('/assets/') || url.pathname.startsWith('/api/')) {
+  // Network-only for API calls
+  if (url.pathname.startsWith('/api/')) {
+    return;
+  }
+
+  // Network-first for static assets — NEVER fallback to index.html for JS/CSS assets
+  if (url.pathname.startsWith('/assets/')) {
     event.respondWith(
-      fetch(event.request).catch((err) => {
-        return caches.match(event.request);
-      })
+      fetch(event.request)
+        .then((response) => {
+          if (response && response.status === 200) {
+            const clone = response.clone();
+            caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone));
+          }
+          return response;
+        })
+        .catch(() => {
+          return caches.match(event.request).then((res) => {
+            if (res) return res;
+            return new Response('', { status: 404, statusText: 'Asset Not Found' });
+          });
+        })
     );
     return;
   }
 
-  // Network-first strategy for navigation / HTML requests
+  // Network-first for HTML pages with fallback to cache
   event.respondWith(
     fetch(event.request)
       .then((networkResponse) => {
@@ -42,7 +63,7 @@ self.addEventListener('fetch', (event) => {
       })
       .catch(() => {
         return caches.match(event.request).then((cachedResponse) => {
-          return cachedResponse || caches.match('/');
+          return cachedResponse || caches.match('/index.html');
         });
       })
   );
