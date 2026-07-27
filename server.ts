@@ -5,7 +5,8 @@ import { createServer as createViteServer } from 'vite';
 import { GoogleGenAI, Type } from '@google/genai';
 import Stripe from 'stripe';
 import { runDeterministicSafetyEngine } from './src/lib/deterministicEngine.js';
-import { generateSyntheticMetar, generateSyntheticNotams } from './src/lib/mockAviationData.js';
+import { fetchLiveNotams } from './src/lib/fetchLiveNotams.js';
+import { generateSyntheticMetar } from './src/lib/mockAviationData.js';
 import { lookupAirport, normalizeAirportCode } from './src/lib/airportData.js';
 import { checkBriefingUsageMiddleware } from './src/middleware.js';
 import { updateUserSubscriptionTier } from './src/lib/supabase.js';
@@ -131,81 +132,7 @@ function decodeTafSummary(tafRaw: string): string {
   return formattedLines.slice(0, 4).join('\n• ');
 }
 
-// Helper to fetch live NOTAM data with fast 3.5s fallback & international ICAO exchange
-async function fetchLiveNotams(icao: string): Promise<RawNotam[]> {
-  const code = icao.trim().toUpperCase();
-  const firCode = lookupFirCode(code);
 
-  // 1. Check environment variable for optional global NOTAM API
-  if (process.env.GLOBAL_NOTAM_API_URL) {
-    try {
-      const controller = new AbortController();
-      const timeout = setTimeout(() => controller.abort(), 3500);
-      const res = await fetch(`${process.env.GLOBAL_NOTAM_API_URL}?icao=${code},${firCode}`, {
-        signal: controller.signal,
-        headers: { Accept: 'application/json' },
-      });
-      clearTimeout(timeout);
-
-      if (res.ok) {
-        const data = await res.json();
-        if (Array.isArray(data) && data.length > 0) {
-          return data.map((item: any, idx: number) => ({
-            id: item.notamId || `GLOBAL-${code}-${idx}`,
-            icao: item.icao || code,
-            rawText: item.icaoMessage || item.rawText || item.raw || JSON.stringify(item),
-            effectiveStart: item.effectiveStart,
-            effectiveEnd: item.effectiveEnd,
-            type: item.type,
-            isFir: item.icao === firCode || (item.rawText && item.rawText.includes('FIR')),
-            firIcao: firCode,
-          }));
-        }
-      }
-    } catch (err) {
-      console.log(`[GLOBAL_NOTAM_API] Global NOTAM fetch fallback for ${code}`);
-    }
-  }
-
-  // 2. Default FAA / NOAA Aviation Weather API (Aerodrome + FIR)
-  try {
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 3500);
-
-    const res = await fetch(`https://aviationweather.gov/api/data/notam?ids=${code},${firCode}`, {
-      signal: controller.signal,
-      headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-        Accept: 'application/json, text/plain, */*',
-      },
-    });
-    clearTimeout(timeout);
-
-    if (res.ok) {
-      const data = await res.json();
-      if (Array.isArray(data) && data.length > 0) {
-        return data.map((item: any, idx: number) => {
-          const raw = item.icaoMessage || item.raw || JSON.stringify(item);
-          const isFirItem = item.icao === firCode || (item.icao !== code && !raw.includes(`A) ${code}`));
-          return {
-            id: item.notamId || `LIVE-${code}-${idx}`,
-            icao: item.icao || code,
-            rawText: raw,
-            effectiveStart: item.effectiveStart,
-            effectiveEnd: item.effectiveEnd,
-            type: item.type,
-            isFir: isFirItem,
-            firIcao: firCode,
-          };
-        });
-      }
-    }
-  } catch (err) {
-    console.log(`[NOTAM Fetch] Live fetch status for ${code}/${firCode}: using backup data stream.`);
-  }
-
-  return generateSyntheticNotams(code);
-}
 
 // API Health Check
 app.get('/api/health', (req, res) => {
@@ -378,11 +305,13 @@ app.post('/api/briefing', async (req, res) => {
     const airportInfo = lookupAirport(cleanIcao);
 
     // Parallel Data Ingestion (METAR + TAF + NOTAMs)
-    const [metar, tafRaw, rawNotams] = await Promise.all([
+    const [metar, tafRaw, notamFetchResult] = await Promise.all([
       fetchLiveMetar(cleanIcao),
       fetchLiveTaf(cleanIcao),
       fetchLiveNotams(cleanIcao),
     ]);
+
+    const rawNotams = notamFetchResult.notams;
 
     // Deterministic Safety Engine Scan
     const flaggedNotams = runDeterministicSafetyEngine(rawNotams);
@@ -407,21 +336,35 @@ app.post('/api/briefing', async (req, res) => {
       try {
         const ai = getAiClient();
         const prompt = `
-You are an expert aviation flight dispatcher and pilot safety evaluator for Project VAYU.
-Convert the provided raw METAR weather, raw TAF forecast, and flagged NOTAM strings into an executive, plain-English pre-flight briefing.
+SYSTEM: You are an aviation safety compiler for Project VAYU. Do NOT alter timestamps, Q-codes, or runway designators (e.g. 11L/29R, 09/27).
+Convert the provided raw METAR weather, raw TAF forecast, and deterministically parsed ICAO NOTAM items into an executive, plain-English pre-flight briefing.
 
 Airport ICAO: ${cleanIcao} (${airportInfo?.name || cleanIcao})
 RAW METAR: ${metar.rawText}
 RAW TAF FORECAST: ${tafRaw}
-RAW NOTAMS & 5-BUCKET REGEX SEVERITY SCAN:
-${JSON.stringify(flaggedNotams, null, 2)}
 
-INSTRUCTIONS:
+PRE-PARSED ICAO NOTAMS & Q-CODE METADATA:
+${JSON.stringify(
+  flaggedNotams.map((n) => ({
+    notamId: n.parsedIcao?.notamId || n.id,
+    icao: n.parsedIcao?.icao || cleanIcao,
+    qCode: n.parsedIcao?.qCode,
+    subject: n.parsedIcao?.qSubjectDecoded || n.category,
+    condition: n.parsedIcao?.qConditionDecoded || n.severity,
+    temporalStatus: n.effectiveStatus,
+    effectiveWindow: n.effectiveWindow,
+    rawText: n.rawText,
+  })),
+  null,
+  2
+)}
+
+STRICT INSTRUCTIONS:
 1. Translate METAR into concise plain English (wind, visibility, clouds, temperature/dewpoint, flight rules category).
 2. Summarize TAF forecast trends in 2-3 concise bullets.
-3. For CRITICAL ALERTS (Severity: CRITICAL): Provide a short headline, 1-2 sentence plain-English explanation of why it is dangerous, raw snippet, category, effective window, and PIC action required.
-4. For WARNINGS (Severity: WARNING): Provide plain-English explanation, raw snippet, category, and effective window.
-5. For INFO (Severity: INFO): Short bullet points summarizing remaining minor notices.
+3. For CRITICAL ALERTS (Severity: CRITICAL): Provide a short headline, 1-sentence plain-English explanation, raw snippet, category, effective window, and PIC action required. Maintain all runway numbers verbatim.
+4. For WARNINGS (Severity: WARNING): Provide 1-sentence plain-English explanation, raw snippet, category, and effective window.
+5. For INFO (Severity: INFO): Short 1-sentence bullet points.
 6. Provide a 1-2 sentence Pilot-in-Command (PIC) Takeaway summary.
 `;
 
@@ -677,8 +620,8 @@ app.post('/api/route-briefing', async (req, res) => {
     // Fetch individual briefings
     const briefingPromises = routeCodes.map(async (code) => {
       const metar = await fetchLiveMetar(code);
-      const notams = await fetchLiveNotams(code);
-      const flagged = runDeterministicSafetyEngine(notams);
+      const notamRes = await fetchLiveNotams(code);
+      const flagged = runDeterministicSafetyEngine(notamRes.notams);
       return buildFallbackBriefing(code, lookupAirport(code)?.name, metar, '', flagged);
     });
 

@@ -1,4 +1,6 @@
 import { FlaggedNotam, NotamBucket, RawNotam, SeverityLevel } from '../types';
+import { parseIcaoNotam, buildDeterministicSummary } from './notamParser';
+import { evaluateTemporalStatus } from './temporalCheck';
 
 /**
  * Deterministic Safety Rule Engine (Non-LLM)
@@ -173,68 +175,72 @@ function formatShortUtc(d: Date): string {
 export function runDeterministicSafetyEngine(rawNotams: RawNotam[]): FlaggedNotam[] {
   return rawNotams.map((notam) => {
     const text = notam.rawText;
+
+    // 1. Strict ICAO NOTAM & Q-Code Parser
+    const parsedIcao = parseIcaoNotam(text, notam.icao);
+
     const matchedKeywords: string[] = [];
-    let category: NotamBucket = 'GENERAL';
+    let category: NotamBucket = parsedIcao.qCategory || 'GENERAL';
+    let severity: SeverityLevel = parsedIcao.qSeverity || 'INFO';
 
-    // 1. Check RUNWAYS & TFRs
-    let isRwyMatch = false;
-    for (const pat of RUNWAYS_TFRS_PATTERNS) {
-      const m = text.match(pat);
-      if (m) {
-        matchedKeywords.push(m[0]);
-        isRwyMatch = true;
-      }
-    }
-    if (isRwyMatch) {
-      category = 'RUNWAYS_TFRS';
-    }
-
-    // 2. Check PROCEDURES & NAVAIDS
+    // 2. Keyword fallback scanner if Q-code is absent
     if (category === 'GENERAL') {
-      let isProcMatch = false;
-      for (const pat of PROCEDURES_NAVAIDS_PATTERNS) {
+      let isRwyMatch = false;
+      for (const pat of RUNWAYS_TFRS_PATTERNS) {
         const m = text.match(pat);
         if (m) {
           matchedKeywords.push(m[0]);
-          isProcMatch = true;
+          isRwyMatch = true;
         }
       }
-      if (isProcMatch) {
-        category = 'PROCEDURES_NAVAIDS';
+      if (isRwyMatch) {
+        category = 'RUNWAYS_TFRS';
+      }
+
+      if (category === 'GENERAL') {
+        let isProcMatch = false;
+        for (const pat of PROCEDURES_NAVAIDS_PATTERNS) {
+          const m = text.match(pat);
+          if (m) {
+            matchedKeywords.push(m[0]);
+            isProcMatch = true;
+          }
+        }
+        if (isProcMatch) {
+          category = 'PROCEDURES_NAVAIDS';
+        }
+      }
+
+      if (category === 'GENERAL') {
+        let isTwyMatch = false;
+        for (const pat of TAXIWAYS_APRON_PATTERNS) {
+          const m = text.match(pat);
+          if (m) {
+            matchedKeywords.push(m[0]);
+            isTwyMatch = true;
+          }
+        }
+        if (isTwyMatch) {
+          category = 'TAXIWAYS_APRON';
+        }
+      }
+
+      if (category === 'GENERAL') {
+        let isObstMatch = false;
+        for (const pat of OBSTACLES_LIGHTING_PATTERNS) {
+          const m = text.match(pat);
+          if (m) {
+            matchedKeywords.push(m[0]);
+            isObstMatch = true;
+          }
+        }
+        if (isObstMatch) {
+          category = 'OBSTACLES_LIGHTING';
+        }
       }
     }
 
-    // 3. Check TAXIWAYS & APRON
-    if (category === 'GENERAL') {
-      let isTwyMatch = false;
-      for (const pat of TAXIWAYS_APRON_PATTERNS) {
-        const m = text.match(pat);
-        if (m) {
-          matchedKeywords.push(m[0]);
-          isTwyMatch = true;
-        }
-      }
-      if (isTwyMatch) {
-        category = 'TAXIWAYS_APRON';
-      }
-    }
-
-    // 4. Check OBSTACLES & LIGHTING
-    if (category === 'GENERAL') {
-      let isObstMatch = false;
-      for (const pat of OBSTACLES_LIGHTING_PATTERNS) {
-        const m = text.match(pat);
-        if (m) {
-          matchedKeywords.push(m[0]);
-          isObstMatch = true;
-        }
-      }
-      if (isObstMatch) {
-        category = 'OBSTACLES_LIGHTING';
-      }
-    }
-
-    // 5. Check FIR & EN-ROUTE AIRSPACE
+    // 3. FIR / En-route check
     let isFirMatch = false;
     for (const pat of FIR_ENROUTE_PATTERNS) {
       const m = text.match(pat);
@@ -243,24 +249,29 @@ export function runDeterministicSafetyEngine(rawNotams: RawNotam[]): FlaggedNota
         isFirMatch = true;
       }
     }
-
     const isFirNotam = notam.isFir || (notam.icao && notam.icao.endsWith('FIR')) || notam.icao === notam.firIcao;
-
-    if (category === 'GENERAL') {
-      if (isFirNotam || isFirMatch) {
-        category = 'FIR_ENROUTE';
-      }
+    if (category === 'GENERAL' && (isFirNotam || isFirMatch)) {
+      category = 'FIR_ENROUTE';
     }
 
-    // Assign Severity
-    let severity: SeverityLevel = 'INFO';
+    // 4. Assign Final Severity
     if (category === 'RUNWAYS_TFRS' || category === 'FIR_ENROUTE') {
       severity = 'CRITICAL';
     } else if (category === 'PROCEDURES_NAVAIDS' || category === 'TAXIWAYS_APRON' || category === 'OBSTACLES_LIGHTING') {
       severity = 'WARNING';
     }
 
-    const tempInfo = parseTemporalWindow(text, notam.effectiveStart, notam.effectiveEnd);
+    // 5. Evaluate Temporal Active Window
+    const tempInfo = evaluateTemporalStatus(
+      notam.effectiveStart || parsedIcao.effectiveStartIso || parsedIcao.effectiveStartRaw,
+      notam.effectiveEnd || parsedIcao.effectiveEndIso || parsedIcao.effectiveEndRaw,
+      text
+    );
+
+    const summaryText = buildDeterministicSummary(parsedIcao, text);
+    const titleText = parsedIcao.notamId
+      ? `${parsedIcao.notamId} — ${parsedIcao.qSubjectDecoded || category.replace('_', ' ')} ${parsedIcao.qConditionDecoded || ''}`.trim()
+      : `${notam.id} — ${category.replace('_', ' ')}`;
 
     return {
       id: notam.id,
@@ -268,12 +279,15 @@ export function runDeterministicSafetyEngine(rawNotams: RawNotam[]): FlaggedNota
       severity,
       matchedKeywords: Array.from(new Set(matchedKeywords)),
       category,
-      effectiveStart: notam.effectiveStart,
-      effectiveEnd: notam.effectiveEnd,
-      effectiveWindow: tempInfo.windowText,
+      effectiveStart: notam.effectiveStart || parsedIcao.effectiveStartIso,
+      effectiveEnd: notam.effectiveEnd || parsedIcao.effectiveEndIso,
+      effectiveWindow: tempInfo.relativeTimeText,
       effectiveStatus: tempInfo.status,
       isFir: isFirNotam,
       firIcao: notam.firIcao,
+      parsedIcao,
+      plainEnglishSummary: summaryText,
+      title: titleText,
     };
   });
 }

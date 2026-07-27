@@ -10,6 +10,25 @@ export type NotamBucket =
   | 'FIR_ENROUTE'
   | 'GENERAL';
 
+export interface ParsedIcaoNotam {
+  notamId?: string;
+  icao?: string; // Item A)
+  effectiveStartRaw?: string; // Item B)
+  effectiveEndRaw?: string; // Item C)
+  effectiveStartIso?: string;
+  effectiveEndIso?: string;
+  effectiveStartFormatted?: string;
+  effectiveEndFormatted?: string;
+  bodyText?: string; // Item E)
+  qCode?: string; // e.g. QMRLC
+  qSubjectCode?: string; // e.g. MR
+  qConditionCode?: string; // e.g. LC
+  qSubjectDecoded?: string; // e.g. Runway
+  qConditionDecoded?: string; // e.g. Closed
+  qCategory?: NotamBucket;
+  qSeverity?: SeverityLevel;
+}
+
 export interface RawNotam {
   id: string;
   icao: string;
@@ -19,6 +38,7 @@ export interface RawNotam {
   type?: string; // RWY, TWY, NAV, TFR, OBST, AIRSPACE, FIR, OTHER
   isFir?: boolean;
   firIcao?: string;
+  parsedIcao?: ParsedIcaoNotam;
 }
 
 export interface FlaggedNotam {
@@ -33,6 +53,9 @@ export interface FlaggedNotam {
   effectiveStatus?: 'ACTIVE_NOW' | 'SCHEDULED_FUTURE' | 'EXPIRED' | 'PERMANENT';
   isFir?: boolean;
   firIcao?: string;
+  parsedIcao?: ParsedIcaoNotam;
+  plainEnglishSummary?: string;
+  title?: string;
 }
 
 export interface MetarData {

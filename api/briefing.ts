@@ -3,6 +3,8 @@
 // Data sources: NOAA aviationweather.gov (100% free, no key needed) + Gemini AI (optional)
 
 import type { VercelRequest, VercelResponse } from '@vercel/node';
+import { runDeterministicSafetyEngine } from '../src/lib/deterministicEngine.js';
+import { fetchLiveNotams } from '../src/lib/fetchLiveNotams.js';
 
 // ── Types ──────────────────────────────────────────────────────────────────────
 type FlightCategory = 'VFR' | 'MVFR' | 'IFR' | 'LIFR' | 'UNKNOWN';
@@ -139,71 +141,7 @@ try {
   supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 } catch {}
 
-// ── Free NOAA NOTAM fetch (best for US; Supabase cache for Indian aerodromes) ──
-async function fetchLiveNotams(icao: string): Promise<{ notams: RawNotam[]; isLive: boolean }> {
-  const code = icao.toUpperCase();
 
-  // Try NOAA live NOTAMs first
-  try {
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 5000);
-    const res = await fetch(`https://aviationweather.gov/api/data/notam?ids=${code}&format=json`, {
-      signal: controller.signal,
-      headers: { 'User-Agent': 'VAYU-EFB/1.0', Accept: 'application/json,*/*' },
-    });
-    clearTimeout(timeout);
-    if (res.ok) {
-      const data = await res.json();
-      if (Array.isArray(data) && data.length > 0) {
-        return {
-          notams: data.map((item: any, idx: number) => ({
-            id: item.notamId || `LIVE-${code}-${idx}`,
-            icao: item.icao || code,
-            rawText: item.icaoMessage || item.raw || JSON.stringify(item),
-            effectiveStart: item.effectiveStart,
-            effectiveEnd: item.effectiveEnd,
-            type: item.type,
-            isFir: false,
-          })),
-          isLive: true,
-        };
-      }
-    }
-  } catch {}
-
-  // Check Supabase Indian NOTAM Cache for Indian ICAO codes (VI*, VA*, VO*, VE*)
-  if (supabaseClient && (code.startsWith('VI') || code.startsWith('VA') || code.startsWith('VO') || code.startsWith('VE'))) {
-    try {
-      const { data } = await supabaseClient
-        .from('indian_notam_cache')
-        .select('*')
-        .eq('icao', code)
-        .single();
-
-      if (data && (data.raw_notams_text || data.series_a_json)) {
-        const rawText = data.raw_notams_text || JSON.stringify(data.series_a_json);
-        return {
-          notams: [
-            {
-              id: `AAI-CACHE-${code}-1`,
-              icao: code,
-              rawText: `[AAI SERIES A/C/G CACHE] ${rawText}`,
-              type: 'GENERAL',
-              isFir: false,
-            },
-          ],
-          isLive: true,
-        };
-      }
-    } catch {}
-  }
-
-  // Return synthetic NOTAMs if all feeds are offline
-  const synthNotams: RawNotam[] = [
-    { id: `SYNTH-${code}-1`, icao: code, rawText: `[SYNTHETIC] A) ${code} B) SYNTHETIC NOTAM — Live NOTAM feed unavailable for this airport. Consult official sources.`, type: 'GENERAL' },
-  ];
-  return { notams: synthNotams, isLive: false };
-}
 
 // ── Deterministic Safety Engine (regex keyword scanner) ───────────────────────
 const CRITICAL_PATTERNS: { keywords: string[]; category: NotamBucket }[] = [
@@ -403,7 +341,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       fetchLiveNotams(clean),
     ]);
 
-    const flagged = runSafetyEngine(notamResult.notams);
+    const flagged = runDeterministicSafetyEngine(notamResult.notams);
 
     // Try Gemini AI summary (optional — works only if GEMINI_API_KEY env var is set)
     const geminiSummary = await tryGeminiSummary(clean, metarResult.metar.rawText, tafResult.taf, flagged);

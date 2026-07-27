@@ -32,6 +32,7 @@ import { AerodromeRadarMap } from './AerodromeRadarMap';
 import { CockpitAudioReadout } from './CockpitAudioReadout';
 import { DynamicRunwayMap } from './DynamicRunwayMap';
 import { ViralGrowthBanner } from './ViralGrowthBanner';
+import { NotamCard } from './NotamCard';
 
 interface ExecutiveBriefingViewProps {
   briefing: BriefingSummary;
@@ -465,42 +466,10 @@ ADVISORY ONLY: Informational pre-flight awareness utility under DGCA and FAA reg
           </div>
 
           {/* Ledger Table / List */}
-          <div className="space-y-2.5 max-h-[500px] overflow-y-auto pr-1">
+          <div className="space-y-3 max-h-[600px] overflow-y-auto pr-1">
             {filteredLedger.length > 0 ? (
               filteredLedger.map((item, idx) => (
-                <div
-                  key={item.id || idx}
-                  className={`p-3 rounded-xl border text-xs font-mono transition ${
-                    item.severity === 'CRITICAL'
-                      ? 'bg-red-950/30 border-red-800/80 text-red-200'
-                      : item.severity === 'WARNING'
-                      ? 'bg-amber-950/30 border-amber-800/80 text-amber-200'
-                      : 'bg-zinc-900/60 border-zinc-800 text-zinc-300'
-                  }`}
-                >
-                  <div className="flex flex-wrap items-center justify-between gap-2 mb-1.5">
-                    <div className="flex items-center gap-2">
-                      <span className="font-bold">{item.id}</span>
-                      <span className="text-[10px] px-2 py-0.5 rounded border uppercase font-bold bg-black/40 border-zinc-700">
-                        {item.category.replace('_', ' ')}
-                      </span>
-                      {item.isFir && (
-                        <span className="text-[10px] px-2 py-0.5 rounded border uppercase font-bold bg-purple-950 text-purple-200 border-purple-700">
-                          FIR EN-ROUTE ({item.firIcao || 'FIR'})
-                        </span>
-                      )}
-                    </div>
-                    {item.effectiveWindow && (
-                      <span className="text-[10px] text-emerald-400 font-bold">
-                        {item.effectiveWindow}
-                      </span>
-                    )}
-                  </div>
-
-                  <p className="p-2 rounded bg-black/80 border border-zinc-800/80 text-[11px] font-mono whitespace-pre-wrap break-all leading-tight text-zinc-200">
-                    {item.rawText}
-                  </p>
-                </div>
+                <NotamCard key={item.id || idx} notam={item} isNight={isNight} />
               ))
             ) : (
               <div className="p-6 text-center text-xs font-mono text-zinc-500 border rounded-xl border-dashed border-zinc-800">
