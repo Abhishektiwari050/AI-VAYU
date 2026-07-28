@@ -5,15 +5,8 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { runDeterministicSafetyEngine } from '../src/lib/deterministicEngine.js';
 import { fetchLiveNotams } from '../src/lib/fetchLiveNotams.js';
-
-// ── Types ──────────────────────────────────────────────────────────────────────
-type FlightCategory = 'VFR' | 'MVFR' | 'IFR' | 'LIFR' | 'UNKNOWN';
-type NotamBucket = 'RUNWAYS_TFRS' | 'PROCEDURES_NAVAIDS' | 'TAXIWAYS_APRON' | 'OBSTACLES_LIGHTING' | 'FIR_ENROUTE' | 'GENERAL';
-type SeverityLevel = 'CRITICAL' | 'WARNING' | 'INFO';
-
-interface RawNotam { id: string; icao: string; rawText: string; effectiveStart?: string; effectiveEnd?: string; type?: string; isFir?: boolean; }
-interface FlaggedNotam { id: string; rawText: string; severity: SeverityLevel; matchedKeywords: string[]; category: NotamBucket; effectiveWindow?: string; effectiveStatus?: string; isFir?: boolean; }
-interface MetarData { icao: string; rawText: string; flightCategory: FlightCategory; windSpeedKts?: number; windDirDeg?: number; visibilitySm?: number; tempC?: number; dewpointC?: number; altimeterInHg?: number; clouds?: string; }
+import { getCachedBriefing, setCachedBriefing, coalescedFetch } from '../src/lib/redisCache.js';
+import type { BriefingSummary, FlaggedNotam, RawNotam, MetarData, NotamBucket, SeverityLevel, FlightCategory } from '../src/types.js';
 
 // ── CORS headers for Vercel ────────────────────────────────────────────────────
 function setCors(res: VercelResponse) {
@@ -87,6 +80,7 @@ async function fetchLiveMetar(icao: string): Promise<{ metar: MetarData; isLive:
           metar: {
             icao: code,
             rawText: text,
+            timestamp: new Date().toISOString(),
             flightCategory: fc,
             windDirDeg: windMatch ? parseInt(windMatch[1]) : undefined,
             windSpeedKts: windMatch ? parseInt(windMatch[2]) : undefined,
@@ -106,6 +100,7 @@ async function fetchLiveMetar(icao: string): Promise<{ metar: MetarData; isLive:
     metar: {
       icao: code,
       rawText: `[SYNTHETIC] ${code} METAR unavailable — no live data returned from aviationweather.gov`,
+      timestamp: new Date().toISOString(),
       flightCategory: 'UNKNOWN',
     },
     isLive: false,
@@ -211,10 +206,10 @@ function buildBriefingResponse(
 
   // Data quality flags — passed to frontend to show honest banners
   const dataSource = {
-    metar: metarLive ? 'LIVE (NOAA)' : 'SYNTHETIC',
-    taf: tafLive ? 'LIVE (NOAA)' : 'SYNTHETIC',
-    notams: notamLive ? 'LIVE (FAA)' : 'SYNTHETIC',
-    aiSummary: geminiSummary ? 'GEMINI AI' : 'DETERMINISTIC ENGINE',
+    metar: (metarLive ? 'LIVE (NOAA)' : 'SYNTHETIC') as 'LIVE (NOAA)' | 'SYNTHETIC',
+    taf: (tafLive ? 'LIVE (NOAA)' : 'SYNTHETIC') as 'LIVE (NOAA)' | 'SYNTHETIC',
+    notams: (notamLive ? 'LIVE (FAA)' : 'SYNTHETIC') as 'LIVE (FAA)' | 'SYNTHETIC',
+    aiSummary: (geminiSummary ? 'GEMINI AI' : 'DETERMINISTIC ENGINE') as 'GEMINI AI' | 'DETERMINISTIC ENGINE',
   };
 
   const weather = geminiSummary?.weather || {};
@@ -334,29 +329,39 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
 
   try {
-    // Fetch all data sources in parallel (all free, no key needed)
-    const [metarResult, tafResult, notamResult] = await Promise.all([
-      fetchLiveMetar(clean),
-      fetchLiveTaf(clean),
-      fetchLiveNotams(clean),
-    ]);
+    const cached = await getCachedBriefing(clean);
+    if (cached) {
+      res.setHeader('x-vayu-cache', 'HIT');
+      return res.status(200).json(cached);
+    }
+    res.setHeader('x-vayu-cache', 'MISS');
 
-    const flagged = runDeterministicSafetyEngine(notamResult.notams);
+    const briefing = await coalescedFetch(`vayu:fetch:${clean}`, async () => {
+      // Fetch all data sources in parallel (all free, no key needed)
+      const [metarResult, tafResult, notamResult] = await Promise.all([
+        fetchLiveMetar(clean),
+        fetchLiveTaf(clean),
+        fetchLiveNotams(clean),
+      ]);
 
-    // Try Gemini AI summary (optional — works only if GEMINI_API_KEY env var is set)
-    const geminiSummary = await tryGeminiSummary(clean, metarResult.metar.rawText, tafResult.taf, flagged);
+      const flagged = runDeterministicSafetyEngine(notamResult.notams);
 
-    const briefing = buildBriefingResponse(
-      clean,
-      metarResult.metar,
-      tafResult.taf,
-      flagged,
-      metarResult.isLive,
-      tafResult.isLive,
-      notamResult.isLive,
-      geminiSummary,
-    );
+      // Try Gemini AI summary (optional — works only if GEMINI_API_KEY env var is set)
+      const geminiSummary = await tryGeminiSummary(clean, metarResult.metar.rawText, tafResult.taf, flagged);
 
+      return buildBriefingResponse(
+        clean,
+        metarResult.metar,
+        tafResult.taf,
+        flagged,
+        metarResult.isLive,
+        tafResult.isLive,
+        notamResult.isLive,
+        geminiSummary,
+      );
+    });
+
+    await setCachedBriefing(clean, briefing, 300);
     return res.status(200).json(briefing);
   } catch (err: any) {
     console.error('[VAYU /api/briefing] Error:', err);

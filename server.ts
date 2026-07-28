@@ -6,6 +6,7 @@ import { GoogleGenAI, Type } from '@google/genai';
 import Stripe from 'stripe';
 import { runDeterministicSafetyEngine } from './src/lib/deterministicEngine.js';
 import { fetchLiveNotams } from './src/lib/fetchLiveNotams.js';
+import { getCachedBriefing, setCachedBriefing, coalescedFetch } from './src/lib/redisCache.js';
 import { generateSyntheticMetar } from './src/lib/mockAviationData.js';
 import { lookupAirport, normalizeAirportCode } from './src/lib/airportData.js';
 import { checkBriefingUsageMiddleware } from './src/middleware.js';
@@ -304,12 +305,21 @@ app.post('/api/briefing', async (req, res) => {
 
     const airportInfo = lookupAirport(cleanIcao);
 
-    // Parallel Data Ingestion (METAR + TAF + NOTAMs)
-    const [metar, tafRaw, notamFetchResult] = await Promise.all([
-      fetchLiveMetar(cleanIcao),
-      fetchLiveTaf(cleanIcao),
-      fetchLiveNotams(cleanIcao),
-    ]);
+    // Check Redis In-Memory Cache first (HIT < 15ms)
+    const cached = await getCachedBriefing(cleanIcao);
+    if (cached) {
+      res.setHeader('x-vayu-cache', 'HIT');
+      return res.json(cached);
+    }
+    res.setHeader('x-vayu-cache', 'MISS');
+
+    const briefingResult = await coalescedFetch(`vayu:fetch:${cleanIcao}`, async () => {
+      // Parallel Data Ingestion (METAR + TAF + NOTAMs)
+      const [metar, tafRaw, notamFetchResult] = await Promise.all([
+        fetchLiveMetar(cleanIcao),
+        fetchLiveTaf(cleanIcao),
+        fetchLiveNotams(cleanIcao),
+      ]);
 
     const rawNotams = notamFetchResult.notams;
 
@@ -501,10 +511,12 @@ STRICT INSTRUCTIONS:
         console.log('[Project VAYU] Soft fallback to deterministic safety engine:', aiError?.message || aiError);
         briefingResult = buildFallbackBriefing(cleanIcao, airportInfo?.name, metar, tafRaw, flaggedNotams);
       }
-    } else {
       briefingResult = buildFallbackBriefing(cleanIcao, airportInfo?.name, metar, tafRaw, flaggedNotams);
     }
+    return briefingResult;
+  });
 
+    await setCachedBriefing(cleanIcao, briefingResult, 300);
     return res.json(briefingResult);
   } catch (error) {
     console.error('Error generating briefing:', error);
