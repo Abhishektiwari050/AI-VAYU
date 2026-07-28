@@ -33,6 +33,8 @@ import { CockpitAudioReadout } from './CockpitAudioReadout';
 import { DynamicRunwayMap } from './DynamicRunwayMap';
 import { ViralGrowthBanner } from './ViralGrowthBanner';
 import { NotamCard } from './NotamCard';
+import { CorridorGisMap } from './CorridorGisMap';
+import { NotamLedgerFilters } from './NotamLedgerFilters';
 
 interface ExecutiveBriefingViewProps {
   briefing: BriefingSummary;
@@ -59,6 +61,9 @@ export const ExecutiveBriefingView: React.FC<ExecutiveBriefingViewProps> = ({
   const [showFullLedger, setShowFullLedger] = useState<boolean>(false);
   const [activeLedgerBucket, setActiveLedgerBucket] = useState<NotamBucket | 'ALL'>('ALL');
   const [ledgerSearchTerm, setLedgerSearchTerm] = useState<string>('');
+  const [selectedSeverity, setSelectedSeverity] = useState<'CRITICAL' | 'WARNING' | 'INFO' | 'ALL'>('ALL');
+  const [selectedStatus, setSelectedStatus] = useState<string | 'ALL'>('ALL');
+  const [selectedRunway, setSelectedRunway] = useState<string | 'ALL'>('ALL');
   const [activeMediaTab, setActiveMediaTab] = useState<'DIAGRAM' | 'RADAR'>('DIAGRAM');
 
 
@@ -147,11 +152,18 @@ ADVISORY ONLY: Informational pre-flight awareness utility under DGCA and FAA reg
   const allLedgerItems = briefing?.allNotamsLedger || [];
   const filteredLedger = allLedgerItems.filter((item) => {
     const matchesBucket = activeLedgerBucket === 'ALL' || item.category === activeLedgerBucket;
+    const matchesSeverity = selectedSeverity === 'ALL' || item.severity === selectedSeverity;
+    const matchesStatus = selectedStatus === 'ALL' || item.effectiveStatus === selectedStatus;
+    const matchesRunway =
+      selectedRunway === 'ALL' ||
+      item.rawText?.toUpperCase().includes(`RWY ${selectedRunway}`) ||
+      item.rawText?.toUpperCase().includes(`RUNWAY ${selectedRunway}`) ||
+      item.rawText?.toUpperCase().includes(selectedRunway);
     const matchesSearch =
       !ledgerSearchTerm ||
       item.rawText?.toLowerCase().includes(ledgerSearchTerm.toLowerCase()) ||
       item.id?.toLowerCase().includes(ledgerSearchTerm.toLowerCase());
-    return matchesBucket && matchesSearch;
+    return matchesBucket && matchesSeverity && matchesStatus && matchesRunway && matchesSearch;
   });
 
   const counts = briefing?.bucketCounts || {
@@ -204,6 +216,14 @@ ADVISORY ONLY: Informational pre-flight awareness utility under DGCA and FAA reg
           );
         })()}
       </div>
+
+      {/* INTERACTIVE FLIGHT CORRIDOR GIS MAP */}
+      <CorridorGisMap
+        icao={briefing.icao}
+        airportName={briefing.airportName}
+        notams={allLedgerItems}
+        flightCategory={briefing.weather.flightCategory}
+      />
 
       {/* HERO AIRPORT TITLE & CIRRUS OPEN SKY HUD */}
       <div className="text-center my-8 space-y-3">
@@ -421,10 +441,23 @@ ADVISORY ONLY: Informational pre-flight awareness utility under DGCA and FAA reg
                 <Shield className="w-4 h-4 text-emerald-400" />
                 <span>ALL NOTAMs UNFILTERED DISPATCH LEDGER</span>
               </h3>
-              <p className="text-[11px] opacity-70 font-sans mt-0.5">
-                Zero NOTAMs dropped. Category filtered & timestamp audited per FAA & ICAO annex standards.
-              </p>
             </div>
+          </div>
+
+          {/* GRANULAR RUNWAY & Q-CODE LEDGER FILTERS */}
+          <NotamLedgerFilters
+            notams={allLedgerItems}
+            searchQuery={ledgerSearchTerm}
+            onSearchChange={setLedgerSearchTerm}
+            selectedCategory={activeLedgerBucket}
+            onCategoryChange={setActiveLedgerBucket}
+            selectedSeverity={selectedSeverity}
+            onSeverityChange={setSelectedSeverity}
+            selectedStatus={selectedStatus}
+            onStatusChange={setSelectedStatus}
+            selectedRunway={selectedRunway}
+            onRunwayChange={setSelectedRunway}
+          />
 
             {/* Search Input */}
             <div className="relative min-w-[240px]">
@@ -439,7 +472,6 @@ ADVISORY ONLY: Informational pre-flight awareness utility under DGCA and FAA reg
                 }`}
               />
             </div>
-          </div>
 
           {/* Category Tabs */}
           <div className="flex items-center gap-1.5 overflow-x-auto pb-2 mb-4 border-b border-zinc-800 text-xs font-mono">
