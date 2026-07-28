@@ -657,6 +657,34 @@ app.post('/api/route-briefing', async (req, res) => {
   }
 });
 
+// PDF Clearance Export Route
+app.post('/api/export/pdf', async (req, res) => {
+  try {
+    const { briefing, operatorName, picName, tailNumber, dispatchNotes } = req.body;
+    if (!briefing || !briefing.icao) {
+      return res.status(400).json({ error: 'Valid BriefingSummary payload is required.' });
+    }
+
+    const { html, hash } = await generateDispatchHtml({
+      briefing,
+      operatorName,
+      picName,
+      tailNumber,
+      dispatchNotes,
+    });
+
+    return res.json({
+      success: true,
+      sha256Hash: hash,
+      clearanceHtml: html,
+      stampedAtZulu: new Date().toISOString(),
+    });
+  } catch (err: any) {
+    console.error('PDF export error:', err);
+    return res.status(500).json({ error: 'Failed to generate clearance PDF.' });
+  }
+});
+
 // Audio TTS Endpoint for Pre-Flight Briefing Voice Synthesis
 app.post('/api/tts', async (req, res) => {
   try {
