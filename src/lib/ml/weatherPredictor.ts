@@ -33,9 +33,13 @@ export interface ApproachWindowWarning {
 
 export const STANDARD_AIRCRAFT_LIMITS: Record<string, AircraftEnvelopeLimit> = {
   C172: { aircraftType: 'Cessna 172 Skyhawk', maxCrosswindKts: 15, maxTailwindKts: 5 },
+  C182: { aircraftType: 'Cessna 182 Skylane', maxCrosswindKts: 15, maxTailwindKts: 5 },
   PA28: { aircraftType: 'Piper PA-28 Archer', maxCrosswindKts: 17, maxTailwindKts: 5 },
+  SR22: { aircraftType: 'Cirrus SR22 GTS', maxCrosswindKts: 20, maxTailwindKts: 7 },
   B737: { aircraftType: 'Boeing 737-800', maxCrosswindKts: 33, maxTailwindKts: 10 },
   A320: { aircraftType: 'Airbus A320neo', maxCrosswindKts: 33, maxTailwindKts: 10 },
+  B777: { aircraftType: 'Boeing 777-300ER', maxCrosswindKts: 38, maxTailwindKts: 10 },
+  A350: { aircraftType: 'Airbus A350-900', maxCrosswindKts: 35, maxTailwindKts: 10 },
 };
 
 /**

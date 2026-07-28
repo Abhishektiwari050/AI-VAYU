@@ -244,6 +244,8 @@ export const Header: React.FC<HeaderProps> = ({
                 <div className="relative flex-1">
                   <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[#5b6472]" />
                   <input
+                    id="airport-search-input"
+                    name="singleIcao"
                     type="text"
                     value={singleIcao}
                     onChange={(e) => setSingleIcao(e.target.value.toUpperCase())}
