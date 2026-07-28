@@ -34,6 +34,7 @@ import { DynamicRunwayMap } from './DynamicRunwayMap';
 import { ViralGrowthBanner } from './ViralGrowthBanner';
 import { NotamCard } from './NotamCard';
 import { CorridorGisMap } from './CorridorGisMap';
+import { AviationGisMap } from './AviationGisMap';
 import { NotamLedgerFilters } from './NotamLedgerFilters';
 
 interface ExecutiveBriefingViewProps {
@@ -217,12 +218,13 @@ ADVISORY ONLY: Informational pre-flight awareness utility under DGCA and FAA reg
         })()}
       </div>
 
-      {/* INTERACTIVE FLIGHT CORRIDOR GIS MAP */}
-      <CorridorGisMap
+      {/* LEAFLET / MAPLIBRE NEXT-GEN GIS AVIATION MAP */}
+      <AviationGisMap
         icao={briefing.icao}
         airportName={briefing.airportName}
         notams={allLedgerItems}
         flightCategory={briefing.weather.flightCategory}
+        isNight={isNight}
       />
 
       {/* HERO AIRPORT TITLE & CIRRUS OPEN SKY HUD */}
