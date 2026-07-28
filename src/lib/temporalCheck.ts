@@ -19,42 +19,47 @@ export interface TemporalEvaluationResult {
  */
 export function parseAviationTimestamp(code?: string): Date | null {
   if (!code) return null;
-  const cleaned = code.trim().replace(/[^0-9]/g, '');
-  if (cleaned.length < 10) return null;
+  const str = code.trim();
 
-  let yy: number;
-  let mmStr: string;
-  let ddStr: string;
-  let hhStr: string;
-  let minStr: string;
-
-  if (cleaned.length === 12) {
-    // YYYYMMDDHHMM
-    yy = parseInt(cleaned.substring(0, 4), 10);
-    mmStr = cleaned.substring(4, 6);
-    ddStr = cleaned.substring(6, 8);
-    hhStr = cleaned.substring(8, 10);
-    minStr = cleaned.substring(10, 12);
-  } else {
-    // YYMMDDHHMM
-    yy = parseInt(cleaned.substring(0, 2), 10) + 2000;
-    mmStr = cleaned.substring(2, 4);
-    ddStr = cleaned.substring(4, 6);
-    hhStr = cleaned.substring(6, 8);
-    minStr = cleaned.substring(8, 10);
+  // 1. Try standard JS date parse first (e.g. ISO string or ISO timestamp)
+  const directDate = new Date(str);
+  if (!isNaN(directDate.getTime()) && str.includes('-')) {
+    return directDate;
   }
 
-  const mm = parseInt(mmStr, 10) - 1;
-  const dd = parseInt(ddStr, 10);
-  const hh = parseInt(hhStr, 10);
-  const min = parseInt(minStr, 10);
-
-  if (mm < 0 || mm > 11 || dd < 1 || dd > 31 || hh < 0 || hh > 23 || min < 0 || min > 59) {
-    return null;
+  // 2. FAA Slash Format: MM/DD/YYYY HH:MM (e.g., "07/01/2026 04:30")
+  const faaMatch = str.match(/^(\d{2})\/(\d{2})\/(\d{4})\s+(\d{2}):?(\d{2})/);
+  if (faaMatch) {
+    const mm = parseInt(faaMatch[1], 10) - 1;
+    const dd = parseInt(faaMatch[2], 10);
+    const yyyy = parseInt(faaMatch[3], 10);
+    const hh = parseInt(faaMatch[4], 10);
+    const min = parseInt(faaMatch[5], 10);
+    const d = new Date(Date.UTC(yyyy, mm, dd, hh, min));
+    return isNaN(d.getTime()) ? null : d;
   }
 
-  const d = new Date(Date.UTC(yy, mm, dd, hh, min));
-  return isNaN(d.getTime()) ? null : d;
+  // 3. ICAO Compact Format: YYMMDDHHMM (10 digits) or YYYYMMDDHHMM (12 digits)
+  const cleaned = str.replace(/[^0-9]/g, '');
+  if (cleaned.length === 10) {
+    const yy = parseInt(cleaned.substring(0, 2), 10) + 2000;
+    const mm = parseInt(cleaned.substring(2, 4), 10) - 1;
+    const dd = parseInt(cleaned.substring(4, 6), 10);
+    const hh = parseInt(cleaned.substring(6, 8), 10);
+    const min = parseInt(cleaned.substring(8, 10), 10);
+    const d = new Date(Date.UTC(yy, mm, dd, hh, min));
+    return isNaN(d.getTime()) ? null : d;
+  } else if (cleaned.length === 12 && !str.includes('/')) {
+    const yyyy = parseInt(cleaned.substring(0, 4), 10);
+    const mm = parseInt(cleaned.substring(4, 6), 10) - 1;
+    const dd = parseInt(cleaned.substring(6, 8), 10);
+    const hh = parseInt(cleaned.substring(8, 10), 10);
+    const min = parseInt(cleaned.substring(10, 12), 10);
+    const d = new Date(Date.UTC(yyyy, mm, dd, hh, min));
+    return isNaN(d.getTime()) ? null : d;
+  }
+
+  return isNaN(directDate.getTime()) ? null : directDate;
 }
 
 /**
