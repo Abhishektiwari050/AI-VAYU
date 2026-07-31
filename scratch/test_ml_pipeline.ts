@@ -1,7 +1,7 @@
 import { classifyNotam } from '../src/lib/ml/notamClassifier';
 import { calculateWindComponents, checkAircraftEnvelope, analyzeTafApproachWindows } from '../src/lib/ml/weatherPredictor';
 import { deduplicateNotams, computeCosineSimilarity } from '../src/lib/ml/deduplication';
-import { buildSpatialGeoJsonEngine, generateGeodesicCirclePolygon } from '../src/lib/ml/geoJsonEngine';
+import { buildSpatialGeoJsonEngine, generateGeodesicCirclePolygon, GeoJsonPolygonGeometry } from '../src/lib/ml/geoJsonEngine';
 import { generateEfbDeepLinks, generateClearanceAuditHash } from '../src/lib/efbExporter';
 import { FlaggedNotam } from '../src/types';
 
@@ -110,7 +110,7 @@ console.log('Sample Polygon Feature (5NM Circle):', JSON.stringify(polygonFeatur
 
 console.assert(lineFeatures.length > 0, 'Should create LineString features for closed runways');
 console.assert(lineFeatures[0].state?.closed === true, 'Line feature state closed should be true for blinking red styling');
-console.assert(polygonFeatures[0].geometry.coordinates[0].length === 65, '5NM Geodesic circle polygon should contain 65 coordinates');
+console.assert((polygonFeatures[0].geometry as GeoJsonPolygonGeometry).coordinates[0].length === 65, '5NM Geodesic circle polygon should contain 65 coordinates');
 console.log('✅ Deterministic GeoJSON Spatial Map Engine Verification: PASSED\n');
 
 
