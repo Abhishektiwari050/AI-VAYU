@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: ✈️ Project VAYU Official Deployment
+    url: https://ai-vayu.vercel.app/
+    about: Access the live production platform to test aerodrome search and GIS vector maps.
+  - name: 📖 Architecture & Safety Documentation
+    url: https://github.com/Abhishektiwari050/AI-VAYU#readme
+    about: Read our deterministic parser specifications, crosswind formulas, and API reference.

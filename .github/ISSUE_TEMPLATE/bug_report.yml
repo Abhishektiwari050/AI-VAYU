@@ -1,0 +1,55 @@
+name: 🐛 Bug Report
+description: Report a parsing error, map rendering glitch, or unexpected behavior in Project VAYU.
+title: "[BUG]: "
+labels: ["bug", "triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for reporting an issue to Project VAYU! Please provide clear reproduction steps so our flight engineering team can investigate.
+
+  - type: input
+    id: airport_icao
+    attributes:
+      label: Target Airport ICAO / IATA Code
+      description: e.g., KJFK, VIDP, EGLL, KLAX
+      placeholder: VIDP
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected_behavior
+    attributes:
+      label: Expected Behavior
+      description: Describe what should have happened.
+      placeholder: The NOTAM QMRLC should be classified as CRITICAL HAZARD: RUNWAY CLOSED.
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual_behavior
+    attributes:
+      label: Actual Behavior
+      description: Describe what actually happened.
+      placeholder: The NOTAM was categorized under TAXIWAYS_APRON instead of RUNWAYS_TFRS.
+    validations:
+      required: true
+
+  - type: textarea
+    id: raw_notam_text
+    attributes:
+      label: Verbatim Raw NOTAM String (if applicable)
+      description: Copy and paste the verbatim raw ASCII NOTAM string.
+      placeholder: "A1405/26 NOTAMN Q) VIDF/QMRLC/... E) RWY 11R/29L NOT AVBL FOR OPS."
+
+  - type: dropdown
+    id: environment
+    attributes:
+      label: Operating Environment
+      options:
+        - Live Web App (https://ai-vayu.vercel.app)
+        - Local Development Server (npm run dev)
+        - Production Docker / Node Container
+        - iPad / iOS Cockpit Browser
+    validations:
+      required: true

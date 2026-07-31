@@ -1,0 +1,160 @@
+openapi: 3.0.3
+info:
+  title: Project VAYU REST API
+  description: Industry-grade aviation NOTAM intelligence, METAR weather decoding, and clearance PDF export API.
+  version: 1.0.0
+  contact:
+    name: Project VAYU Engineering
+    url: https://ai-vayu.vercel.app/
+
+servers:
+  - url: https://ai-vayu.vercel.app/api
+    description: Production Serverless API
+  - url: http://localhost:3000/api
+    description: Local Express Development Server
+
+paths:
+  /briefing:
+    post:
+      summary: Fetch Aerodrome Briefing
+      description: Ingests METAR, TAF, and live NOTAMs for an airport code, returning a 5-bucket safety matrix briefing.
+      operationId: getBriefing
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - icao
+              properties:
+                icao:
+                  type: string
+                  example: VIDP
+                  description: 4-letter ICAO airport code or 3-letter IATA code.
+      responses:
+        '200':
+          description: Successfully parsed aviation safety briefing.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BriefingSummary'
+        '400':
+          description: Invalid airport code payload.
+        '500':
+          description: Upstream fetch failure.
+
+  /route-briefing:
+    post:
+      summary: Fetch Route Corridor Briefing
+      description: Ingests NOTAMs and weather for origin, waypoints, and destination corridor legs.
+      operationId: getRouteBriefing
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - origin
+                - destination
+              properties:
+                origin:
+                  type: string
+                  example: VIDP
+                destination:
+                  type: string
+                  example: KJFK
+                waypoints:
+                  type: array
+                  items:
+                    type: string
+                  example: ["VABB", "EGLL"]
+      responses:
+        '200':
+          description: Route corridor briefing payload.
+
+  /export/pdf:
+    post:
+      summary: Generate Clearance PDF Payload & SHA-256 Digest
+      description: Generates stamped dispatch clearance HTML payload and SHA-256 audit digest.
+      operationId: exportPdf
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - briefing
+              properties:
+                briefing:
+                  $ref: '#/components/schemas/BriefingSummary'
+                picName:
+                  type: string
+                  example: CAPT. SMITH
+                tailNumber:
+                  type: string
+                  example: VT-VAYU
+                operatorName:
+                  type: string
+                  example: VAYU Flight Ops
+      responses:
+        '200':
+          description: Stamped PDF clearance HTML payload and audit hash.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  sha256Hash:
+                    type: string
+                    example: VAYU-CLR-2026-VIDP-36866335-SHA256
+                  clearanceHtml:
+                    type: string
+                  stampedAtZulu:
+                    type: string
+
+components:
+  schemas:
+    BriefingSummary:
+      type: object
+      required:
+        - icao
+        - airportName
+        - generatedAtUtc
+        - weather
+        - criticalCount
+        - warningCount
+        - totalNotamsIngested
+      properties:
+        icao:
+          type: string
+          example: VIDP
+        airportName:
+          type: string
+          example: Indira Gandhi Intl
+        generatedAtUtc:
+          type: string
+          example: '2026-07-31T06:00:00Z'
+        weather:
+          type: object
+          properties:
+            rawMetar:
+              type: string
+            flightCategory:
+              type: string
+              example: VFR
+            plainEnglishSummary:
+              type: string
+        criticalCount:
+          type: integer
+          example: 2
+        warningCount:
+          type: integer
+          example: 28
+        totalNotamsIngested:
+          type: integer
+          example: 30

@@ -1,0 +1,40 @@
+name: 🚀 Feature Request
+description: Suggest a new feature, EFB integration, or GIS map capability for Project VAYU.
+title: "[FEAT]: "
+labels: ["enhancement", "proposal"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Suggesting a new capability or cockpit integration for Project VAYU.
+
+  - type: textarea
+    id: problem_statement
+    attributes:
+      label: Problem Statement / Operational Need
+      description: What operational challenge does this feature solve?
+      placeholder: Pilots flying in high-wind conditions need real-time crosswind envelope alerts tailored to their specific aircraft tail limits.
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposed_solution
+    attributes:
+      label: Proposed Solution & Approach
+      description: Describe the solution you'd like to see.
+      placeholder: Add custom aircraft tail profiles (e.g. C182, SR22, B737) to weatherPredictor.ts with dynamic envelope warnings.
+    validations:
+      required: true
+
+  - type: dropdown
+    id: feature_category
+    attributes:
+      label: Feature Category
+      options:
+        - ML Intelligence & Classification Engine
+        - GIS Vector Map & Weather Radar
+        - EFB Deep Links & Clearance PDF Export
+        - Redis Ingestion & Cache Performance
+        - Cockpit UI / UX & Night Mode
+    validations:
+      required: true
