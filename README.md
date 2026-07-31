@@ -1,5 +1,7 @@
 <div align="center">
 
+<img src="docs/assets/vayu-logo.svg" width="120" height="120" alt="Project VAYU Emblem" />
+
 # ✈️ Project VAYU (AI-VAYU)
 ### *Next-Generation NOTAM Intelligence & Cockpit Safety Platform*
 
